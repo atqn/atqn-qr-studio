@@ -1,1 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>إنشاء QR - ATQN QR Studio</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+
+        <a href="index.html" class="back-btn">
+            ← الرئيسية
+        </a>
+
+        <h1>إنشاء QR جديد</h1>
+
+        <p class="subtitle">
+            أنشئ وراجع الباركود قبل حفظه داخل المكتبة
+        </p>
+
+    </div>
+
+    <div class="create-layout">
+
+        <!-- الإعدادات -->
+
+        <div class="panel">
+
+            <h2>إعدادات الباركود</h2>
+
+            <label>اسم الكتاب</label>
+            <input type="text" placeholder="مثال: الإملاء - الصف الأول">
+
+            <label>عنوان الباركود</label>
+            <input type="text" placeholder="مثال: المدود">
+
+            <label>الرابط</label>
+            <input type="text" placeholder="https://">
+
+            <label>الشعار</label>
+            <input type="file">
+
+            <label>اللون</label>
+            <input type="color" value="#38bdf8">
+
+            <label>الستايل</label>
+            <select>
+                <option>Square</option>
+                <option>Dots</option>
+                <option>Rounded</option>
+                <option>Extra Rounded</option>
+                <option>Classy</option>
+                <option>Classy Rounded</option>
+            </select>
+
+            <label>الدقة</label>
+            <select>
+                <option>300</option>
+                <option>600</option>
+                <option>1200</option>
+            </select>
+
+            <button class="primary-btn">
+                ⚡ توليد المعاينة
+            </button>
+
+        </div>
+
+        <!-- المعاينة -->
+
+        <div class="panel">
+
+            <h2>المعاينة</h2>
+
+            <div class="preview-box">
+
+                QR Preview
+
+            </div>
+
+            <div class="preview-info">
+
+                <p><strong>الكتاب:</strong> —</p>
+
+                <p><strong>العنوان:</strong> —</p>
+
+                <p><strong>الرابط:</strong> —</p>
+
+            </div>
+
+            <button class="save-btn">
+                💾 حفظ في المكتبة
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
