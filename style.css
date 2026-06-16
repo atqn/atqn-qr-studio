@@ -9,7 +9,6 @@ body{
     background:#0f172a;
     color:#fff;
     min-height:100vh;
-    overflow:hidden;
 }
 
 .container{
@@ -374,5 +373,6 @@ body{
 }
 
 .panel{
-    min-height:600px;
+    min-height:500px;
+}
 }
