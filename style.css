@@ -330,3 +330,11 @@ body{
     }
 
 }
+
+@media(max-width:1100px){
+
+    .create-layout{
+        grid-template-columns:1fr;
+    }
+
+}
