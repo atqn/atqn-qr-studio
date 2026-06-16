@@ -177,7 +177,7 @@ body{
 }
 
 .preview-box{
-    height:320px;
+    height:180px;
     border:2px dashed #334155;
     border-radius:20px;
     display:flex;
