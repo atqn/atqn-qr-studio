@@ -339,3 +339,11 @@ body{
     }
 
 }
+
+.create-layout{
+    align-items:stretch;
+}
+
+.panel{
+    height:100%;
+}
