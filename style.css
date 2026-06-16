@@ -372,3 +372,7 @@ body{
     font-size:14px;
     color:#fff;
 }
+
+.panel{
+    height:600px;
+}
