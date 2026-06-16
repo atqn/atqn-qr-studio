@@ -376,4 +376,7 @@ body{
 .panel{
     min-height:430px;
 }
+
+.create-layout .panel{
+    padding:18px;
 }
