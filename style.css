@@ -14,7 +14,7 @@ body{
 .container{
     max-width:1200px;
     margin:auto;
-    padding:15px 20px;
+    padding:8px 20px;
 }
 
 .hero{
@@ -33,7 +33,7 @@ body{
 }
 
 .stats{
-    margin-top:40px;
+    margin-top:45px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:20px;
@@ -285,7 +285,7 @@ body{
 }
 
 .preview-box{
-    height:220px;
+    height:130px;
 }
 
 .secondary-btn{
@@ -374,9 +374,9 @@ body{
 }
 
 .panel{
-    min-height:430px;
+    min-height:380px;
 }
 
 .create-layout .panel{
-    padding:18px;
+    padding:14px;
 }
