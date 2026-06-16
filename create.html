@@ -51,43 +51,106 @@
 
     </div>
 
-    <div class="create-layout">
+<div class="create-layout">
 
-        <!-- الإعدادات -->
+    <!-- العمود الأول -->
 
-        <div class="panel">
+    <div class="panel">
 
-            <h3>بيانات الباركود</h3>
+        <h3>بيانات الباركود</h3>
 
-            <label>اسم الكتاب</label>
-            <input type="text" placeholder="الإملاء - الصف الأول">
+        <label>اسم الكتاب</label>
+        <input type="text">
 
-            <label>عنوان الباركود</label>
-            <input type="text" placeholder="المدود">
+        <label>عنوان الباركود</label>
+        <input type="text">
 
-            <label>وصف مختصر (اختياري)</label>
-            <input type="text" placeholder="شرح المدود بالأمثلة">
+        <label>وصف مختصر</label>
+        <input type="text">
 
-            <label>الرابط</label>
-            <input type="text" placeholder="https://">
+        <label>الرابط</label>
+        <input type="text">
 
-            <hr class="divider">
+    </div>
 
-            <h3>الشعار</h3>
+    <!-- العمود الثاني -->
 
-            <div class="radio-box">
+    <div class="panel">
 
-                <label>
-                    <input type="radio" name="logoMode" checked>
-                    استخدام شعار ATQN الافتراضي
-                </label>
+        <h3>الإعدادات</h3>
 
-                <label>
-                    <input type="radio" name="logoMode">
-                    رفع شعار من الجهاز
-                </label>
+        <label>
+            <input type="radio" checked>
+            استخدام شعار ATQN
+        </label>
 
-            </div>
+        <label>
+            <input type="radio">
+            رفع شعار
+        </label>
+
+        <input type="file">
+
+        <label>اللون</label>
+        <input type="color" value="#38bdf8">
+
+        <label>الستايل</label>
+        <select>
+            <option>Square</option>
+            <option>Dots</option>
+            <option>Rounded</option>
+            <option>Extra Rounded</option>
+            <option>Classy</option>
+            <option>Classy Rounded</option>
+        </select>
+
+        <label>الدقة</label>
+        <select>
+            <option>300</option>
+            <option selected>600</option>
+            <option>1200</option>
+            <option>2400</option>
+        </select>
+
+        <button class="secondary-btn">
+            💾 حفظ كإعدادات افتراضية
+        </button>
+
+    </div>
+
+    <!-- العمود الثالث -->
+
+    <div class="panel">
+
+        <h3>المعاينة</h3>
+
+        <div class="preview-box">
+            QR Preview
+        </div>
+
+        <button class="primary-btn">
+            ⚡ توليد المعاينة
+        </button>
+
+        <button class="save-btn">
+            📚 حفظ في المكتبة
+        </button>
+
+        <button class="export-btn">
+            PNG
+        </button>
+
+        <button class="export-btn">
+            SVG
+        </button>
+
+        <button class="export-btn">
+            PDF
+        </button>
+
+    </div>
+
+</div>
 
             <input type="file">
 
