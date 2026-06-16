@@ -33,7 +33,7 @@ body{
 }
 
 .stats{
-    margin-top:50px;
+    margin-top:20px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:20px;
@@ -58,7 +58,7 @@ body{
 }
 
 .actions{
-    margin-top:40px;
+    margin-top:20px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:20px;
@@ -69,7 +69,7 @@ body{
     text-decoration:none;
     color:white;
     border-radius:20px;
-    padding:40px;
+    padding:25px;
     text-align:center;
     transition:.25s;
 }
@@ -80,11 +80,12 @@ body{
 }
 
 .action-card span{
-    font-size:50px;
+    font-size:38px;
 }
 
 .action-card h2{
-    margin-top:15px;
+    margin-top:10px;
+    font-size:22px;
 }
 
 @media(max-width:768px){
