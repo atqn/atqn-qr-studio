@@ -177,7 +177,7 @@ body{
 }
 
 .preview-box{
-    height:260px;
+    height:170px;
     border:2px dashed #334155;
     border-radius:20px;
     display:flex;
@@ -374,6 +374,6 @@ body{
 }
 
 .panel{
-    min-height:500px;
+    min-height:430px;
 }
 }
