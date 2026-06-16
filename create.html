@@ -3,28 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>إنشاء QR - ATQN QR Studio</title>
 
 <link rel="stylesheet" href="style.css">
-
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<div class="container">
+<header class="topbar">
 
-    <div class="page-header">
+    <div class="brand">
 
-        <a href="index.html" class="back-btn">
-            ← الرئيسية
+        <img src="assets/atqn-logo.png" alt="ATQN">
+
+        <div>
+            <h1>ATQN QR Studio</h1>
+        </div>
+
+    </div>
+
+    <nav>
+
+        <a href="index.html">الرئيسية</a>
+
+        <a href="create.html" class="active">
+            إنشاء QR
         </a>
 
-        <h1>إنشاء QR جديد</h1>
+        <a href="library.html">
+            مكتبة الكتب
+        </a>
 
-        <p class="subtitle">
-            أنشئ وراجع الباركود قبل حفظه داخل المكتبة
+    </nav>
+
+</header>
+
+<div class="container">
+
+    <div class="page-title">
+
+        <h2>إنشاء QR جديد</h2>
+
+        <p>
+            أنشئ الباركود وراجعه قبل حفظه في المكتبة
         </p>
 
     </div>
@@ -35,19 +57,43 @@
 
         <div class="panel">
 
-            <h2>إعدادات الباركود</h2>
+            <h3>بيانات الباركود</h3>
 
             <label>اسم الكتاب</label>
-            <input type="text" placeholder="مثال: الإملاء - الصف الأول">
+            <input type="text" placeholder="الإملاء - الصف الأول">
 
             <label>عنوان الباركود</label>
-            <input type="text" placeholder="مثال: المدود">
+            <input type="text" placeholder="المدود">
+
+            <label>وصف مختصر (اختياري)</label>
+            <input type="text" placeholder="شرح المدود بالأمثلة">
 
             <label>الرابط</label>
             <input type="text" placeholder="https://">
 
-            <label>الشعار</label>
+            <hr class="divider">
+
+            <h3>الشعار</h3>
+
+            <div class="radio-box">
+
+                <label>
+                    <input type="radio" name="logoMode" checked>
+                    استخدام شعار ATQN الافتراضي
+                </label>
+
+                <label>
+                    <input type="radio" name="logoMode">
+                    رفع شعار من الجهاز
+                </label>
+
+            </div>
+
             <input type="file">
+
+            <hr class="divider">
+
+            <h3>الإعدادات</h3>
 
             <label>اللون</label>
             <input type="color" value="#38bdf8">
@@ -65,12 +111,17 @@
             <label>الدقة</label>
             <select>
                 <option>300</option>
-                <option>600</option>
+                <option selected>600</option>
                 <option>1200</option>
+                <option>2400</option>
             </select>
 
             <button class="primary-btn">
                 ⚡ توليد المعاينة
+            </button>
+
+            <button class="secondary-btn">
+                💾 حفظ كإعدادات افتراضية
             </button>
 
         </div>
@@ -79,7 +130,7 @@
 
         <div class="panel">
 
-            <h2>المعاينة</h2>
+            <h3>المعاينة</h3>
 
             <div class="preview-box">
 
@@ -93,12 +144,26 @@
 
                 <p><strong>العنوان:</strong> —</p>
 
+                <p><strong>الوصف:</strong> —</p>
+
                 <p><strong>الرابط:</strong> —</p>
 
             </div>
 
             <button class="save-btn">
-                💾 حفظ في المكتبة
+                📚 حفظ في المكتبة
+            </button>
+
+            <button class="export-btn">
+                PNG
+            </button>
+
+            <button class="export-btn">
+                SVG
+            </button>
+
+            <button class="export-btn">
+                PDF
             </button>
 
         </div>
@@ -109,4 +174,3 @@
 
 </body>
 </html>
-
