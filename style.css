@@ -285,10 +285,17 @@ body{
 }
 
 .preview-box{
-    height:210px;
+    height:150px;
+
     display:flex;
     justify-content:center;
     align-items:center;
+}
+
+.preview-box img,
+.preview-box canvas{
+    max-width:140px;
+    max-height:140px;
 }
 .secondary-btn{
     width:100%;
