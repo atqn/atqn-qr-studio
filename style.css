@@ -597,3 +597,59 @@ body{
 .books-grid{
     scrollbar-width:none;
 }
+
+/* =========================
+   Library Toolbar
+========================= */
+
+.library-toolbar{
+    display:flex;
+    justify-content:flex-start;
+    margin-bottom:18px;
+}
+
+.add-book-btn{
+    background:#38bdf8;
+    color:#0f172a;
+    border:none;
+    border-radius:12px;
+    padding:12px 20px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+/* =========================
+   Horizontal Books
+========================= */
+
+.books-scroll{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-bottom:8px;
+}
+
+.books-grid{
+    display:flex;
+    gap:18px;
+    width:max-content;
+}
+
+.book-card{
+    width:250px;
+    min-width:250px;
+}
+
+/* شريط تمرير خفيف */
+
+.books-scroll::-webkit-scrollbar{
+    height:6px;
+}
+
+.books-scroll::-webkit-scrollbar-thumb{
+    background:#334155;
+    border-radius:10px;
+}
+
+.books-scroll::-webkit-scrollbar-track{
+    background:transparent;
+}
