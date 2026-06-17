@@ -409,3 +409,31 @@ body{
     width:100%;
     height:42px;
 }
+
+.export-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:12px;
+}
+
+.primary-btn{
+    margin-top:15px;
+}
+
+.save-btn{
+    margin-top:10px;
+}
+
+.preview-box{
+    margin-bottom:15px;
+}
+
+.panel .primary-btn{
+    margin-bottom:8px;
+}
+
+.panel .save-btn{
+    margin-bottom:8px;
+}
+
