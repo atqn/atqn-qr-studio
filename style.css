@@ -175,15 +175,16 @@ body{
 }
 
 .preview-box{
-    height:170px;
-    border:2px dashed #334155;
-    border-radius:20px;
+    min-height:220px;
+    height:220px;
+
     display:flex;
     justify-content:center;
     align-items:center;
-    color:#94a3b8;
-    font-size:22px;
-    margin-bottom:25px;
+
+    border:2px dashed #334155;
+    border-radius:16px;
+    margin-bottom:15px;
 }
 
 .preview-info{
@@ -375,7 +376,7 @@ body{
 }
 
 .panel{
-    min-height:380px;
+    min-height:450px;
 }
 
 .create-layout .panel{
@@ -437,3 +438,6 @@ body{
     margin-bottom:8px;
 }
 
+.preview-panel{
+    min-height:450px;
+}
