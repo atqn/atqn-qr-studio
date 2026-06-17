@@ -469,3 +469,17 @@ body{
 
     margin-top:-6px;
 }
+
+.preview-box{
+    margin-bottom:8px;
+}
+
+.preview-actions{
+    margin-top:-10px;
+}
+
+.export-btn,
+.primary-btn,
+.save-btn{
+    height:36px;
+}
