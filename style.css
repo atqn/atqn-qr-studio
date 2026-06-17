@@ -8,8 +8,6 @@ body{
     font-family:'Cairo',sans-serif;
     background:#0f172a;
     color:#fff;
-    height:100vh;
-    overflow:hidden;
 }
 
 .container{
@@ -382,4 +380,14 @@ body{
     padding:14px;
 }
 
+.create-layout{
+    height:auto;
+}
 
+.create-layout .panel{
+    min-height:340px;
+}
+
+.preview-box{
+    height:110px;
+}
