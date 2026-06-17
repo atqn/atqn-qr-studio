@@ -518,8 +518,7 @@ body{
     scroll-behavior:smooth;
 }
 
-.book-card,
-.add-book-card{
+.book-card{
     background:#1e293b;
     border-radius:18px;
     padding:25px;
@@ -527,8 +526,7 @@ body{
     transition:.25s;
 }
 
-.book-card:hover,
-.add-book-card:hover{
+.book-card:hover{
     transform:translateY(-4px);
 }
 
