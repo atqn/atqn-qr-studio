@@ -8,7 +8,8 @@ body{
     font-family:'Cairo',sans-serif;
     background:#0f172a;
     color:#fff;
-    min-height:100vh;
+    height:100vh;
+    overflow:hidden;
 }
 
 .container{
@@ -379,4 +380,8 @@ body{
 
 .create-layout .panel{
     padding:14px;
+}
+
+.container{
+    height:calc(100vh - 70px);
 }
