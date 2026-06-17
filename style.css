@@ -284,9 +284,11 @@ body{
 }
 
 .preview-box{
-    height:90px;
+    height:150px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
-
 .secondary-btn{
     width:100%;
     border:none;
@@ -399,4 +401,11 @@ body{
     border:none;
     border-radius:10px;
     cursor:pointer;
+}
+
+.primary-btn,
+.save-btn,
+.export-btn{
+    width:100%;
+    height:42px;
 }
