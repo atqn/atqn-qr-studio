@@ -516,12 +516,6 @@ body{
     color:#94a3b8;
 }
 
-.books-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:18px;
-}
-
 .book-card{
     background:#1e293b;
     border-radius:18px;
@@ -632,11 +626,10 @@ body{
 
 .books-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,220px));
-    gap:30px;
+    grid-template-columns:repeat(auto-fit,minmax(250px,250px));
+    gap:40px;
     justify-content:center;
-
-    padding:20px 0;
+    padding:20px;
 }
 
 .book-card{
