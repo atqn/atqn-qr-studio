@@ -633,7 +633,6 @@ body{
 .books-grid{
     display:flex;
     gap:18px;
-    width:max-content;
 }
 
 .book-card{
