@@ -653,3 +653,7 @@ body{
 }
 
 
+.add-book-btn{
+    position:relative;
+    left:-25px;
+}
