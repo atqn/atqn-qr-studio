@@ -631,8 +631,10 @@ body{
 }
 
 .books-grid{
-    display:flex;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,220px));
     gap:18px;
+    justify-content:center;
 }
 
 .book-card{
