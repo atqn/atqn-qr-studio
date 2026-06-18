@@ -592,7 +592,7 @@ body{
 
 .book-card,
 .add-book-card{
-    height:240px;
+    min-height:260px;
 }
 
 .books-grid::-webkit-scrollbar{
