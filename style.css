@@ -515,12 +515,9 @@ body{
 }
 
 .books-grid{
-    display:flex;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
     gap:18px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    padding-bottom:5px;
-    scroll-behavior:smooth;
 }
 
 .book-card{
@@ -628,9 +625,7 @@ body{
 ========================= */
 
 .books-scroll{
-    overflow-x:auto;
-    overflow-y:hidden;
-    padding-bottom:8px;
+    width:100%;
 }
 
 .books-grid{
