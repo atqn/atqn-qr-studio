@@ -633,8 +633,10 @@ body{
 .books-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,220px));
-    gap:18px;
+    gap:30px;
     justify-content:center;
+
+    padding:20px 0;
 }
 
 .book-card{
