@@ -657,3 +657,29 @@ body{
     position:relative;
     left:-20px;
 }
+
+.book-actions{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.action-btn{
+    flex:1;
+    height:36px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+}
+
+.edit-btn{
+    background:#f59e0b;
+    color:#fff;
+}
+
+.delete-btn{
+    background:#ef4444;
+    color:#fff;
+}
