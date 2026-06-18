@@ -8,6 +8,8 @@ body{
     font-family:'Cairo',sans-serif;
     background:#0f172a;
     color:#fff;
+
+    overflow-x:hidden;
 }
 
 .container{
