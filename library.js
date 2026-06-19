@@ -1,3 +1,5 @@
+let deleteBookId = null;
+
 const defaultBooks = [
 
     { id:1, title:"كتاب المدود", icon:"📘", count:24 },
@@ -76,11 +78,11 @@ function renderBooks() {
             ✏️ تعديل
         </button>
 
-<button
-    class="action-btn delete-btn"
-    onclick="deleteBook(${book.id})">
-    🗑 حذف
-</button>
+        <button
+            class="action-btn delete-btn"
+            onclick="deleteBook(${book.id})">
+            🗑 حذف
+        </button>
 
     </div>
 
@@ -99,31 +101,77 @@ function renderBooks() {
     );
 }
 
-document.addEventListener(
-    "DOMContentLoaded",
-    renderBooks
-);
-
 function deleteBook(id) {
 
-    const confirmDelete =
-        confirm(
-            "⚠️ تأكيد الحذف\n\nهل تريد حذف هذا الكتاب؟"
-        );
+    deleteBookId = id;
 
-    if (!confirmDelete) {
-        return;
-    }
-
-    let books =
-        getBooks();
-
-    books =
-        books.filter(
-            book => book.id !== id
-        );
-
-    saveBooks(books);
-
-    renderBooks();
+    document
+        .getElementById("deleteModal")
+        .classList
+        .add("show");
 }
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        renderBooks();
+
+        const modal =
+            document.getElementById(
+                "deleteModal"
+            );
+
+        const cancelBtn =
+            document.getElementById(
+                "cancelDeleteBtn"
+            );
+
+        const confirmBtn =
+            document.getElementById(
+                "confirmDeleteBtn"
+            );
+
+        cancelBtn.addEventListener(
+            "click",
+            function () {
+
+                modal.classList.remove(
+                    "show"
+                );
+
+                deleteBookId = null;
+            }
+        );
+
+        confirmBtn.addEventListener(
+            "click",
+            function () {
+
+                if (
+                    deleteBookId === null
+                ) return;
+
+                let books =
+                    getBooks();
+
+                books =
+                    books.filter(
+                        book =>
+                        book.id !== deleteBookId
+                    );
+
+                saveBooks(books);
+
+                modal.classList.remove(
+                    "show"
+                );
+
+                deleteBookId = null;
+
+                renderBooks();
+            }
+        );
+
+    }
+);
