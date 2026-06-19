@@ -175,3 +175,46 @@ document.addEventListener(
 
     }
 );
+
+const addBookBtn =
+    document.querySelector(
+        ".add-book-btn"
+    );
+
+if (addBookBtn) {
+
+    addBookBtn.addEventListener(
+        "click",
+        addBook
+    );
+}
+
+function addBook() {
+
+    const title =
+        prompt(
+            "أدخل اسم الكتاب الجديد"
+        );
+
+    if (!title) return;
+
+    let books =
+        getBooks();
+
+    const newBook = {
+
+        id: Date.now(),
+
+        title: title,
+
+        icon: "📘",
+
+        count: 0
+    };
+
+    books.push(newBook);
+
+    saveBooks(books);
+
+    renderBooks();
+}
