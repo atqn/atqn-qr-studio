@@ -76,10 +76,11 @@ function renderBooks() {
             ✏️ تعديل
         </button>
 
-        <button
-            class="action-btn delete-btn">
-            🗑 حذف
-        </button>
+<button
+    class="action-btn delete-btn"
+    onclick="deleteBook(${book.id})">
+    🗑 حذف
+</button>
 
     </div>
 
@@ -102,3 +103,27 @@ document.addEventListener(
     "DOMContentLoaded",
     renderBooks
 );
+
+function deleteBook(id) {
+
+    const confirmDelete =
+        confirm(
+            "⚠️ تأكيد الحذف\n\nهل تريد حذف هذا الكتاب؟"
+        );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    let books =
+        getBooks();
+
+    books =
+        books.filter(
+            book => book.id !== id
+        );
+
+    saveBooks(books);
+
+    renderBooks();
+}
