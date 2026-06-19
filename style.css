@@ -683,3 +683,100 @@ body{
     background:#ef4444;
     color:#fff;
 }
+
+/* =========================
+   Delete Modal
+========================= */
+
+.modal-overlay{
+
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.65);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    z-index:99999;
+}
+
+.modal-overlay.show{
+    display:flex;
+}
+
+.modal-box{
+
+    width:90%;
+    max-width:360px;
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    padding:25px;
+
+    text-align:center;
+
+    box-shadow:
+    0 15px 40px rgba(0,0,0,.45);
+}
+
+.modal-icon{
+
+    font-size:50px;
+
+    margin-bottom:10px;
+}
+
+.modal-box h3{
+
+    margin-bottom:10px;
+}
+
+.modal-box p{
+
+    color:#cbd5e1;
+
+    margin-bottom:20px;
+}
+
+.modal-actions{
+
+    display:flex;
+
+    gap:12px;
+}
+
+.modal-btn{
+
+    flex:1;
+
+    border:none;
+
+    height:42px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-family:'Cairo',sans-serif;
+
+    font-weight:700;
+}
+
+.cancel-btn{
+
+    background:#475569;
+
+    color:white;
+}
+
+.danger-btn{
+
+    background:#ef4444;
+
+    color:white;
+}
