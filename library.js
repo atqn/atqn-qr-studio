@@ -355,3 +355,9 @@ function openBook(id) {
     window.location.href =
         "book.html?id=" + id;
 }
+
+function openBook(id) {
+
+    window.location.href =
+        "book.html?id=" + id;
+}
