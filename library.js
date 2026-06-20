@@ -88,9 +88,13 @@ function renderBooks() {
 
     </div>
 
-    <button class="book-btn">
-        📖 فتح الكتاب
-    </button>
+<button
+    class="book-btn"
+    onclick="openBook(${book.id})">
+
+    📖 فتح الكتاب
+
+</button>
 
 </div>
 
