@@ -5,6 +5,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const bookId = Number(params.get("book"));
     const qrId = Number(params.get("qr"));
 
+    const qrPreviewBox = document.getElementById("qrPreviewBox");
+    const generateBtn = document.getElementById("generatePreviewBtn");
+
+    const qrContentInput = document.getElementById("qrContentInput");
+
     if (!bookId || !qrId) return;
 
     const books =
@@ -13,65 +18,43 @@ document.addEventListener("DOMContentLoaded", function () {
     const book =
         books.find(b => b.id === bookId);
 
-    if (!book) return;
-
-    document.getElementById("bookNameInput").value =
-        book.title;
-
-    if (!book.qrs) return;
+    if (!book || !book.qrs) return;
 
     const qr =
         book.qrs.find(q => q.id === qrId);
 
     if (!qr) return;
 
-    document.getElementById("qrTitleInput").value =
-        qr.title || "";
+    // تعبئة الحقول
+    document.getElementById("bookNameInput").value = book.title;
+    document.getElementById("qrTitleInput").value = qr.title;
+    document.getElementById("qrDescriptionInput").value = qr.description || "";
+    qrContentInput.value = qr.content || "";
 
-    document.getElementById("qrDescriptionInput").value =
-        qr.description || "";
+    function generateQR(text) {
 
-    document.getElementById("qrContentInput").value =
-        qr.content || "";
+        qrPreviewBox.innerHTML = "";
 
-    const saveBtn =
-        document.getElementById("saveQrChangesBtn");
+        new QRCode(qrPreviewBox, {
+            text: text,
+            width: 220,
+            height: 220,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
 
-    if (!saveBtn) return;
+    // توليد أولي تلقائي
+    generateQR(qr.content || "");
 
-    saveBtn.addEventListener("click", function () {
+    generateBtn.addEventListener("click", function () {
 
-        const books =
-            JSON.parse(localStorage.getItem("atqn_books")) || [];
+        const text = qrContentInput.value.trim();
 
-        const bookIndex =
-            books.findIndex(book => book.id === bookId);
+        if (!text) return;
 
-        if (bookIndex === -1) return;
-
-        if (!books[bookIndex].qrs) return;
-
-        const qrIndex =
-            books[bookIndex].qrs.findIndex(qr => qr.id === qrId);
-
-        if (qrIndex === -1) return;
-
-        books[bookIndex].qrs[qrIndex].title =
-            document.getElementById("qrTitleInput").value.trim();
-
-        books[bookIndex].qrs[qrIndex].description =
-            document.getElementById("qrDescriptionInput").value.trim();
-
-        books[bookIndex].qrs[qrIndex].content =
-            document.getElementById("qrContentInput").value.trim();
-
-        localStorage.setItem(
-            "atqn_books",
-            JSON.stringify(books)
-        );
-
-        window.location.href =
-            "book.html?id=" + bookId;
+        generateQR(text);
     });
 
 });
