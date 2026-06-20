@@ -349,3 +349,9 @@ document
         .classList.remove("show");
     }
 );
+
+function openBook(id) {
+
+    window.location.href =
+        "book.html?id=" + id;
+}
