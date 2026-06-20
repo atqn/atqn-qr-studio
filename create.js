@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const qrPreviewBox = document.getElementById("qrPreviewBox");
     const generateBtn = document.getElementById("generatePreviewBtn");
+    const downloadBtn = document.getElementById("downloadQrBtn");
 
     const qrContentInput = document.getElementById("qrContentInput");
 
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // توليد أولي تلقائي
     generateQR(qr.content || "");
 
+    // زر التوليد
     generateBtn.addEventListener("click", function () {
 
         const text = qrContentInput.value.trim();
@@ -56,5 +58,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
         generateQR(text);
     });
+
+    // زر التحميل PNG
+    if (downloadBtn) {
+
+        downloadBtn.addEventListener("click", function () {
+
+            const canvas = qrPreviewBox.querySelector("canvas");
+
+            if (!canvas) {
+                alert("قم بتوليد QR أولاً");
+                return;
+            }
+
+            const link = document.createElement("a");
+            link.download = "qr-code.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
 
 });
