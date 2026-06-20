@@ -59,12 +59,19 @@ document.addEventListener("DOMContentLoaded", function () {
         generateQR(text);
     });
 
-    // زر التحميل PNG
+    // ===== إصلاح مشكلة تكرار التحميل =====
     if (downloadBtn) {
 
-        downloadBtn.addEventListener("click", function () {
+        const newBtn = downloadBtn.cloneNode(true);
+        downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
 
-            const canvas = qrPreviewBox.querySelector("canvas");
+        const fixedDownloadBtn =
+            document.getElementById("downloadQrBtn");
+
+        fixedDownloadBtn.addEventListener("click", function () {
+
+            const canvas =
+                qrPreviewBox.querySelector("canvas");
 
             if (!canvas) {
                 alert("قم بتوليد QR أولاً");
@@ -74,7 +81,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const link = document.createElement("a");
             link.download = "qr-code.png";
             link.href = canvas.toDataURL("image/png");
+
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         });
     }
 
