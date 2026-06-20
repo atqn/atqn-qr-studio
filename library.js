@@ -193,32 +193,18 @@ if (addBookBtn) {
 
 function addBook() {
 
-    const title =
-        prompt(
-            "أدخل اسم الكتاب الجديد"
-        );
+    document
+        .getElementById(
+            "newBookTitle"
+        )
+        .value = "";
 
-    if (!title) return;
-
-    let books =
-        getBooks();
-
-    const newBook = {
-
-        id: Date.now(),
-
-        title: title,
-
-        icon: "📘",
-
-        count: 0
-    };
-
-    books.push(newBook);
-
-    saveBooks(books);
-
-    renderBooks();
+    document
+        .getElementById(
+            "addModal"
+        )
+        .classList
+        .add("show");
 }
 
 let currentEditId = null;
@@ -299,6 +285,62 @@ document
         document
         .getElementById(
             "editModal"
+        )
+        .classList.remove("show");
+    }
+);
+
+document
+.getElementById("cancelAddBtn")
+.addEventListener(
+    "click",
+    function () {
+
+        document
+        .getElementById(
+            "addModal"
+        )
+        .classList.remove("show");
+    }
+);
+
+document
+.getElementById("saveAddBtn")
+.addEventListener(
+    "click",
+    function () {
+
+        const title =
+            document
+            .getElementById(
+                "newBookTitle"
+            )
+            .value
+            .trim();
+
+        if (!title) return;
+
+        let books =
+            getBooks();
+
+        books.push({
+
+            id: Date.now(),
+
+            title: title,
+
+            icon: "📘",
+
+            count: 0
+        });
+
+        saveBooks(books);
+
+        renderBooks();
+
+        document
+        .getElementById(
+            "addModal"
         )
         .classList.remove("show");
     }
