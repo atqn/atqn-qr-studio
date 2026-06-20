@@ -115,3 +115,67 @@ function renderQrList() {
 
 `;
 }
+
+const addQrBtn =
+    document.getElementById("addQrBtn");
+
+const addQrModal =
+    document.getElementById("addQrModal");
+
+const qrTitleInput =
+    document.getElementById("qrTitleInput");
+
+const qrLinkInput =
+    document.getElementById("qrLinkInput");
+
+const saveQrBtn =
+    document.getElementById("saveQrBtn");
+
+const cancelQrBtn =
+    document.getElementById("cancelQrBtn");
+
+if (addQrBtn) {
+
+    addQrBtn.addEventListener(
+        "click",
+        function () {
+
+            qrTitleInput.value = "";
+            qrLinkInput.value = "";
+
+            addQrModal.classList.add("show");
+        }
+    );
+}
+
+if (cancelQrBtn) {
+
+    cancelQrBtn.addEventListener(
+        "click",
+        function () {
+
+            addQrModal.classList.remove("show");
+        }
+    );
+}
+
+if (saveQrBtn) {
+
+    saveQrBtn.addEventListener(
+        "click",
+        function () {
+
+            const title =
+                qrTitleInput.value.trim();
+
+            const link =
+                qrLinkInput.value.trim();
+
+            if (!title || !link) return;
+
+            alert("سيتم حفظ QR في الخطوة التالية");
+
+            addQrModal.classList.remove("show");
+        }
+    );
+}
