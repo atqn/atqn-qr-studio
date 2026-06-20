@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // توليد أولي تلقائي
+    // توليد أولي
     generateQR(qr.content || "");
 
     // زر التوليد
@@ -59,16 +59,16 @@ document.addEventListener("DOMContentLoaded", function () {
         generateQR(text);
     });
 
-    // ===== إصلاح مشكلة تكرار التحميل =====
+    // ===== تحميل احترافي PNG =====
     if (downloadBtn) {
 
-        const newBtn = downloadBtn.cloneNode(true);
-        downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
+        const fixedBtn = downloadBtn.cloneNode(true);
+        downloadBtn.parentNode.replaceChild(fixedBtn, downloadBtn);
 
-        const fixedDownloadBtn =
+        const newDownloadBtn =
             document.getElementById("downloadQrBtn");
 
-        fixedDownloadBtn.addEventListener("click", function () {
+        newDownloadBtn.addEventListener("click", function () {
 
             const canvas =
                 qrPreviewBox.querySelector("canvas");
@@ -78,9 +78,38 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            const link = document.createElement("a");
-            link.download = "qr-code.png";
-            link.href = canvas.toDataURL("image/png");
+            const scale = 4;
+
+            const tempCanvas =
+                document.createElement("canvas");
+
+            const ctx =
+                tempCanvas.getContext("2d");
+
+            tempCanvas.width = canvas.width * scale;
+            tempCanvas.height = canvas.height * scale;
+
+            ctx.scale(scale, scale);
+            ctx.drawImage(canvas, 0, 0);
+
+            const imageURL =
+                tempCanvas.toDataURL("image/png");
+
+            const bookName =
+                document.getElementById("bookNameInput").value || "Book";
+
+            const qrTitle =
+                document.getElementById("qrTitleInput").value || "QR";
+
+            const fileName =
+                `${bookName} - ${qrTitle}.png`
+                    .replace(/\s+/g, "_");
+
+            const link =
+                document.createElement("a");
+
+            link.download = fileName;
+            link.href = imageURL;
 
             document.body.appendChild(link);
             link.click();
