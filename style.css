@@ -878,3 +878,21 @@ body{
     word-break:break-word;
     line-height:1.5;
 }
+
+.qr-description{
+    color:#cbd5e1;
+    font-size:14px;
+    line-height:1.6;
+    margin-bottom:12px;
+    min-height:42px;
+}
+
+.qr-link-badge{
+    background:#0f172a;
+    border:1px solid #334155;
+    color:#38bdf8;
+    border-radius:10px;
+    padding:7px 10px;
+    font-size:13px;
+    margin-bottom:14px;
+}
