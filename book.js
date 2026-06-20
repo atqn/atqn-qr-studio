@@ -57,7 +57,10 @@ document.addEventListener("DOMContentLoaded", function () {
             qrList.innerHTML += `
                 <div class="book-card">
                     <h3>${qr.title}</h3>
-                    <div class="book-count">QR</div>
+
+<div class="book-count">
+    ${qr.content}
+</div>
 
                     <div class="book-actions">
                         <button class="action-btn edit-btn" data-edit="${qr.id}">
