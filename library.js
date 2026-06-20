@@ -73,10 +73,12 @@ function renderBooks() {
 
     <div class="book-actions">
 
-        <button
-            class="action-btn edit-btn">
-            ✏️ تعديل
-        </button>
+<button
+    class="action-btn edit-btn"
+    onclick="editBook(${book.id})">
+
+    ✏️ تعديل
+</button>
 
         <button
             class="action-btn delete-btn"
