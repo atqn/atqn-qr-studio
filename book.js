@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const bookId = Number(params.get("id"));
 
     let editQrId = null;
+    let deleteQrId = null;
 
     const addQrBtn = document.getElementById("addQrBtn");
     const qrList = document.getElementById("qrList");
@@ -14,6 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const qrLinkInput = document.getElementById("qrLinkInput");
     const saveQrBtn = document.getElementById("saveQrBtn");
     const cancelQrBtn = document.getElementById("cancelQrBtn");
+
+    const deleteQrModal = document.getElementById("deleteQrModal");
+    const confirmDeleteQrBtn = document.getElementById("confirmDeleteQrBtn");
+    const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
     function getBooks() {
         return JSON.parse(localStorage.getItem("atqn_books")) || [];
@@ -32,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!book) return;
 
         document.getElementById("bookTitle").textContent = book.title;
+
         document.getElementById("bookCount").textContent =
             "عدد الأكواد: " + ((book.qrs && book.qrs.length) || 0);
     }
@@ -56,13 +62,21 @@ document.addEventListener("DOMContentLoaded", function () {
         qrs.forEach(qr => {
             qrList.innerHTML += `
                 <div class="book-card">
+
+                    <div class="book-icon">🔗</div>
+
                     <h3>${qr.title}</h3>
 
-                    <div class="book-count">
+                    <div class="qr-description">
                         ${qr.description || "بدون وصف"}
                     </div>
 
+                    <div class="qr-link-badge">
+                        🌐 رابط مرفق
+                    </div>
+
                     <div class="book-actions">
+
                         <button class="action-btn edit-btn" data-edit="${qr.id}">
                             ✏️ تعديل
                         </button>
@@ -70,37 +84,37 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button class="action-btn delete-btn" data-delete="${qr.id}">
                             🗑 حذف
                         </button>
+
                     </div>
 
                     <button class="book-btn" data-open="${qr.id}">
                         📖 فتح
                     </button>
+
                 </div>
             `;
         });
     }
 
-    if (qrList) {
-        qrList.addEventListener("click", function (e) {
+    qrList.addEventListener("click", function (e) {
 
-            const editId = e.target.dataset.edit;
-            const deleteId = e.target.dataset.delete;
-            const openId = e.target.dataset.open;
+        const editId = e.target.dataset.edit;
+        const deleteId = e.target.dataset.delete;
+        const openId = e.target.dataset.open;
 
-            if (editId) {
-                editQr(Number(editId));
-            }
+        if (editId) {
+            editQr(Number(editId));
+        }
 
-            if (deleteId) {
-                deleteQr(Number(deleteId));
-            }
+        if (deleteId) {
+            deleteQr(Number(deleteId));
+        }
 
-            if (openId) {
-                window.location.href =
-                    "create.html?book=" + bookId + "&qr=" + openId;
-            }
-        });
-    }
+        if (openId) {
+            window.location.href =
+                "create.html?book=" + bookId + "&qr=" + openId;
+        }
+    });
 
     function editQr(qrId) {
         const book = getBook();
@@ -122,9 +136,83 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function deleteQr(qrId) {
-        const confirmDelete = confirm("⚠️ تأكيد الحذف\n\nهل تريد حذف هذا الـ QR؟");
+        deleteQrId = qrId;
+        deleteQrModal.classList.add("show");
+    }
 
-        if (!confirmDelete) return;
+    addQrBtn.addEventListener("click", function () {
+
+        editQrId = null;
+
+        addQrModal.querySelector("h3").textContent = "إضافة QR جديد";
+        saveQrBtn.textContent = "حفظ";
+
+        qrTitleInput.value = "";
+        qrDescriptionInput.value = "";
+        qrLinkInput.value = "";
+
+        addQrModal.classList.add("show");
+    });
+
+    cancelQrBtn.addEventListener("click", function () {
+        addQrModal.classList.remove("show");
+        editQrId = null;
+    });
+
+    saveQrBtn.addEventListener("click", function () {
+
+        const title = qrTitleInput.value.trim();
+        const description = qrDescriptionInput.value.trim();
+        const link = qrLinkInput.value.trim();
+
+        if (!title || !link) return;
+
+        const books = getBooks();
+        const bookIndex = books.findIndex(book => book.id === bookId);
+
+        if (bookIndex === -1) return;
+
+        if (!books[bookIndex].qrs) {
+            books[bookIndex].qrs = [];
+        }
+
+        if (editQrId) {
+            const qrIndex =
+                books[bookIndex].qrs.findIndex(qr => qr.id === editQrId);
+
+            if (qrIndex !== -1) {
+                books[bookIndex].qrs[qrIndex].title = title;
+                books[bookIndex].qrs[qrIndex].description = description;
+                books[bookIndex].qrs[qrIndex].content = link;
+            }
+        } else {
+            books[bookIndex].qrs.push({
+                id: Date.now(),
+                title: title,
+                description: description,
+                content: link
+            });
+        }
+
+        books[bookIndex].count = books[bookIndex].qrs.length;
+
+        saveBooks(books);
+
+        addQrModal.classList.remove("show");
+        editQrId = null;
+
+        updateHeader();
+        renderQrList();
+    });
+
+    cancelDeleteQrBtn.addEventListener("click", function () {
+        deleteQrModal.classList.remove("show");
+        deleteQrId = null;
+    });
+
+    confirmDeleteQrBtn.addEventListener("click", function () {
+
+        if (!deleteQrId) return;
 
         const books = getBooks();
         const bookIndex = books.findIndex(book => book.id === bookId);
@@ -132,86 +220,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (bookIndex === -1 || !books[bookIndex].qrs) return;
 
         books[bookIndex].qrs =
-            books[bookIndex].qrs.filter(qr => qr.id !== qrId);
+            books[bookIndex].qrs.filter(qr => qr.id !== deleteQrId);
 
         books[bookIndex].count = books[bookIndex].qrs.length;
 
         saveBooks(books);
 
+        deleteQrModal.classList.remove("show");
+        deleteQrId = null;
+
         updateHeader();
         renderQrList();
-    }
-
-    if (addQrBtn) {
-        addQrBtn.addEventListener("click", function () {
-
-            editQrId = null;
-
-            addQrModal.querySelector("h3").textContent = "إضافة QR جديد";
-            saveQrBtn.textContent = "حفظ";
-
-            qrTitleInput.value = "";
-            qrDescriptionInput.value = "";
-            qrLinkInput.value = "";
-
-            addQrModal.classList.add("show");
-        });
-    }
-
-    if (cancelQrBtn) {
-        cancelQrBtn.addEventListener("click", function () {
-            addQrModal.classList.remove("show");
-            editQrId = null;
-        });
-    }
-
-    if (saveQrBtn) {
-        saveQrBtn.addEventListener("click", function () {
-
-            const title = qrTitleInput.value.trim();
-            const description = qrDescriptionInput.value.trim();
-            const link = qrLinkInput.value.trim();
-
-            if (!title || !link) return;
-
-            const books = getBooks();
-            const bookIndex = books.findIndex(book => book.id === bookId);
-
-            if (bookIndex === -1) return;
-
-            if (!books[bookIndex].qrs) {
-                books[bookIndex].qrs = [];
-            }
-
-            if (editQrId) {
-                const qrIndex =
-                    books[bookIndex].qrs.findIndex(qr => qr.id === editQrId);
-
-                if (qrIndex !== -1) {
-                    books[bookIndex].qrs[qrIndex].title = title;
-                    books[bookIndex].qrs[qrIndex].description = description;
-                    books[bookIndex].qrs[qrIndex].content = link;
-                }
-            } else {
-                books[bookIndex].qrs.push({
-                    id: Date.now(),
-                    title: title,
-                    description: description,
-                    content: link
-                });
-            }
-
-            books[bookIndex].count = books[bookIndex].qrs.length;
-
-            saveBooks(books);
-
-            addQrModal.classList.remove("show");
-            editQrId = null;
-
-            updateHeader();
-            renderQrList();
-        });
-    }
+    });
 
     updateHeader();
     renderQrList();
