@@ -848,3 +848,23 @@ body{
 
     margin-bottom:20px;
 }
+
+/* =========================
+   Book Page Toolbar
+========================= */
+
+.library-toolbar{
+    display:flex;
+    gap:15px;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.library-toolbar .add-book-btn{
+    height:44px;
+    padding:0 18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+}
