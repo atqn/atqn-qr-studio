@@ -806,3 +806,24 @@ body{
         transform:scale(1);
     }
 }
+
+.modal-input{
+
+    width:100%;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#0f172a;
+
+    color:white;
+
+    padding:0 12px;
+
+    margin-bottom:20px;
+
+    font-family:'Cairo',sans-serif;
+}
