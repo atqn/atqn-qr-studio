@@ -4,13 +4,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const bookId = Number(params.get("id"));
 
     let editQrId = null;
-    let deleteQrId = null;
 
     const addQrBtn = document.getElementById("addQrBtn");
     const qrList = document.getElementById("qrList");
 
     const addQrModal = document.getElementById("addQrModal");
     const qrTitleInput = document.getElementById("qrTitleInput");
+    const qrDescriptionInput = document.getElementById("qrDescriptionInput");
     const qrLinkInput = document.getElementById("qrLinkInput");
     const saveQrBtn = document.getElementById("saveQrBtn");
     const cancelQrBtn = document.getElementById("cancelQrBtn");
@@ -58,9 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="book-card">
                     <h3>${qr.title}</h3>
 
-<div class="book-count">
-    ${qr.content}
-</div>
+                    <div class="book-count">
+                        ${qr.description || "بدون وصف"}
+                    </div>
 
                     <div class="book-actions">
                         <button class="action-btn edit-btn" data-edit="${qr.id}">
@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
         saveQrBtn.textContent = "حفظ";
 
         qrTitleInput.value = qr.title;
+        qrDescriptionInput.value = qr.description || "";
         qrLinkInput.value = qr.content || "";
 
         addQrModal.classList.add("show");
@@ -150,6 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
             saveQrBtn.textContent = "حفظ";
 
             qrTitleInput.value = "";
+            qrDescriptionInput.value = "";
             qrLinkInput.value = "";
 
             addQrModal.classList.add("show");
@@ -167,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
         saveQrBtn.addEventListener("click", function () {
 
             const title = qrTitleInput.value.trim();
+            const description = qrDescriptionInput.value.trim();
             const link = qrLinkInput.value.trim();
 
             if (!title || !link) return;
@@ -186,12 +189,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (qrIndex !== -1) {
                     books[bookIndex].qrs[qrIndex].title = title;
+                    books[bookIndex].qrs[qrIndex].description = description;
                     books[bookIndex].qrs[qrIndex].content = link;
                 }
             } else {
                 books[bookIndex].qrs.push({
                     id: Date.now(),
                     title: title,
+                    description: description,
                     content: link
                 });
             }
