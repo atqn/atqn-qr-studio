@@ -220,3 +220,86 @@ function addBook() {
 
     renderBooks();
 }
+
+let currentEditId = null;
+
+function editBook(id) {
+
+    const books =
+        getBooks();
+
+    const book =
+        books.find(
+            b => b.id === id
+        );
+
+    if (!book) return;
+
+    currentEditId = id;
+
+    document.getElementById(
+        "editBookTitle"
+    ).value = book.title;
+
+    document.getElementById(
+        "editModal"
+    ).classList.add("show");
+}
+
+document
+.getElementById("cancelEditBtn")
+.addEventListener(
+    "click",
+    function () {
+
+        document
+        .getElementById(
+            "editModal"
+        )
+        .classList.remove("show");
+    }
+);
+
+document
+.getElementById("saveEditBtn")
+.addEventListener(
+    "click",
+    function () {
+
+        const newTitle =
+            document
+            .getElementById(
+                "editBookTitle"
+            )
+            .value
+            .trim();
+
+        if (!newTitle) return;
+
+        let books =
+            getBooks();
+
+        const index =
+            books.findIndex(
+                b =>
+                b.id ===
+                currentEditId
+            );
+
+        if (index === -1)
+            return;
+
+        books[index].title =
+            newTitle;
+
+        saveBooks(books);
+
+        renderBooks();
+
+        document
+        .getElementById(
+            "editModal"
+        )
+        .classList.remove("show");
+    }
+);
