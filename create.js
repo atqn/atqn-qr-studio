@@ -1,70 +1,38 @@
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
-
-        const bookId =
-            Number(
-                params.get("book")
-            );
-
-        const qrId =
-            Number(
-                params.get("qr")
-            );
-
-        if (!bookId || !qrId)
-            return;
-
-        const books =
-            JSON.parse(
-                localStorage.getItem(
-                    "atqn_books"
-                )
-            ) || [];
-
-        const book =
-            books.find(
-                b => b.id === bookId
-            );
-
-        if (!book)
-            return;
-
-        document.getElementById(
-            "bookNameInput"
-        ).value =
-            book.title;
-
-        if (!book.qrs)
-            return;
-
-        const qr =
-            book.qrs.find(
-                q => q.id === qrId
-            );
-
-        if (!qr)
-            return;
-
-        document.getElementById(
-            "qrTitleInput"
-        ).value =
-            qr.title;
-
-        document.getElementById(
-            "qrContentInput"
-        ).value =
-            qr.content || "";
-
-    }
-);
-
 document.addEventListener("DOMContentLoaded", function () {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const bookId = Number(params.get("book"));
+    const qrId = Number(params.get("qr"));
+
+    if (!bookId || !qrId) return;
+
+    const books =
+        JSON.parse(localStorage.getItem("atqn_books")) || [];
+
+    const book =
+        books.find(b => b.id === bookId);
+
+    if (!book) return;
+
+    document.getElementById("bookNameInput").value =
+        book.title;
+
+    if (!book.qrs) return;
+
+    const qr =
+        book.qrs.find(q => q.id === qrId);
+
+    if (!qr) return;
+
+    document.getElementById("qrTitleInput").value =
+        qr.title || "";
+
+    document.getElementById("qrDescriptionInput").value =
+        qr.description || "";
+
+    document.getElementById("qrContentInput").value =
+        qr.content || "";
 
     const saveBtn =
         document.getElementById("saveQrChangesBtn");
@@ -72,13 +40,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!saveBtn) return;
 
     saveBtn.addEventListener("click", function () {
-
-        const params = new URLSearchParams(window.location.search);
-
-        const bookId = Number(params.get("book"));
-        const qrId = Number(params.get("qr"));
-
-        if (!bookId || !qrId) return;
 
         const books =
             JSON.parse(localStorage.getItem("atqn_books")) || [];
@@ -88,6 +49,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (bookIndex === -1) return;
 
+        if (!books[bookIndex].qrs) return;
+
         const qrIndex =
             books[bookIndex].qrs.findIndex(qr => qr.id === qrId);
 
@@ -95,6 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         books[bookIndex].qrs[qrIndex].title =
             document.getElementById("qrTitleInput").value.trim();
+
+        books[bookIndex].qrs[qrIndex].description =
+            document.getElementById("qrDescriptionInput").value.trim();
 
         books[bookIndex].qrs[qrIndex].content =
             document.getElementById("qrContentInput").value.trim();
@@ -107,4 +73,5 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href =
             "book.html?id=" + bookId;
     });
+
 });
