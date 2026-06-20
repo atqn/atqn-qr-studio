@@ -64,11 +64,18 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button class="action-btn delete-btn">🗑 حذف</button>
                     </div>
 
-                    <button class="book-btn">📖 فتح</button>
+                    <button class="book-btn" onclick="openQr(${bookId}, ${qr.id})">
+                        📖 فتح
+                    </button>
                 </div>
             `;
         });
     }
+
+    window.openQr = function (bookId, qrId) {
+        window.location.href =
+            "create.html?book=" + bookId + "&qr=" + qrId;
+    };
 
     if (addQrBtn) {
         addQrBtn.addEventListener("click", function () {
