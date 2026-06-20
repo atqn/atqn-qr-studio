@@ -874,3 +874,7 @@ body{
     font-size:14px;
 }
 
+.book-count{
+    word-break:break-word;
+    line-height:1.5;
+}
