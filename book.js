@@ -42,90 +42,58 @@ document.addEventListener("DOMContentLoaded", function () {
             "عدد الأكواد: " + ((book.qrs && book.qrs.length) || 0);
     }
 
-function renderQrList() {
-    const book = getBook();
-    if (!qrList || !book) return;
+    function renderQrList() {
+        const book = getBook();
+        if (!qrList || !book) return;
 
-    const qrs = book.qrs || [];
-    qrList.innerHTML = "";
+        const qrs = book.qrs || [];
+        qrList.innerHTML = "";
 
-    if (qrs.length === 0) {
-        qrList.innerHTML = `
-            <div class="book-card">
-                <h3>لا توجد أكواد QR بعد</h3>
-                <div class="book-count">اضغط على إضافة QR جديد</div>
-            </div>
-        `;
-        return;
-    }
-
-    qrs.forEach(qr => {
-
-        const settings = qr.qrSettings || {};
-
-        qrList.innerHTML += `
-        <div class="book-card">
-
-            <div class="book-icon">🔗</div>
-
-            <h3>${qr.title}</h3>
-
-            <div class="qr-description">
-                ${qr.description || "بدون وصف"}
-            </div>
-
-            <div class="qr-preview" id="qr-${qr.id}"></div>
-
-            <div class="book-actions">
-
-                <button class="action-btn edit-btn" data-edit="${qr.id}">
-                    ✏️ تعديل
-                </button>
-
-                <button class="action-btn delete-btn" data-delete="${qr.id}">
-                    🗑 حذف
-                </button>
-
-            </div>
-
-            <button class="book-btn" data-open="${qr.id}">
-                📖 فتح
-            </button>
-
-        </div>
-        `;
-    });
-
-    // 🔥 بعد الرسم: توليد QR فعلي لكل عنصر
-    setTimeout(() => {
+        if (qrs.length === 0) {
+            qrList.innerHTML = `
+                <div class="book-card">
+                    <h3>لا توجد أكواد QR بعد</h3>
+                    <div class="book-count">اضغط على إضافة QR جديد</div>
+                </div>
+            `;
+            return;
+        }
 
         qrs.forEach(qr => {
+            qrList.innerHTML += `
+                <div class="book-card">
 
-            const container = document.getElementById(`qr-${qr.id}`);
-            if (!container) return;
+                    <div class="book-icon">🔗</div>
 
-            const settings = qr.qrSettings || {};
+                    <h3>${qr.title}</h3>
 
-            new QRCodeStyling({
-                width: settings.size || 200,
-                height: settings.size || 200,
-                data: qr.content,
+                    <div class="qr-description">
+                        ${qr.description || "بدون وصف"}
+                    </div>
 
-                image: settings.logo || "assets/atqn-logo.png",
+                    <div class="qr-link-badge">
+                        🌐 رابط مرفق
+                    </div>
 
-                dotsOptions: {
-                    color: settings.color || "#000",
-                    type: settings.style || "square"
-                },
+                    <div class="book-actions">
 
-                backgroundOptions: {
-                    color: "#ffffff"
-                }
-            }).append(container);
+                        <button class="action-btn edit-btn" data-edit="${qr.id}">
+                            ✏️ تعديل
+                        </button>
+
+                        <button class="action-btn delete-btn" data-delete="${qr.id}">
+                            🗑 حذف
+                        </button>
+
+                    </div>
+
+                    <button class="book-btn" data-open="${qr.id}">
+                        📖 فتح
+                    </button>
+
+                </div>
+            `;
         });
-
-    }, 50);
-}
     }
 
     qrList.addEventListener("click", function (e) {
