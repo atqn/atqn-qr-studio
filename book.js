@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmDeleteQrBtn = document.getElementById("confirmDeleteQrBtn");
     const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
+    // =========================
+    // STORAGE
+    // =========================
     function getBooks() {
         return JSON.parse(localStorage.getItem("atqn_books") || "[]");
     }
@@ -33,15 +36,21 @@ document.addEventListener("DOMContentLoaded", function () {
         return getBooks().find(b => b.id === bookId);
     }
 
+    // =========================
+    // HEADER
+    // =========================
     function updateHeader() {
         const book = getBook();
         if (!book) return;
 
-        document.getElementById("bookTitle").textContent = book.title;
+        document.getElementById("bookTitle").textContent = book.title || "";
         document.getElementById("bookCount").textContent =
             "عدد الأكواد: " + (book.qrs?.length || 0);
     }
 
+    // =========================
+    // RENDER LIST (FIXED BADGE + CONTENT)
+    // =========================
     function renderQrList() {
 
         const book = getBook();
@@ -73,8 +82,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${qr.description || "بدون وصف"}
                     </div>
 
+                    <!-- ✔ FIX: إعادة "رابط مرفق" -->
                     <div class="qr-link-badge">
-                        🌐 ${qr.content || ""}
+                        🌐 رابط مرفق
                     </div>
 
                     <div class="book-actions">
@@ -99,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // EVENTS (CLICK DELEGATION FIXED)
+    // CLICK EVENTS
     // =========================
     qrList.addEventListener("click", function (e) {
 
@@ -116,6 +126,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // =========================
+    // EDIT
+    // =========================
     function editQr(qrId) {
 
         const book = getBook();
@@ -136,13 +149,40 @@ document.addEventListener("DOMContentLoaded", function () {
         addQrModal.classList.add("show");
     }
 
+    // =========================
+    // DELETE
+    // =========================
     function deleteQr(qrId) {
         deleteQrId = qrId;
         deleteQrModal.classList.add("show");
     }
 
+    cancelDeleteQrBtn.addEventListener("click", function () {
+        deleteQrModal.classList.remove("show");
+        deleteQrId = null;
+    });
+
+    confirmDeleteQrBtn.addEventListener("click", function () {
+
+        let books = getBooks();
+        const bookIndex = books.findIndex(b => b.id === bookId);
+
+        if (bookIndex === -1) return;
+
+        books[bookIndex].qrs =
+            (books[bookIndex].qrs || []).filter(q => q.id !== deleteQrId);
+
+        saveBooks(books);
+
+        deleteQrModal.classList.remove("show");
+        deleteQrId = null;
+
+        updateHeader();
+        renderQrList();
+    });
+
     // =========================
-    // ADD QR
+    // ADD NEW
     // =========================
     addQrBtn.addEventListener("click", function () {
 
@@ -164,7 +204,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =========================
-    // SAVE (FIXED FINAL)
+    // SAVE (FIXED FINAL STABLE)
     // =========================
     saveQrBtn.addEventListener("click", function () {
 
@@ -186,11 +226,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (editQrId) {
 
-            const qrIndex = books[bookIndex].qrs.findIndex(q => q.id === editQrId);
+            const qrIndex =
+                books[bookIndex].qrs.findIndex(q => q.id === editQrId);
 
             if (qrIndex !== -1) {
                 books[bookIndex].qrs[qrIndex] = {
-                    ...books[bookIndex].qrs[qrIndex],
+                    id: editQrId,
                     title,
                     description,
                     content: link
@@ -213,37 +254,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         addQrModal.classList.remove("show");
         editQrId = null;
-
-        updateHeader();
-        renderQrList();
-    });
-
-    // =========================
-    // DELETE
-    // =========================
-    cancelDeleteQrBtn.addEventListener("click", function () {
-        deleteQrModal.classList.remove("show");
-        deleteQrId = null;
-    });
-
-    confirmDeleteQrBtn.addEventListener("click", function () {
-
-        if (!deleteQrId) return;
-
-        let books = getBooks();
-        const bookIndex = books.findIndex(b => b.id === bookId);
-
-        if (bookIndex === -1) return;
-
-        books[bookIndex].qrs =
-            books[bookIndex].qrs.filter(q => q.id !== deleteQrId);
-
-        books[bookIndex].count = books[bookIndex].qrs.length;
-
-        saveBooks(books);
-
-        deleteQrModal.classList.remove("show");
-        deleteQrId = null;
 
         updateHeader();
         renderQrList();
