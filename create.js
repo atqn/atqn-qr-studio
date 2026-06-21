@@ -196,14 +196,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======================
     // DOWNLOAD SVG
     // ======================
-    svgBtn?.addEventListener("click", function () {
+svgBtn?.addEventListener("click", function () {
 
-        if (!qrCode) return;
+    if (!qrCode) return;
 
-        qrCode.download({
-            name: "qr-code",
-            extension: "svg"
-        });
+    const bookName =
+        document.getElementById("bookNameInput")?.value?.trim() || "Book";
+
+    const qrTitle =
+        document.getElementById("qrTitleInput")?.value?.trim() || "QR";
+
+    const fileName =
+        `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
+
+    qrCode.download({
+        name: fileName,
+        extension: "svg"
     });
+});
 
 });
