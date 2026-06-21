@@ -69,49 +69,52 @@ function showToast(message, type = "success") {
     // ======================
     // GENERATE (FIXED STABLE)
     // ======================
-    function generateQR(text) {
+function generateQR(text) {
 
-        if (!text) {
-            qrPreviewBox.innerHTML = "أدخل النص أولاً";
-            return;
-        }
-
-        qrPreviewBox.innerHTML = "";
-
-        const size = parseInt(document.getElementById("qrSizeInput").value || 300);
-        const color = document.getElementById("qrColorInput").value || "#000000";
-        const style = document.getElementById("qrStyleInput").value || "square";
-
-        // ✔ إصلاح الشعار (بدون URL.createObjectURL تكرار)
-        const logoFile = logoInput?.files?.[0];
-        const logoSrc = logoFile
-            ? URL.createObjectURL(logoFile)
-            : "assets/atqn-logo.png";
-
-        qrCode = new QRCodeStyling({
-            width: size,
-            height: size,
-            data: text,
-
-            image: logoSrc,
-
-            dotsOptions: {
-                color: color,
-                type: style
-            },
-
-            backgroundOptions: {
-                color: "#ffffff"
-            },
-
-            imageOptions: {
-                margin: 8,
-                imageSize: 0.25
-            }
-        });
-
-        qrCode.append(qrPreviewBox);
+    if (!text) {
+        qrPreviewBox.innerHTML = "أدخل النص أولاً";
+        return;
     }
+
+    qrPreviewBox.innerHTML = "";
+
+    const size = parseInt(document.getElementById("qrSizeInput").value || 300);
+    const color = document.getElementById("qrColorInput").value || "#000000";
+    const style = document.getElementById("qrStyleInput").value || "square";
+
+    const logoFile = logoInput?.files?.[0];
+    const logoSrc = logoFile
+        ? URL.createObjectURL(logoFile)
+        : "assets/atqn-logo.png";
+
+    // 🔥 أهم نقطة: منع التراكم
+    qrCode = null;
+
+    qrCode = new QRCodeStyling({
+        width: size,
+        height: size,
+        data: text,
+
+        image: logoSrc,
+
+        dotsOptions: {
+            color: color,
+            type: style
+        },
+
+        backgroundOptions: {
+            color: "#ffffff"
+        },
+
+        imageOptions: {
+            crossOrigin: "anonymous",
+            margin: 8,
+            imageSize: 0.25
+        }
+    });
+
+    qrCode.append(qrPreviewBox);
+}
 
     // ======================
     // FIRST LOAD
