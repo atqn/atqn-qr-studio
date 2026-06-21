@@ -979,11 +979,12 @@ body{
 }
 
 .preview-actions button{
-    padding: 8px 20px;   /* تصغير فعلي */
+    width: 100%;
+    padding: 8px 10px;   /* 👈 الحجم المناسب المتوازن */
     font-size: 13px;
-    border-radius: 10px;
-    height: 40px;        /* 🔥 مهم جدًا */
-    line-height: 1;
+    border-radius: 8px;
+    font-family: "Cairo";
+    font-weight: 600;
 }
 
 .settings-divider{
