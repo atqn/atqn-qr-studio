@@ -1,5 +1,4 @@
-console.log("CREATE JS IS RUNNING");
-alert("JS LOADED");
+
 
 document.addEventListener("DOMContentLoaded", function () {
 
