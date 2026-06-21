@@ -35,26 +35,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (qrIndex === -1) return;
 
-    // تعبئة الحقول
-    const qr = book.qrs[qrIndex];
+    const qr =
+        book.qrs[qrIndex];
 
+    // تعبئة الحقول
     document.getElementById("bookNameInput").value = book.title;
     document.getElementById("qrTitleInput").value = qr.title || "";
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
+    // =========================
+    // QR GENERATOR (WITH LOGO)
+    // =========================
     function generateQR(text) {
 
         qrPreviewBox.innerHTML = "";
 
-        new QRCode(qrPreviewBox, {
+        const tempDiv = document.createElement("div");
+
+        new QRCode(tempDiv, {
             text: text,
-            width: 220,
-            height: 220,
+            width: 240,
+            height: 240,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
         });
+
+        setTimeout(() => {
+
+            const canvas = tempDiv.querySelector("canvas");
+            if (!canvas) return;
+
+            const ctx = canvas.getContext("2d");
+
+            const logo = new Image();
+            logo.src = "assets/atqn-logo.png";
+
+            logo.onload = function () {
+
+                const size = canvas.width * 0.22;
+
+                const x = (canvas.width - size) / 2;
+                const y = (canvas.height - size) / 2;
+
+                ctx.drawImage(logo, x, y, size, size);
+
+                qrPreviewBox.innerHTML = "";
+                qrPreviewBox.appendChild(canvas);
+            };
+
+            qrPreviewBox.innerHTML = "";
+            qrPreviewBox.appendChild(canvas);
+
+        }, 120);
     }
 
     generateQR(qr.content || "");
@@ -70,7 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ===== 🔴 الحفظ (إعادة كتابة آمنة 100%) =====
+    // =========================
+    // SAVE (FIXED 100%)
+    // =========================
     if (saveBtn) {
 
         saveBtn.addEventListener("click", function () {
@@ -95,19 +131,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const bookIndex =
                 books.findIndex(b => b.id === bookId);
 
-            if (bookIndex === -1) return;
-
             const qrIndex =
                 books[bookIndex].qrs.findIndex(q => q.id === qrId);
 
-            if (qrIndex === -1) return;
-
-            // 🔥 إعادة بناء العنصر بالكامل (أفضل من spread)
             books[bookIndex].qrs[qrIndex] = {
                 id: qrId,
-                title: title,
-                description: description,
-                content: content
+                title,
+                description,
+                content
             };
 
             localStorage.setItem(
@@ -121,7 +152,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ===== تحميل PNG =====
+    // =========================
+    // DOWNLOAD PNG (PRO)
+    // =========================
     if (downloadBtn) {
 
         downloadBtn.addEventListener("click", function () {
