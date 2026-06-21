@@ -469,14 +469,7 @@ body{
     margin-top: 18px;
 }
 
-/* توحيد الحجم */
-.preview-actions button{
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    font-family: "Cairo";
-    font-weight: 600;
-}
+
 
 .info-card{
     margin-top:20px;
@@ -989,7 +982,7 @@ body{
     width: 100%;
     padding: 8px 10px;   /* 👈 الحجم المناسب المتوازن */
     font-size: 13px;
-    border-radius: 8px;
+    border-radius: 4px;
     font-family: "Cairo";
     font-weight: 600;
 }
