@@ -990,3 +990,10 @@ body{
     font-size: 13px;     /* تصغير النص */
     border-radius: 9px;
 }
+
+
+.panel select,
+.panel input[type="color"]{
+    height: 36px;
+    padding: 4px 8px;
+}
