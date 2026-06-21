@@ -148,6 +148,22 @@ function generateQR(text) {
     }, 120);
 }
 
+["qrColorInput", "qrSizeInput", "qrStyleInput"].forEach(id => {
+
+    const el = document.getElementById(id);
+
+    if (el) {
+
+        el.addEventListener("change", function () {
+
+            const text =
+                qrContentInput.value.trim();
+
+            if (text) generateQR(text);
+        });
+    }
+});
+    
     // أول تشغيل
     generateQR(qr.content || "");
 
