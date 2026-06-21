@@ -8,23 +8,41 @@ document.addEventListener("DOMContentLoaded", function () {
     const qrPreviewBox = document.getElementById("qrPreviewBox");
     const generateBtn = document.getElementById("generatePreviewBtn");
     const downloadBtn = document.getElementById("downloadQrBtn");
+    const saveBtn = document.getElementById("saveQrChangesBtn");
 
     const qrContentInput = document.getElementById("qrContentInput");
 
-    if (!bookId || !qrId) return;
+    if (!bookId || !qrId) {
+        console.log("Missing bookId or qrId");
+        return;
+    }
 
-    const books =
+    let books =
         JSON.parse(localStorage.getItem("atqn_books")) || [];
 
-    const book =
-        books.find(b => b.id === bookId);
+    const bookIndex =
+        books.findIndex(b => b.id === bookId);
 
-    if (!book || !book.qrs) return;
+    if (bookIndex === -1) {
+        console.log("Book not found");
+        return;
+    }
+
+    const book =
+        books[bookIndex];
+
+    if (!book.qrs) book.qrs = [];
+
+    const qrIndex =
+        book.qrs.findIndex(q => q.id === qrId);
+
+    if (qrIndex === -1) {
+        console.log("QR not found");
+        return;
+    }
 
     const qr =
-        book.qrs.find(q => q.id === qrId);
-
-    if (!qr) return;
+        book.qrs[qrIndex];
 
     // تعبئة الحقول
     document.getElementById("bookNameInput").value = book.title;
@@ -46,20 +64,59 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // توليد أولي
     generateQR(qr.content || "");
 
-    // زر التوليد
-    generateBtn.addEventListener("click", function () {
+    // توليد QR
+    if (generateBtn) {
+        generateBtn.addEventListener("click", function () {
 
-        const text = qrContentInput.value.trim();
+            const text = qrContentInput.value.trim();
 
-        if (!text) return;
+            if (!text) return;
 
-        generateQR(text);
-    });
+            generateQR(text);
+        });
+    }
 
-    // ===== تحميل احترافي PNG (بدون cloneNode) =====
+    // ===== الحفظ (الإصلاح الحقيقي النهائي) =====
+    if (saveBtn) {
+
+        saveBtn.addEventListener("click", function () {
+
+            const title =
+                document.getElementById("qrTitleInput").value.trim();
+
+            const description =
+                document.getElementById("qrDescriptionInput").value.trim();
+
+            const content =
+                document.getElementById("qrContentInput").value.trim();
+
+            if (!title || !content) {
+                alert("يرجى تعبئة البيانات");
+                return;
+            }
+
+            // 🔴 التحديث الحقيقي داخل نفس المصفوفة
+            books[bookIndex].qrs[qrIndex] = {
+                ...books[bookIndex].qrs[qrIndex],
+                title,
+                description,
+                content
+            };
+
+            localStorage.setItem(
+                "atqn_books",
+                JSON.stringify(books)
+            );
+
+            alert("تم حفظ التعديلات بنجاح");
+
+            window.location.href = "book.html?id=" + bookId;
+        });
+    }
+
+    // ===== تحميل PNG =====
     if (downloadBtn) {
 
         downloadBtn.addEventListener("click", function () {
