@@ -976,3 +976,10 @@ body{
 .action-btn:hover{
     transform: translateY(-2px);
 }
+
+.info-card{
+    padding: 18px;
+    min-height: 120px;
+    line-height: 1.6;
+    border-radius: 12px;
+}
