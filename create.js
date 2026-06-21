@@ -211,3 +211,16 @@ downloadBtn.addEventListener("click", function () {
 const downloadSvgBtn = document.getElementById("downloadSvgBtn");
     
 });
+
+const svgBtn = document.getElementById("downloadSvgBtn");
+
+if (svgBtn) {
+    svgBtn.addEventListener("click", function () {
+        if (!qrCode) return;
+
+        qrCode.download({
+            name: "qr_code",
+            extension: "svg"
+        });
+    });
+}
