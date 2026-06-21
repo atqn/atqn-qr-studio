@@ -979,9 +979,9 @@ body{
 }
 
 .preview-actions button{
-    padding: 7px 10px;   /* تصغير فعلي */
+    padding: 8px 12px;   /* تصغير فعلي */
     font-size: 13px;
-    border-radius: 8px;
+    border-radius: 10px;
     height: 40px;        /* 🔥 مهم جدًا */
     line-height: 1;
 }
