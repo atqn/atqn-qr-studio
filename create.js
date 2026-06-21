@@ -62,31 +62,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let logoFile = logoInput?.files?.[0];
 
-        qrCode = new QRCodeStyling({
-            width: size,
-            height: size,
-            data: text,
+qrCode = new QRCodeStyling({
+    width: size,
+    height: size,
+    data: text,
 
-            image: logoFile
-                ? URL.createObjectURL(logoFile)
-                : "assets/atqn-logo.png",
+    image: logoFile
+        ? URL.createObjectURL(logoFile)
+        : "assets/atqn-logo.png",
 
-            dotsOptions: {
-                color: color,
-                type: style
-            },
+    dotsOptions: {
+        color: color,
+        type: style
+    },
 
-            backgroundOptions: {
-                color: "#ffffff"
-            },
+    backgroundOptions: {
+        color: "#ffffff"
+    },
 
-            scale: 1.3 // 👈 تكبير QR نفسه بدون تكبير الإطار
-            
-            imageOptions: {
-                margin: 6,
-                imageSize: 0.35
-            }
-        });
+    scale: 1.3,   // ⭐ الحل الحقيقي للتكبير الداخلي
+
+    imageOptions: {
+        margin: 6,
+        imageSize: 0.35
+    }
+});
 
         qrCode.append(qrPreviewBox);
         isGenerated = true;
