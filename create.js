@@ -80,9 +80,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: "#ffffff"
             },
 
+            scale: 1.3, // 👈 تكبير QR نفسه بدون تكبير الإطار
+            
             imageOptions: {
-                margin: 8,
-                imageSize: 0.25
+                margin: 6,
+                imageSize: 0.35
             }
         });
 
