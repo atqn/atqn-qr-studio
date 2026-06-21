@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const params = new URLSearchParams(window.location.search);
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!bookId || !qrId) return;
 
     // ======================
-    // LOAD DB
+    // LOAD DATABASE
     // ======================
     let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
@@ -41,13 +42,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
-    // ======================
-    // QR OBJECT
-    // ======================
     let qrCode = null;
+    let isGenerated = false;
 
     // ======================
-    // FIXED GENERATE
+    // GENERATE QR
     // ======================
     function generateQR(text) {
 
@@ -58,44 +57,51 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const size = parseInt(document.getElementById("qrSizeInput").value || 300);
-        const color = document.getElementById("qrColorInput").value || "#000000";
-        const style = document.getElementById("qrStyleInput").value || "square";
+        let size = parseInt(document.getElementById("qrSizeInput").value || 300);
+        let color = document.getElementById("qrColorInput").value || "#000";
+        let style = document.getElementById("qrStyleInput").value || "square";
 
         let logoFile = logoInput?.files?.[0];
 
-        let dotsType = style;
+qrCode = new QRCodeStyling({
+    width: size,
+    height: size,
+    data: text,
 
-        // mapping safe
-        if (!["square", "dots", "rounded", "classy", "classy-rounded", "extra-rounded"].includes(dotsType)) {
-            dotsType = "square";
-        }
+    image: logoFile
+        ? URL.createObjectURL(logoFile)
+        : "assets/atqn-logo.png",
 
-        qrCode = new QRCodeStyling({
-            width: size,
-            height: size,
-            data: text,
+    dotsOptions: {
+        color: color,
+        type: style
+    },
 
-            image: logoFile
-                ? URL.createObjectURL(logoFile)
-                : "assets/atqn-logo.png",
+    backgroundOptions: {
+        color: "#ffffff"
+    },
 
-            dotsOptions: {
-                color: color,
-                type: dotsType
-            },
+    scale: 1.3,   // ⭐ الحل الحقيقي للتكبير الداخلي
 
-            backgroundOptions: {
-                color: "#ffffff"
-            },
+    imageOptions: {
+        margin: 6,
+        imageSize: 0.35
+    }
+});
 
-            imageOptions: {
-                margin: 8,
-                imageSize: 0.28
-            }
-        });
+        qrPreviewBox.innerHTML = "";
 
-        qrCode.append(qrPreviewBox);
+const wrapper = document.createElement("div");
+wrapper.style.display = "flex";
+wrapper.style.justifyContent = "center";
+wrapper.style.alignItems = "center";
+wrapper.style.transform = "scale(1.35)";  // 👈 التكبير هنا فقط
+wrapper.style.transformOrigin = "center";
+
+qrPreviewBox.appendChild(wrapper);
+
+qrCode.append(wrapper);
+        isGenerated = true;
     }
 
     // ======================
@@ -104,33 +110,29 @@ document.addEventListener("DOMContentLoaded", function () {
     qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 
     // ======================
-    // MANUAL GENERATE
+    // GENERATE BUTTON
     // ======================
     generateBtn?.addEventListener("click", function () {
         generateQR(qrContentInput.value.trim());
     });
 
     // ======================
-    // LIVE UPDATE (REAL FIX)
+    // LIVE UPDATE AFTER GENERATE
     // ======================
-    function liveUpdate() {
-        const text = qrContentInput.value.trim();
-        if (text) generateQR(text);
-    }
+    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
 
-    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
-        .forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
+        const el = document.getElementById(id);
 
-            el.addEventListener("input", liveUpdate);
-            el.addEventListener("change", liveUpdate);
-        });
-
-    qrContentInput.addEventListener("input", liveUpdate);
+        if (el) {
+            el.addEventListener("change", function () {
+                if (!isGenerated) return;
+                generateQR(qrContentInput.value.trim());
+            });
+        }
+    });
 
     // ======================
-    // SAVE QR (STABLE)
+    // SAVE QR (FIXED)
     // ======================
     saveBtn?.addEventListener("click", function () {
 
@@ -143,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
         let bIndex = books.findIndex(b => b.id === bookId);
         let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
@@ -152,7 +154,12 @@ document.addEventListener("DOMContentLoaded", function () {
             id: qrId,
             title,
             description,
-            content
+            content,
+            qrSettings: {
+                color: document.getElementById("qrColorInput").value,
+                size: document.getElementById("qrSizeInput").value,
+                style: document.getElementById("qrStyleInput").value
+            }
         };
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
@@ -167,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======================
     saveDefaultBtn?.addEventListener("click", function () {
 
-        const settings = {
+        let settings = {
             color: document.getElementById("qrColorInput").value,
             size: document.getElementById("qrSizeInput").value,
             style: document.getElementById("qrStyleInput").value
@@ -191,8 +198,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const qrTitle =
             document.getElementById("qrTitleInput")?.value?.trim() || "QR";
 
+        const safeName =
+            `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
+
         qrCode.download({
-            name: `${bookName}_${qrTitle}`.replace(/\s+/g, "_"),
+            name: safeName,
             extension: "png"
         });
     });
@@ -200,20 +210,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======================
     // DOWNLOAD SVG
     // ======================
-    svgBtn?.addEventListener("click", function () {
+svgBtn?.addEventListener("click", function () {
 
-        if (!qrCode) return;
+    if (!qrCode) return;
 
-        const bookName =
-            document.getElementById("bookNameInput")?.value?.trim() || "Book";
+    const bookName =
+        document.getElementById("bookNameInput")?.value?.trim() || "Book";
 
-        const qrTitle =
-            document.getElementById("qrTitleInput")?.value?.trim() || "QR";
+    const qrTitle =
+        document.getElementById("qrTitleInput")?.value?.trim() || "QR";
 
-        qrCode.download({
-            name: `${bookName}_${qrTitle}`.replace(/\s+/g, "_"),
-            extension: "svg"
-        });
+    const fileName =
+        `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
+
+    qrCode.download({
+        name: fileName,
+        extension: "svg"
     });
+});
 
 });
