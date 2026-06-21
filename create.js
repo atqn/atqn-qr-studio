@@ -33,7 +33,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let book = books[bookIndex];
     let qr = books[bookIndex].qrs[qrIndex];
+    if (qr.qrSettings) {
 
+    document.getElementById("qrColorInput").value =
+        qr.qrSettings.color || "#000000";
+
+    document.getElementById("qrSizeInput").value =
+        qr.qrSettings.size || 300;
+
+    document.getElementById("qrStyleInput").value =
+        qr.qrSettings.style || "square";
+}
     // ======================
     // FILL INPUTS
     // ======================
@@ -61,7 +71,15 @@ document.addEventListener("DOMContentLoaded", function () {
         let color = document.getElementById("qrColorInput").value || "#000";
         let style = document.getElementById("qrStyleInput").value || "square";
 
-        let logoFile = logoInput?.files?.[0];
+        let logoFile = null;
+
+if (logoInput?.files?.[0]) {
+    logoFile = URL.createObjectURL(logoInput.files[0]);
+} else if (qr.qrSettings?.logo === "custom") {
+    logoFile = "assets/atqn-logo.png";
+} else {
+    logoFile = "assets/atqn-logo.png";
+}
 
 qrCode = new QRCodeStyling({
     width: size,
@@ -155,11 +173,16 @@ qrCode.append(wrapper);
             title,
             description,
             content,
-            qrSettings: {
-                color: document.getElementById("qrColorInput").value,
-                size: document.getElementById("qrSizeInput").value,
-                style: document.getElementById("qrStyleInput").value
-            }
+qrSettings: {
+    color: document.getElementById("qrColorInput").value,
+    size: document.getElementById("qrSizeInput").value,
+    style: document.getElementById("qrStyleInput").value,
+
+    // ⭐ الإضافة المهمة
+    logo: logoInput?.files?.[0]
+        ? URL.createObjectURL(logoInput.files[0])
+        : "assets/atqn-logo.png"
+}
         };
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
