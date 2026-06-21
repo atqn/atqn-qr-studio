@@ -137,49 +137,57 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // 🔴 FIX: الحفظ (يشمل كل الإعدادات الآن)
     // =========================
-    saveBtn.addEventListener("click", function () {
+saveBtn.addEventListener("click", function () {
 
-        const title =
-            document.getElementById("qrTitleInput").value.trim();
+    const title =
+        document.getElementById("qrTitleInput").value.trim();
 
-        const description =
-            document.getElementById("qrDescriptionInput").value.trim();
+    const description =
+        document.getElementById("qrDescriptionInput").value.trim();
 
-        const content =
-            document.getElementById("qrContentInput").value.trim();
+    const content =
+        document.getElementById("qrContentInput").value.trim();
 
-        const color =
-            document.getElementById("qrColorInput").value;
+    const color =
+        document.getElementById("qrColorInput").value;
 
-        const size =
-            document.getElementById("qrSizeInput").value;
+    const size =
+        document.getElementById("qrSizeInput").value;
 
-        const style =
-            document.getElementById("qrStyleInput").value;
+    const style =
+        document.getElementById("qrStyleInput").value;
 
-        if (!title || !content) {
-            alert("يرجى تعبئة البيانات");
-            return;
+    const logo =
+        logoInput?.files?.[0]
+            ? URL.createObjectURL(logoInput.files[0])
+            : "assets/atqn-logo.png";
+
+    if (!title || !content) {
+        alert("يرجى تعبئة البيانات");
+        return;
+    }
+
+    // 🔴 هنا المهم: نحفظ كل شيء
+    books[bookIndex].qrs[qrIndex] = {
+        id: qrId,
+        title,
+        description,
+        content,
+
+        qrSettings: {
+            color,
+            size,
+            style,
+            logo
         }
+    };
 
-        books[bookIndex].qrs[qrIndex] = {
-            id: qrId,
-            title,
-            description,
-            content,
-            settings: {
-                color,
-                size,
-                style
-            }
-        };
+    localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        localStorage.setItem("atqn_books", JSON.stringify(books));
+    alert("تم حفظ QR بالكامل (بيانات + إعدادات)");
 
-        alert("تم حفظ التعديلات بنجاح");
-
-        window.location.href = "book.html?id=" + bookId;
-    });
+    window.location.href = "book.html?id=" + bookId;
+});
 
     // =========================
     // 🔴 FIX: تحميل PNG باسم الكتاب
