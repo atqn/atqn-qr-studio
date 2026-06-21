@@ -23,10 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const bookIndex =
         books.findIndex(b => b.id === bookId);
 
-    if (bookIndex === -1) {
-        console.log("Book not found");
-        return;
-    }
+    if (bookIndex === -1) return;
 
     const book =
         books[bookIndex];
@@ -36,17 +33,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const qrIndex =
         book.qrs.findIndex(q => q.id === qrId);
 
-    if (qrIndex === -1) {
-        console.log("QR not found");
-        return;
-    }
-
-    const qr =
-        book.qrs[qrIndex];
+    if (qrIndex === -1) return;
 
     // تعبئة الحقول
+    const qr = book.qrs[qrIndex];
+
     document.getElementById("bookNameInput").value = book.title;
-    document.getElementById("qrTitleInput").value = qr.title;
+    document.getElementById("qrTitleInput").value = qr.title || "";
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
@@ -71,14 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
         generateBtn.addEventListener("click", function () {
 
             const text = qrContentInput.value.trim();
-
             if (!text) return;
 
             generateQR(text);
         });
     }
 
-    // ===== الحفظ (الإصلاح الحقيقي النهائي) =====
+    // ===== 🔴 الحفظ (إعادة كتابة آمنة 100%) =====
     if (saveBtn) {
 
         saveBtn.addEventListener("click", function () {
@@ -97,12 +89,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // 🔴 التحديث الحقيقي داخل نفس المصفوفة
+            let books =
+                JSON.parse(localStorage.getItem("atqn_books")) || [];
+
+            const bookIndex =
+                books.findIndex(b => b.id === bookId);
+
+            if (bookIndex === -1) return;
+
+            const qrIndex =
+                books[bookIndex].qrs.findIndex(q => q.id === qrId);
+
+            if (qrIndex === -1) return;
+
+            // 🔥 إعادة بناء العنصر بالكامل (أفضل من spread)
             books[bookIndex].qrs[qrIndex] = {
-                ...books[bookIndex].qrs[qrIndex],
-                title,
-                description,
-                content
+                id: qrId,
+                title: title,
+                description: description,
+                content: content
             };
 
             localStorage.setItem(
