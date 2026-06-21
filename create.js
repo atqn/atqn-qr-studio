@@ -202,4 +202,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+const downloadSvgBtn = document.getElementById("downloadSvgBtn");
+    
 });
