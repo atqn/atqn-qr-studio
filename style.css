@@ -935,3 +935,44 @@ body{
 .action-btn:hover{
     transform: scale(1.02);
 }
+
+.vertical-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+/* توحيد حجم الأزرار */
+.vertical-actions .action-btn{
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-family: "Cairo", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* الألوان */
+.action-btn.primary{
+    background:#38bdf8;
+    color:#fff;
+}
+
+.action-btn.success{
+    background:#22c55e;
+    color:#fff;
+}
+
+.action-btn.dark{
+    background:#334155;
+    color:#fff;
+}
+
+/* حركة بسيطة */
+.action-btn:hover{
+    transform: translateY(-2px);
+}
