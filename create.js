@@ -1,4 +1,3 @@
-console.log("CREATE JS LOADED");
 
 document.addEventListener("DOMContentLoaded", function () {
 
