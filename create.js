@@ -61,9 +61,13 @@ function generateQR(text) {
     const color =
         document.getElementById("qrColorInput")?.value || "#000000";
 
-    const tempDiv = document.createElement("div");
+    const style =
+        document.getElementById("qrStyleInput")?.value || "square";
 
-    new QRCode(tempDiv, {
+    const container = document.createElement("div");
+    qrPreviewBox.appendChild(container);
+
+    const qr = new QRCode(container, {
         text: text,
         width: size,
         height: size,
@@ -74,19 +78,42 @@ function generateQR(text) {
 
     setTimeout(() => {
 
-        const qrCanvas = tempDiv.querySelector("canvas");
-        if (!qrCanvas) return;
+        const canvas = container.querySelector("canvas");
+        if (!canvas) return;
 
-        // ===== إنشاء Canvas نهائي =====
+        const ctx = canvas.getContext("2d");
+
+        // =========================
+        // STYLE ENGINE (SIMULATION)
+        // =========================
+        if (style === "dots") {
+            ctx.globalAlpha = 0.85;
+            ctx.drawImage(canvas, 0, 0);
+        }
+
+        if (style === "rounded") {
+            ctx.globalAlpha = 0.9;
+            ctx.drawImage(canvas, 0, 0);
+        }
+
+        if (style === "square") {
+            ctx.globalAlpha = 1;
+            ctx.drawImage(canvas, 0, 0);
+        }
+
+        ctx.globalAlpha = 1;
+
+        // =========================
+        // LOGO ENGINE (PRO)
+        // =========================
         const finalCanvas = document.createElement("canvas");
-        const ctx = finalCanvas.getContext("2d");
+        const fctx = finalCanvas.getContext("2d");
 
         finalCanvas.width = size;
         finalCanvas.height = size;
 
-        ctx.drawImage(qrCanvas, 0, 0, size, size);
+        fctx.drawImage(canvas, 0, 0);
 
-        // ===== إضافة الشعار بشكل صحيح =====
         const logo = new Image();
 
         logo.onload = function () {
@@ -96,7 +123,10 @@ function generateQR(text) {
             const x = (size - logoSize) / 2;
             const y = (size - logoSize) / 2;
 
-            ctx.drawImage(logo, x, y, logoSize, logoSize);
+            fctx.fillStyle = "#ffffff";
+            fctx.fillRect(x, y, logoSize, logoSize);
+
+            fctx.drawImage(logo, x, y, logoSize, logoSize);
 
             qrPreviewBox.innerHTML = "";
             qrPreviewBox.appendChild(finalCanvas);
