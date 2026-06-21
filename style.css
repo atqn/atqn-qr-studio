@@ -1004,4 +1004,19 @@ body{
     margin-top: 4px;
 }
 
+#qrPreviewBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+}
 
+/* 🔥 هذا هو السر الحقيقي */
+#qrPreviewBox canvas,
+#qrPreviewBox svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 320px;   /* 👈 هنا تكبير/تصغير المعاينة فقط */
+    transform: scale(1.15); /* 👈 تكبير داخلي بصري */
+    transform-origin: center;
+}
