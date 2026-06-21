@@ -20,7 +20,7 @@ function showToast(message, type = "success") {
     const qrPreviewBox = document.getElementById("qrPreviewBox");
     const generateBtn = document.getElementById("generatePreviewBtn");
     const downloadBtn = document.getElementById("downloadQrBtn");
-    const saveBtn = document.getElementById("saveQrChangesBtn");
+    const saveBtn = () => document.getElementById("saveQrChangesBtn");
     const saveDefaultBtn = document.getElementById("saveDefaultSettings");
     const svgBtn = document.getElementById("downloadSvgBtn");
 
@@ -148,42 +148,40 @@ function showToast(message, type = "success") {
     // ======================
     // SAVE QR (FIXED + STABLE)
     // ======================
-    saveBtn?.addEventListener("click", function () {
+document.addEventListener("click", function (e) {
 
-                
+    if (e.target && e.target.id === "saveQrChangesBtn") {
+
+        console.log("SAVE CLICKED");
+
         let title = document.getElementById("qrTitleInput").value.trim();
         let description = document.getElementById("qrDescriptionInput").value.trim();
-        let content = qrContentInput.value.trim();
+        let content = document.getElementById("qrContentInput").value.trim();
 
         if (!title || !content) {
             alert("أدخل البيانات");
             return;
         }
 
-        books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-        let bIndex = books.findIndex(b => b.id === bookId);
-        let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+        let bookIndex = books.findIndex(b => b.id === bookId);
+        let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
 
-        books[bIndex].qrs[qIndex] = {
+        books[bookIndex].qrs[qrIndex] = {
             id: qrId,
             title,
             description,
-            content,
-
-            qrSettings: {
-                color: document.getElementById("qrColorInput").value,
-                size: document.getElementById("qrSizeInput").value,
-                style: document.getElementById("qrStyleInput").value
-            }
+            content
         };
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        showToast("تم حفظ الباركود بنجاح", "success");
+        showToast("تم حفظ الباركود بنجاح");
 
         window.location.href = "book.html?id=" + bookId;
-    });
+    }
+});
 
     // ======================
     // SAVE DEFAULT SETTINGS
