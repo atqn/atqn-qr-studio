@@ -896,3 +896,42 @@ body{
     font-size:13px;
     margin-bottom:14px;
 }
+
+.clean-actions{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.action-btn{
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-family: "Cairo", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* ألوان موحدة */
+.action-btn.primary{
+    background:#38bdf8;
+    color:#fff;
+}
+
+.action-btn.success{
+    background:#22c55e;
+    color:#fff;
+}
+
+.action-btn.dark{
+    background:#334155;
+    color:#fff;
+}
+
+.action-btn:hover{
+    transform: scale(1.02);
+}
