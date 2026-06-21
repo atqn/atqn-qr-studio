@@ -214,13 +214,13 @@ const downloadSvgBtn = document.getElementById("downloadSvgBtn");
 
 const svgBtn = document.getElementById("downloadSvgBtn");
 
-if (svgBtn) {
-    svgBtn.addEventListener("click", function () {
-        if (!qrCode) return;
+svgBtn?.addEventListener("click", function () {
 
-        qrCode.download({
-            name: "qr_code",
-            extension: "svg"
-        });
+    if (!qrCode) return;
+
+    qrCode.download({
+        name: "qr-code",
+        extension: "svg"
     });
+});
 }
