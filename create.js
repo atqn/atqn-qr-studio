@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const params = new URLSearchParams(window.location.search);
@@ -19,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!bookId || !qrId) return;
 
     // ======================
-    // LOAD DATABASE
+    // LOAD DB
     // ======================
     let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
@@ -33,17 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let book = books[bookIndex];
     let qr = books[bookIndex].qrs[qrIndex];
-    if (qr.qrSettings) {
 
-    document.getElementById("qrColorInput").value =
-        qr.qrSettings.color || "#000000";
-
-    document.getElementById("qrSizeInput").value =
-        qr.qrSettings.size || 300;
-
-    document.getElementById("qrStyleInput").value =
-        qr.qrSettings.style || "square";
-}
     // ======================
     // FILL INPUTS
     // ======================
@@ -52,74 +41,62 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
+    // ======================
+    // RESTORE SETTINGS (FIXED)
+    // ======================
+    if (qr.qrSettings) {
+        document.getElementById("qrColorInput").value = qr.qrSettings.color || "#000000";
+        document.getElementById("qrSizeInput").value = qr.qrSettings.size || 300;
+        document.getElementById("qrStyleInput").value = qr.qrSettings.style || "square";
+    }
+
     let qrCode = null;
-    let isGenerated = false;
 
     // ======================
-    // GENERATE QR
+    // GENERATE (FIXED STABLE)
     // ======================
     function generateQR(text) {
-
-        qrPreviewBox.innerHTML = "";
 
         if (!text) {
             qrPreviewBox.innerHTML = "أدخل النص أولاً";
             return;
         }
 
-        let size = parseInt(document.getElementById("qrSizeInput").value || 300);
-        let color = document.getElementById("qrColorInput").value || "#000";
-        let style = document.getElementById("qrStyleInput").value || "square";
-
-        let logoFile = null;
-
-if (logoInput?.files?.[0]) {
-    logoFile = URL.createObjectURL(logoInput.files[0]);
-} else if (qr.qrSettings?.logo === "custom") {
-    logoFile = "assets/atqn-logo.png";
-} else {
-    logoFile = "assets/atqn-logo.png";
-}
-
-qrCode = new QRCodeStyling({
-    width: size,
-    height: size,
-    data: text,
-
-    image: logoFile
-        ? URL.createObjectURL(logoFile)
-        : "assets/atqn-logo.png",
-
-    dotsOptions: {
-        color: color,
-        type: style
-    },
-
-    backgroundOptions: {
-        color: "#ffffff"
-    },
-
-    scale: 1.3,   // ⭐ الحل الحقيقي للتكبير الداخلي
-
-    imageOptions: {
-        margin: 6,
-        imageSize: 0.35
-    }
-});
-
         qrPreviewBox.innerHTML = "";
 
-const wrapper = document.createElement("div");
-wrapper.style.display = "flex";
-wrapper.style.justifyContent = "center";
-wrapper.style.alignItems = "center";
-wrapper.style.transform = "scale(1.35)";  // 👈 التكبير هنا فقط
-wrapper.style.transformOrigin = "center";
+        const size = parseInt(document.getElementById("qrSizeInput").value || 300);
+        const color = document.getElementById("qrColorInput").value || "#000000";
+        const style = document.getElementById("qrStyleInput").value || "square";
 
-qrPreviewBox.appendChild(wrapper);
+        // ✔ إصلاح الشعار (بدون URL.createObjectURL تكرار)
+        const logoFile = logoInput?.files?.[0];
+        const logoSrc = logoFile
+            ? URL.createObjectURL(logoFile)
+            : "assets/atqn-logo.png";
 
-qrCode.append(wrapper);
-        isGenerated = true;
+        qrCode = new QRCodeStyling({
+            width: size,
+            height: size,
+            data: text,
+
+            image: logoSrc,
+
+            dotsOptions: {
+                color: color,
+                type: style
+            },
+
+            backgroundOptions: {
+                color: "#ffffff"
+            },
+
+            imageOptions: {
+                margin: 8,
+                imageSize: 0.25
+            }
+        });
+
+        qrCode.append(qrPreviewBox);
     }
 
     // ======================
@@ -127,30 +104,37 @@ qrCode.append(wrapper);
     // ======================
     qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 
+    // توليد أولي تلقائي عند فتح الصفحة
+    generateQR(qr.content || "");
+
     // ======================
-    // GENERATE BUTTON
+    // MANUAL GENERATE
     // ======================
     generateBtn?.addEventListener("click", function () {
         generateQR(qrContentInput.value.trim());
     });
 
     // ======================
-    // LIVE UPDATE AFTER GENERATE
+    // LIVE UPDATE (REAL FIX)
     // ======================
-    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
+    function liveUpdate() {
+        const text = qrContentInput.value.trim();
+        if (text) generateQR(text);
+    }
 
-        const el = document.getElementById(id);
+    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
 
-        if (el) {
-            el.addEventListener("change", function () {
-                if (!isGenerated) return;
-                generateQR(qrContentInput.value.trim());
-            });
-        }
-    });
+            el.addEventListener("input", liveUpdate);
+            el.addEventListener("change", liveUpdate);
+        });
+
+    qrContentInput.addEventListener("input", liveUpdate);
 
     // ======================
-    // SAVE QR (FIXED)
+    // SAVE QR (FIXED + STABLE)
     // ======================
     saveBtn?.addEventListener("click", function () {
 
@@ -163,7 +147,7 @@ qrCode.append(wrapper);
             return;
         }
 
-        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+        books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
         let bIndex = books.findIndex(b => b.id === bookId);
         let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
@@ -173,16 +157,12 @@ qrCode.append(wrapper);
             title,
             description,
             content,
-qrSettings: {
-    color: document.getElementById("qrColorInput").value,
-    size: document.getElementById("qrSizeInput").value,
-    style: document.getElementById("qrStyleInput").value,
 
-    // ⭐ الإضافة المهمة
-    logo: logoInput?.files?.[0]
-        ? URL.createObjectURL(logoInput.files[0])
-        : "assets/atqn-logo.png"
-}
+            qrSettings: {
+                color: document.getElementById("qrColorInput").value,
+                size: document.getElementById("qrSizeInput").value,
+                style: document.getElementById("qrStyleInput").value
+            }
         };
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
@@ -197,7 +177,7 @@ qrSettings: {
     // ======================
     saveDefaultBtn?.addEventListener("click", function () {
 
-        let settings = {
+        const settings = {
             color: document.getElementById("qrColorInput").value,
             size: document.getElementById("qrSizeInput").value,
             style: document.getElementById("qrStyleInput").value
@@ -221,11 +201,8 @@ qrSettings: {
         const qrTitle =
             document.getElementById("qrTitleInput")?.value?.trim() || "QR";
 
-        const safeName =
-            `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
-
         qrCode.download({
-            name: safeName,
+            name: `${bookName}_${qrTitle}`.replace(/\s+/g, "_"),
             extension: "png"
         });
     });
@@ -233,23 +210,20 @@ qrSettings: {
     // ======================
     // DOWNLOAD SVG
     // ======================
-svgBtn?.addEventListener("click", function () {
+    svgBtn?.addEventListener("click", function () {
 
-    if (!qrCode) return;
+        if (!qrCode) return;
 
-    const bookName =
-        document.getElementById("bookNameInput")?.value?.trim() || "Book";
+        const bookName =
+            document.getElementById("bookNameInput")?.value?.trim() || "Book";
 
-    const qrTitle =
-        document.getElementById("qrTitleInput")?.value?.trim() || "QR";
+        const qrTitle =
+            document.getElementById("qrTitleInput")?.value?.trim() || "QR";
 
-    const fileName =
-        `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
-
-    qrCode.download({
-        name: fileName,
-        extension: "svg"
+        qrCode.download({
+            name: `${bookName}_${qrTitle}`.replace(/\s+/g, "_"),
+            extension: "svg"
+        });
     });
-});
 
 });
