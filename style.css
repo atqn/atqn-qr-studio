@@ -1004,8 +1004,3 @@ body{
     margin-top: 4px;
 }
 
-#qrPreviewBox canvas,
-#qrPreviewBox img{
-    width: 120% !important;
-    height: auto !important;
-}
