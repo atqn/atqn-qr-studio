@@ -227,3 +227,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+
+const previewBox = document.getElementById("qrPreviewBox");
+
+previewBox.style.display = "flex";
+previewBox.style.justifyContent = "center";
+previewBox.style.alignItems = "center";
+previewBox.style.minHeight = "320px";
+
+// 👇 تكبير العرض فقط بدون لمس QR
+previewBox.style.transform = "scale(1.25)";
+previewBox.style.transformOrigin = "center";
