@@ -986,16 +986,11 @@ body{
 }
 
 .preview-actions button{
-    padding: 4px 6px;   /* كان أكبر */
-    font-size: 13px;
+    padding: 7px 10px;   /* تصغير فعلي */
+    font-size: 12.5px;
     border-radius: 8px;
-}
-
-
-.preview-actions button{
-    padding: 8px 10px;   /* كان أكبر */
-    font-size: 13px;
-    border-radius: 8px;
+    height: 38px;        /* 🔥 مهم جدًا */
+    line-height: 1;
 }
 
 .settings-divider{
