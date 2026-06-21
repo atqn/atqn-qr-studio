@@ -16,27 +16,16 @@
 <header class="topbar">
 
     <div class="brand">
-
         <img src="assets/atqn-logo.png" alt="ATQN">
-
         <div>
             <h1>ATQN QR Studio</h1>
         </div>
-
     </div>
 
     <nav>
-
         <a href="index.html">الرئيسة</a>
-
-        <a href="create.html" class="active">
-            إنشاء QR
-        </a>
-
-        <a href="library.html">
-            مكتبة الكتب
-        </a>
-
+        <a href="create.html" class="active">إنشاء QR</a>
+        <a href="library.html">مكتبة الكتب</a>
     </nav>
 
 </header>
@@ -45,7 +34,9 @@
 
     <div class="create-layout">
 
+        <!-- ========================= -->
         <!-- العمود الأول -->
+        <!-- ========================= -->
         <div class="panel">
 
             <h3>بيانات الباركود</h3>
@@ -59,7 +50,7 @@
             <label>وصف مختصر</label>
             <input id="qrDescriptionInput" type="text">
 
-            <label>الرابط</label>
+            <label>المحتوى / الرابط</label>
             <input id="qrContentInput" type="text">
 
             <div class="info-card">
@@ -72,7 +63,9 @@
 
         </div>
 
+        <!-- ========================= -->
         <!-- العمود الثاني -->
+        <!-- ========================= -->
         <div class="panel">
 
             <h3>الإعدادات</h3>
@@ -91,7 +84,9 @@
 
             </div>
 
-            <input type="file">
+            <!-- ✅ FIX: هذا هو العنصر المفقود -->
+            <label>رفع الشعار داخل QR</label>
+            <input type="file" id="qrLogoInput" accept="image/*">
 
             <label>اللون</label>
             <input id="qrColorInput" type="color" value="#38bdf8">
@@ -120,7 +115,9 @@
 
         </div>
 
+        <!-- ========================= -->
         <!-- العمود الثالث -->
+        <!-- ========================= -->
         <div class="panel preview-panel">
 
             <h3>المعاينة</h3>
@@ -153,10 +150,10 @@
 
 </div>
 
-<!-- مكتبة QR أولاً -->
+<!-- QR Library -->
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-<!-- ثم ملفك -->
+<!-- JS -->
 <script src="create.js"></script>
 
 </body>
