@@ -1006,6 +1006,6 @@ body{
 
 #qrPreviewBox canvas,
 #qrPreviewBox img{
-    width: 100% !important;
+    width: 120% !important;
     height: auto !important;
 }
