@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const qrContentInput = document.getElementById("qrContentInput");
     const logoInput = document.getElementById("qrLogoInput");
 
+    const saveDefaultSettingsBtn =
+        document.getElementById("saveDefaultSettings");
+
     if (!bookId || !qrId) return;
 
     let books =
@@ -43,11 +46,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
-    // =========================
-    // QR OBJECT (GLOBAL)
-    // =========================
     let qrCode = null;
 
+    // =========================
+    // QR GENERATOR (STABLE)
+    // =========================
     function generateQR(text) {
 
         qrPreviewBox.innerHTML = "";
@@ -93,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 6,
+                margin: 8,
                 imageSize: 0.25
             }
         });
@@ -101,94 +104,121 @@ document.addEventListener("DOMContentLoaded", function () {
         qrCode.append(qrPreviewBox);
     }
 
-    // =========================
     // أول تشغيل
-    // =========================
     generateQR(qr.content || "");
 
     // =========================
-    // زر التوليد
+    // توليد يدوي
     // =========================
-    if (generateBtn) {
+    generateBtn.addEventListener("click", function () {
 
-        generateBtn.addEventListener("click", function () {
+        const text = qrContentInput.value.trim();
+        if (!text) return;
 
-            const text = qrContentInput.value.trim();
-
-            if (!text) return;
-
-            generateQR(text);
-        });
-    }
+        generateQR(text);
+    });
 
     // =========================
-    // تحديث مباشر للإعدادات
+    // إعادة توليد تلقائي عند التغيير
     // =========================
     ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
 
         const el = document.getElementById(id);
 
         if (el) {
-
             el.addEventListener("change", function () {
 
-                const text =
-                    qrContentInput.value.trim();
-
+                const text = qrContentInput.value.trim();
                 if (text) generateQR(text);
             });
         }
     });
 
     // =========================
-    // الحفظ
+    // 🔴 FIX: الحفظ (يشمل كل الإعدادات الآن)
     // =========================
-    if (saveBtn) {
+    saveBtn.addEventListener("click", function () {
 
-        saveBtn.addEventListener("click", function () {
+        const title =
+            document.getElementById("qrTitleInput").value.trim();
 
-            const title =
-                document.getElementById("qrTitleInput").value.trim();
+        const description =
+            document.getElementById("qrDescriptionInput").value.trim();
 
-            const description =
-                document.getElementById("qrDescriptionInput").value.trim();
+        const content =
+            document.getElementById("qrContentInput").value.trim();
 
-            const content =
-                document.getElementById("qrContentInput").value.trim();
+        const color =
+            document.getElementById("qrColorInput").value;
 
-            if (!title || !content) {
-                alert("يرجى تعبئة البيانات");
-                return;
+        const size =
+            document.getElementById("qrSizeInput").value;
+
+        const style =
+            document.getElementById("qrStyleInput").value;
+
+        if (!title || !content) {
+            alert("يرجى تعبئة البيانات");
+            return;
+        }
+
+        books[bookIndex].qrs[qrIndex] = {
+            id: qrId,
+            title,
+            description,
+            content,
+            settings: {
+                color,
+                size,
+                style
             }
+        };
 
-            books[bookIndex].qrs[qrIndex] = {
-                id: qrId,
-                title,
-                description,
-                content
+        localStorage.setItem("atqn_books", JSON.stringify(books));
+
+        alert("تم حفظ التعديلات بنجاح");
+
+        window.location.href = "book.html?id=" + bookId;
+    });
+
+    // =========================
+    // 🔴 FIX: تحميل PNG باسم الكتاب
+    // =========================
+    downloadBtn.addEventListener("click", function () {
+
+        if (!qrCode) return;
+
+        const bookName =
+            document.getElementById("bookNameInput").value || "Book";
+
+        const qrTitle =
+            document.getElementById("qrTitleInput").value || "QR";
+
+        const fileName =
+            `${bookName} - ${qrTitle}`;
+
+        qrCode.download({
+            name: fileName,
+            extension: "png"
+        });
+    });
+
+    // =========================
+    // حفظ الإعدادات الافتراضية
+    // =========================
+    if (saveDefaultSettingsBtn) {
+
+        saveDefaultSettingsBtn.addEventListener("click", function () {
+
+            const settings = {
+                color: document.getElementById("qrColorInput").value,
+                size: document.getElementById("qrSizeInput").value,
+                style: document.getElementById("qrStyleInput").value
             };
 
-            localStorage.setItem("atqn_books", JSON.stringify(books));
+            localStorage.setItem("qr_default_settings", JSON.stringify(settings));
 
-            alert("تم حفظ التعديلات بنجاح");
-
-            window.location.href = "book.html?id=" + bookId;
-        });
-    }
-
-    // =========================
-    // تحميل PNG احترافي
-    // =========================
-    if (downloadBtn) {
-
-        downloadBtn.addEventListener("click", function () {
-
-            if (!qrCode) return;
-
-            qrCode.download({
-                name: "qr-code",
-                extension: "png"
-            });
+            alert("تم حفظ الإعدادات الافتراضية");
         });
     }
 
