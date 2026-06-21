@@ -463,18 +463,19 @@ body{
 }
 
 .preview-actions{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    margin-top:8px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 18px;
 }
 
-.preview-actions{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-
-    margin-top:-6px;
+/* توحيد الحجم */
+.preview-actions button{
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    font-family: "Cairo";
+    font-weight: 600;
 }
 
 .info-card{
