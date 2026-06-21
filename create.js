@@ -1,245 +1,264 @@
-
-
 document.addEventListener("DOMContentLoaded", function () {
 
-function showToast(message, type = "success") {
+function showToast(message) {
     const toast = document.getElementById("toast");
     if (!toast) return;
 
     toast.textContent = message;
-    toast.className = type + " show";
+    toast.className = "show";
 
     setTimeout(() => {
         toast.className = "";
-    }, 2500);
+    }, 2000);
 }
-    
-    const params = new URLSearchParams(window.location.search);
 
-    const bookId = Number(params.get("book"));
-    const qrId = Number(params.get("qr"));
+const params = new URLSearchParams(window.location.search);
 
-    const qrPreviewBox = document.getElementById("qrPreviewBox");
-    const generateBtn = document.getElementById("generatePreviewBtn");
-    const downloadBtn = document.getElementById("downloadQrBtn");
-    const saveBtn = () => document.getElementById("saveQrChangesBtn");
-    const saveDefaultBtn = document.getElementById("saveDefaultSettings");
-    const svgBtn = document.getElementById("downloadSvgBtn");
+const bookId = Number(params.get("book"));
+const qrId = Number(params.get("qr"));
 
-    const qrContentInput = document.getElementById("qrContentInput");
-    const logoInput = document.getElementById("qrLogoInput");
+const qrPreviewBox = document.getElementById("qrPreviewBox");
+const generateBtn = document.getElementById("generatePreviewBtn");
+const downloadBtn = document.getElementById("downloadQrBtn");
+const saveBtn = document.getElementById("saveQrChangesBtn");
+const saveDefaultBtn = document.getElementById("saveDefaultSettings");
+const svgBtn = document.getElementById("downloadSvgBtn");
 
-    if (!bookId || !qrId) return;
+const qrContentInput = document.getElementById("qrContentInput");
+const logoInput = document.getElementById("qrLogoInput");
 
-    // ======================
-    // LOAD DB
-    // ======================
-    let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+if (!bookId || !qrId) return;
 
-    let bookIndex = books.findIndex(b => b.id === bookId);
-    if (bookIndex === -1) return;
+/* ======================
+   LOAD DB
+====================== */
+let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-    if (!books[bookIndex].qrs) books[bookIndex].qrs = [];
+let bookIndex = books.findIndex(b => b.id === bookId);
+if (bookIndex === -1) return;
 
-    let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
-    if (qrIndex === -1) return;
+if (!books[bookIndex].qrs) books[bookIndex].qrs = [];
 
-    let book = books[bookIndex];
-    let qr = books[bookIndex].qrs[qrIndex];
+let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
+if (qrIndex === -1) return;
 
-    // ======================
-    // FILL INPUTS
-    // ======================
-    document.getElementById("bookNameInput").value = book.title || "";
-    document.getElementById("qrTitleInput").value = qr.title || "";
-    document.getElementById("qrDescriptionInput").value = qr.description || "";
-    qrContentInput.value = qr.content || "";
+let book = books[bookIndex];
+let qr = books[bookIndex].qrs[qrIndex];
 
-    // ======================
-    // RESTORE SETTINGS (FIXED)
-    // ======================
-    if (qr.qrSettings) {
-        document.getElementById("qrColorInput").value = qr.qrSettings.color || "#000000";
-        document.getElementById("qrSizeInput").value = qr.qrSettings.size || 300;
-        document.getElementById("qrStyleInput").value = qr.qrSettings.style || "square";
-    }
+/* ======================
+   FILL INPUTS
+====================== */
+document.getElementById("bookNameInput").value = book.title || "";
+document.getElementById("qrTitleInput").value = qr.title || "";
+document.getElementById("qrDescriptionInput").value = qr.description || "";
+qrContentInput.value = qr.content || "";
 
-    let qrCode = null;
+/* ======================
+   RESTORE SETTINGS
+====================== */
+if (qr.qrSettings) {
 
-    // ======================
-    // GENERATE (FIXED STABLE)
-    // ======================
+document.getElementById("qrColorInput").value =
+    qr.qrSettings.color || "#000000";
+
+document.getElementById("qrSizeInput").value =
+    qr.qrSettings.size || 300;
+
+document.getElementById("qrStyleInput").value =
+    qr.qrSettings.style || "square";
+}
+
+/* ======================
+   QR STATE
+====================== */
+let qrCode = null;
+
+/* ======================
+   GENERATE QR
+====================== */
 function generateQR(text) {
 
-    if (!text) {
-        qrPreviewBox.innerHTML = "أدخل النص أولاً";
-        return;
-    }
-
-    qrPreviewBox.innerHTML = "";
-
-    const size = parseInt(document.getElementById("qrSizeInput").value || 300);
-    const color = document.getElementById("qrColorInput").value || "#000000";
-    const style = document.getElementById("qrStyleInput").value || "square";
-
-    const logoFile = logoInput?.files?.[0];
-    const logoSrc = logoFile
-        ? URL.createObjectURL(logoFile)
-        : "assets/atqn-logo.png";
-
-    // 🔥 أهم نقطة: منع التراكم
-    qrCode = null;
-
-    qrCode = new QRCodeStyling({
-        width: size,
-        height: size,
-        data: text,
-
-        image: logoSrc,
-
-        dotsOptions: {
-            color: color,
-            type: style
-        },
-
-        backgroundOptions: {
-            color: "#ffffff"
-        },
-
-        imageOptions: {
-            crossOrigin: "anonymous",
-            margin: 8,
-            imageSize: 0.25
-        }
-    });
-
-    qrCode.append(qrPreviewBox);
+if (!text) {
+    qrPreviewBox.innerHTML = "أدخل النص أولاً";
+    return;
 }
 
-    // ======================
-    // FIRST LOAD
-    // ======================
-    qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
+qrPreviewBox.innerHTML = "";
 
-    // توليد أولي تلقائي عند فتح الصفحة
-    generateQR(qr.content || "");
+const size = parseInt(document.getElementById("qrSizeInput").value || 300);
+const color = document.getElementById("qrColorInput").value || "#000000";
+const style = document.getElementById("qrStyleInput").value || "square";
 
-    // ======================
-    // MANUAL GENERATE
-    // ======================
-    generateBtn?.addEventListener("click", function () {
-        generateQR(qrContentInput.value.trim());
-    });
+/* logo handling (SAFE) */
+let logoSrc = "assets/atqn-logo.png";
 
-    // ======================
-    // LIVE UPDATE (REAL FIX)
-    // ======================
-    function liveUpdate() {
-        const text = qrContentInput.value.trim();
-        if (text) generateQR(text);
-    }
+if (logoInput?.files?.[0]) {
+    logoSrc = URL.createObjectURL(logoInput.files[0]);
+} else if (qr.qrSettings?.logo) {
+    logoSrc = qr.qrSettings.logo;
+}
 
-    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
-        .forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
+qrCode = new QRCodeStyling({
+    width: size,
+    height: size,
+    data: text,
 
-            el.addEventListener("input", liveUpdate);
-            el.addEventListener("change", liveUpdate);
-        });
+    image: logoSrc,
 
-    qrContentInput.addEventListener("input", liveUpdate);
+    dotsOptions: {
+        color: color,
+        type: style
+    },
 
-    // ======================
-    // SAVE QR (FIXED + STABLE)
-    // ======================
-document.addEventListener("click", function (e) {
+    backgroundOptions: {
+        color: "#ffffff"
+    },
 
-    if (e.target && e.target.id === "saveQrChangesBtn") {
-
-        console.log("SAVE CLICKED");
-
-        let title = document.getElementById("qrTitleInput").value.trim();
-        let description = document.getElementById("qrDescriptionInput").value.trim();
-        let content = document.getElementById("qrContentInput").value.trim();
-
-        if (!title || !content) {
-            alert("أدخل البيانات");
-            return;
-        }
-
-        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
-
-        let bookIndex = books.findIndex(b => b.id === bookId);
-        let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
-
-        books[bookIndex].qrs[qrIndex] = {
-            id: qrId,
-            title,
-            description,
-            content
-        };
-
-        localStorage.setItem("atqn_books", JSON.stringify(books));
-
-        showToast("تم حفظ الباركود بنجاح");
-
-        window.location.href = "book.html?id=" + bookId;
+    imageOptions: {
+        margin: 8,
+        imageSize: 0.28
     }
 });
 
-    // ======================
-    // SAVE DEFAULT SETTINGS
-    // ======================
-    saveDefaultBtn?.addEventListener("click", function () {
+qrCode.append(qrPreviewBox);
+}
 
-        const settings = {
-            color: document.getElementById("qrColorInput").value,
-            size: document.getElementById("qrSizeInput").value,
-            style: document.getElementById("qrStyleInput").value
-        };
+/* ======================
+   FIRST LOAD (NO AUTO)
+====================== */
+qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 
-        localStorage.setItem("qr_default_settings", JSON.stringify(settings));
+/* optional auto preview */
+generateQR(qr.content || "");
 
-        alert("تم حفظ الإعدادات الافتراضية");
-    });
+/* ======================
+   GENERATE BUTTON
+====================== */
+generateBtn?.addEventListener("click", function () {
+generateQR(qrContentInput.value.trim());
+});
 
-    // ======================
-    // DOWNLOAD PNG
-    // ======================
-    downloadBtn?.addEventListener("click", function () {
+/* ======================
+   LIVE UPDATE
+====================== */
+["qrColorInput","qrSizeInput","qrStyleInput","qrLogoInput"].forEach(id => {
 
-        if (!qrCode) return;
+const el = document.getElementById(id);
 
-        const bookName =
-            document.getElementById("bookNameInput")?.value?.trim() || "Book";
+if (!el) return;
 
-        const qrTitle =
-            document.getElementById("qrTitleInput")?.value?.trim() || "QR";
+el.addEventListener("input", () => {
+    generateQR(qrContentInput.value.trim());
+});
 
-        qrCode.download({
-            name: `${bookName}_${qrTitle}`.replace(/\s+/g, "_"),
-            extension: "png"
-        });
-    });
+el.addEventListener("change", () => {
+    generateQR(qrContentInput.value.trim());
+});
 
-    // ======================
-    // DOWNLOAD SVG
-    // ======================
-    svgBtn?.addEventListener("click", function () {
+});
 
-        if (!qrCode) return;
+qrContentInput?.addEventListener("input", () => {
+generateQR(qrContentInput.value.trim());
+});
 
-        const bookName =
-            document.getElementById("bookNameInput")?.value?.trim() || "Book";
+/* ======================
+   SAVE QR (FIXED 100%)
+====================== */
+saveBtn?.addEventListener("click", function () {
 
-        const qrTitle =
-            document.getElementById("qrTitleInput")?.value?.trim() || "QR";
+let title = document.getElementById("qrTitleInput").value.trim();
+let description = document.getElementById("qrDescriptionInput").value.trim();
+let content = qrContentInput.value.trim();
 
-        qrCode.download({
-            name: `${bookName}_${qrTitle}`.replace(/\s+/g, "_"),
-            extension: "svg"
-        });
-    });
+if (!title || !content) {
+    alert("أدخل البيانات");
+    return;
+}
+
+let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+
+let bIndex = books.findIndex(b => b.id === bookId);
+let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+
+let logo = "assets/atqn-logo.png";
+
+if (logoInput?.files?.[0]) {
+    logo = URL.createObjectURL(logoInput.files[0]);
+} else if (qr.qrSettings?.logo) {
+    logo = qr.qrSettings.logo;
+}
+
+books[bIndex].qrs[qIndex] = {
+    id: qrId,
+    title,
+    description,
+    content,
+
+    qrSettings: {
+        color: document.getElementById("qrColorInput").value,
+        size: document.getElementById("qrSizeInput").value,
+        style: document.getElementById("qrStyleInput").value,
+        logo: logo
+    }
+};
+
+localStorage.setItem("atqn_books", JSON.stringify(books));
+
+showToast("تم الحفظ بنجاح");
+
+window.location.href = "book.html?id=" + bookId;
+});
+
+/* ======================
+   SAVE DEFAULT SETTINGS
+====================== */
+saveDefaultBtn?.addEventListener("click", function () {
+
+let settings = {
+    color: document.getElementById("qrColorInput").value,
+    size: document.getElementById("qrSizeInput").value,
+    style: document.getElementById("qrStyleInput").value
+};
+
+localStorage.setItem("qr_default_settings", JSON.stringify(settings));
+
+showToast("تم حفظ الإعدادات الافتراضية");
+});
+
+/* ======================
+   DOWNLOAD PNG
+====================== */
+downloadBtn?.addEventListener("click", function () {
+
+if (!qrCode) return;
+
+const name =
+    (document.getElementById("bookNameInput").value + "_" +
+    document.getElementById("qrTitleInput").value)
+    .replace(/\s+/g, "_");
+
+qrCode.download({
+    name: name,
+    extension: "png"
+});
+});
+
+/* ======================
+   DOWNLOAD SVG
+====================== */
+svgBtn?.addEventListener("click", function () {
+
+if (!qrCode) return;
+
+const name =
+    (document.getElementById("bookNameInput").value + "_" +
+    document.getElementById("qrTitleInput").value)
+    .replace(/\s+/g, "_");
+
+qrCode.download({
+    name: name,
+    extension: "svg"
+});
+});
 
 });
