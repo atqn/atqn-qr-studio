@@ -12,11 +12,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const qrContentInput = document.getElementById("qrContentInput");
 
+    // 🚨 حماية أولية
     if (!bookId || !qrId) {
         console.log("Missing bookId or qrId");
         return;
     }
 
+    // =========================
+    // تحميل البيانات
+    // =========================
     let books =
         JSON.parse(localStorage.getItem("atqn_books")) || [];
 
@@ -25,31 +29,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (bookIndex === -1) return;
 
-    const book =
-        books[bookIndex];
-
-    if (!book.qrs) book.qrs = [];
+    if (!books[bookIndex].qrs) {
+        books[bookIndex].qrs = [];
+    }
 
     const qrIndex =
-        book.qrs.findIndex(q => q.id === qrId);
+        books[bookIndex].qrs.findIndex(q => q.id === qrId);
 
     if (qrIndex === -1) return;
 
-    const qr =
-        book.qrs[qrIndex];
+    const book = books[bookIndex];
+    const qr = books[bookIndex].qrs[qrIndex];
 
+    // =========================
     // تعبئة الحقول
-    document.getElementById("bookNameInput").value = book.title;
+    // =========================
+    document.getElementById("bookNameInput").value = book.title || "";
     document.getElementById("qrTitleInput").value = qr.title || "";
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
     // =========================
-    // QR GENERATOR (WITH LOGO)
+    // توليد QR (مضمون)
     // =========================
     function generateQR(text) {
 
         qrPreviewBox.innerHTML = "";
+
+        if (!text) return;
 
         const tempDiv = document.createElement("div");
 
@@ -65,39 +72,30 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => {
 
             const canvas = tempDiv.querySelector("canvas");
-            if (!canvas) return;
 
-            const ctx = canvas.getContext("2d");
-
-            const logo = new Image();
-            logo.src = "assets/atqn-logo.png";
-
-            logo.onload = function () {
-
-                const size = canvas.width * 0.22;
-
-                const x = (canvas.width - size) / 2;
-                const y = (canvas.height - size) / 2;
-
-                ctx.drawImage(logo, x, y, size, size);
-
-                qrPreviewBox.innerHTML = "";
-                qrPreviewBox.appendChild(canvas);
-            };
+            if (!canvas) {
+                qrPreviewBox.innerHTML = "فشل توليد QR";
+                return;
+            }
 
             qrPreviewBox.innerHTML = "";
             qrPreviewBox.appendChild(canvas);
 
-        }, 120);
+        }, 100);
     }
 
+    // أول تشغيل
     generateQR(qr.content || "");
 
-    // توليد QR
+    // =========================
+    // زر التوليد
+    // =========================
     if (generateBtn) {
+
         generateBtn.addEventListener("click", function () {
 
             const text = qrContentInput.value.trim();
+
             if (!text) return;
 
             generateQR(text);
@@ -105,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // SAVE (FIXED 100%)
+    // الحفظ (نسخة مستقرة 100%)
     // =========================
     if (saveBtn) {
 
@@ -121,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("qrContentInput").value.trim();
 
             if (!title || !content) {
-                alert("يرجى تعبئة البيانات");
+                alert("يرجى تعبئة العنوان والمحتوى");
                 return;
             }
 
@@ -131,9 +129,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const bookIndex =
                 books.findIndex(b => b.id === bookId);
 
+            if (bookIndex === -1) return;
+
             const qrIndex =
                 books[bookIndex].qrs.findIndex(q => q.id === qrId);
 
+            if (qrIndex === -1) return;
+
+            // 🔥 تحديث مباشر وآمن
             books[bookIndex].qrs[qrIndex] = {
                 id: qrId,
                 title,
@@ -153,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // DOWNLOAD PNG (PRO)
+    // تحميل PNG (بدون مشاكل)
     // =========================
     if (downloadBtn) {
 
