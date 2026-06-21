@@ -46,49 +46,33 @@
     <div class="create-layout">
 
         <!-- العمود الأول -->
-
         <div class="panel">
 
             <h3>بيانات الباركود</h3>
 
             <label>اسم الكتاب</label>
-            <input
-                id="bookNameInput"
-                type="text"
-                readonly>
+            <input id="bookNameInput" type="text" readonly>
 
             <label>عنوان الباركود</label>
-            <input
-                id="qrTitleInput"
-                type="text">
+            <input id="qrTitleInput" type="text">
 
             <label>وصف مختصر</label>
-            <input
-                id="qrDescriptionInput"
-                type="text">
+            <input id="qrDescriptionInput" type="text">
 
             <label>الرابط</label>
-            <input
-                id="qrContentInput"
-                type="text">
+            <input id="qrContentInput" type="text">
 
             <div class="info-card">
-
-                <div class="info-title">
-                    📚 تنظيم الباركودات
-                </div>
-
+                <div class="info-title">📚 تنظيم الباركودات</div>
                 <p>
                     استخدم اسم الكتاب لتجميع جميع أكواد QR الخاصة به
                     داخل مكتبة واحدة، ثم أضف عنوانًا ليسهل العثور عليه لاحقًا.
                 </p>
-
             </div>
 
         </div>
 
         <!-- العمود الثاني -->
-
         <div class="panel">
 
             <h3>الإعدادات</h3>
@@ -96,19 +80,12 @@
             <div class="logo-options">
 
                 <label class="radio-item">
-                    <input
-                        type="radio"
-                        name="logoMode"
-                        checked>
-
+                    <input type="radio" name="logoMode" checked>
                     <span>استخدام شعار ATQN</span>
                 </label>
 
                 <label class="radio-item">
-                    <input
-                        type="radio"
-                        name="logoMode">
-
+                    <input type="radio" name="logoMode">
                     <span>رفع شعار من الجهاز</span>
                 </label>
 
@@ -117,10 +94,7 @@
             <input type="file">
 
             <label>اللون</label>
-            <input
-                id="qrColorInput"
-                type="color"
-                value="#38bdf8">
+            <input id="qrColorInput" type="color" value="#38bdf8">
 
             <label>الستايل</label>
             <select id="qrStyleInput">
@@ -147,35 +121,28 @@
         </div>
 
         <!-- العمود الثالث -->
-
         <div class="panel preview-panel">
 
             <h3>المعاينة</h3>
 
-<div id="qrPreviewBox" class="preview-box"></div>
+            <div id="qrPreviewBox" class="preview-box"></div>
 
             <div class="preview-actions">
 
-                <button
-                    id="generatePreviewBtn"
-                    class="primary-btn">
+                <button id="generatePreviewBtn" class="primary-btn">
                     ⚡ توليد المعاينة
                 </button>
 
-<button id="downloadQrBtn" class="save-btn">
-    ⬇️ تحميل PNG
-</button>
-                
-                <button
-                    id="saveQrChangesBtn"
-                    class="save-btn">
+                <button id="downloadQrBtn" class="save-btn">
+                    ⬇️ تحميل PNG
+                </button>
+
+                <button id="saveQrChangesBtn" class="save-btn">
                     📚 حفظ في المكتبة
                 </button>
 
                 <button class="export-btn">PNG</button>
-
                 <button class="export-btn">SVG</button>
-
                 <button class="export-btn">PDF</button>
 
             </div>
@@ -186,10 +153,11 @@
 
 </div>
 
+<!-- مكتبة QR أولاً -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<!-- ثم ملفك -->
 <script src="create.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="create.js"></script>
-    
 </body>
 </html>
