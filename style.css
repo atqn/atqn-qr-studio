@@ -1004,5 +1004,5 @@ body{
 .panel:nth-child(2) label,
 .panel:nth-child(2) select,
 .panel:nth-child(2) input{
-    margin-top: 8px;
+    margin-top: 6px;
 }
