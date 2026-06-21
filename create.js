@@ -46,61 +46,77 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // توليد QR + STYLE + LOGO
     // =========================
-    function generateQR(text) {
+function generateQR(text) {
 
-        qrPreviewBox.innerHTML = "";
+    qrPreviewBox.innerHTML = "";
 
-        if (!text) {
-            qrPreviewBox.innerHTML = "أدخل نص لتوليد QR";
-            return;
-        }
+    if (!text) {
+        qrPreviewBox.innerHTML = "أدخل نص لتوليد QR";
+        return;
+    }
 
-        const size =
-            parseInt(document.getElementById("qrSizeInput")?.value || 240);
+    const size =
+        parseInt(document.getElementById("qrSizeInput")?.value || 240);
 
-        const color =
-            document.getElementById("qrColorInput")?.value || "#000000";
+    const color =
+        document.getElementById("qrColorInput")?.value || "#000000";
 
-        const style =
-            document.getElementById("qrStyleInput")?.value || "square";
+    const tempDiv = document.createElement("div");
 
-        const container = document.createElement("div");
-        qrPreviewBox.appendChild(container);
+    new QRCode(tempDiv, {
+        text: text,
+        width: size,
+        height: size,
+        colorDark: color,
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 
-        new QRCode(container, {
-            text: text,
-            width: size,
-            height: size,
-            colorDark: color,
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
+    setTimeout(() => {
 
-        // ===== إضافة الشعار =====
-        setTimeout(() => {
+        const qrCanvas = tempDiv.querySelector("canvas");
+        if (!qrCanvas) return;
 
-            const canvas = container.querySelector("canvas");
-            if (!canvas) return;
+        // ===== إنشاء Canvas نهائي =====
+        const finalCanvas = document.createElement("canvas");
+        const ctx = finalCanvas.getContext("2d");
 
-            const ctx = canvas.getContext("2d");
+        finalCanvas.width = size;
+        finalCanvas.height = size;
 
-            const logo = new Image();
-            logo.src = logoInput?.files?.[0]
-                ? URL.createObjectURL(logoInput.files[0])
+        ctx.drawImage(qrCanvas, 0, 0, size, size);
+
+        // ===== إضافة الشعار بشكل صحيح =====
+        const logo = new Image();
+
+        logo.onload = function () {
+
+            const logoSize = size * 0.22;
+
+            const x = (size - logoSize) / 2;
+            const y = (size - logoSize) / 2;
+
+            ctx.drawImage(logo, x, y, logoSize, logoSize);
+
+            qrPreviewBox.innerHTML = "";
+            qrPreviewBox.appendChild(finalCanvas);
+        };
+
+        logo.onerror = function () {
+            qrPreviewBox.innerHTML = "";
+            qrPreviewBox.appendChild(finalCanvas);
+        };
+
+        logo.src =
+            document.getElementById("qrLogoInput")?.files?.[0]
+                ? URL.createObjectURL(document.getElementById("qrLogoInput").files[0])
                 : "assets/atqn-logo.png";
 
-            logo.onload = function () {
+        qrPreviewBox.innerHTML = "";
+        qrPreviewBox.appendChild(finalCanvas);
 
-                const logoSize = canvas.width * 0.22;
-
-                const x = (canvas.width - logoSize) / 2;
-                const y = (canvas.height - logoSize) / 2;
-
-                ctx.drawImage(logo, x, y, logoSize, logoSize);
-            };
-
-        }, 120);
-    }
+    }, 120);
+}
 
     // أول تشغيل
     generateQR(qr.content || "");
