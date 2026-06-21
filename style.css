@@ -986,7 +986,7 @@ body{
 }
 
 .preview-actions button{
-    padding: 6px 8px;   /* كان أكبر */
+    padding: 4px 6px;   /* كان أكبر */
     font-size: 13px;
     border-radius: 8px;
 }
