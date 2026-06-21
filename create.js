@@ -44,126 +44,85 @@ document.addEventListener("DOMContentLoaded", function () {
     qrContentInput.value = qr.content || "";
 
     // =========================
-    // توليد QR + STYLE + LOGO
+    // QR ENGINE (PRO STABLE)
     // =========================
-function generateQR(text) {
-
-    qrPreviewBox.innerHTML = "";
-
-    if (!text) {
-        qrPreviewBox.innerHTML = "أدخل نص لتوليد QR";
-        return;
-    }
-
-    const size =
-        parseInt(document.getElementById("qrSizeInput")?.value || 240);
-
-    const color =
-        document.getElementById("qrColorInput")?.value || "#000000";
-
-    const style =
-        document.getElementById("qrStyleInput")?.value || "square";
-
-    const container = document.createElement("div");
-    qrPreviewBox.appendChild(container);
-
-    const qr = new QRCode(container, {
-        text: text,
-        width: size,
-        height: size,
-        colorDark: color,
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    setTimeout(() => {
-
-        const canvas = container.querySelector("canvas");
-        if (!canvas) return;
-
-        const ctx = canvas.getContext("2d");
-
-        // =========================
-        // STYLE ENGINE (SIMULATION)
-        // =========================
-        if (style === "dots") {
-            ctx.globalAlpha = 0.85;
-            ctx.drawImage(canvas, 0, 0);
-        }
-
-        if (style === "rounded") {
-            ctx.globalAlpha = 0.9;
-            ctx.drawImage(canvas, 0, 0);
-        }
-
-        if (style === "square") {
-            ctx.globalAlpha = 1;
-            ctx.drawImage(canvas, 0, 0);
-        }
-
-        ctx.globalAlpha = 1;
-
-        // =========================
-        // LOGO ENGINE (PRO)
-        // =========================
-        const finalCanvas = document.createElement("canvas");
-        const fctx = finalCanvas.getContext("2d");
-
-        finalCanvas.width = size;
-        finalCanvas.height = size;
-
-        fctx.drawImage(canvas, 0, 0);
-
-        const logo = new Image();
-
-        logo.onload = function () {
-
-            const logoSize = size * 0.22;
-
-            const x = (size - logoSize) / 2;
-            const y = (size - logoSize) / 2;
-
-            fctx.fillStyle = "#ffffff";
-            fctx.fillRect(x, y, logoSize, logoSize);
-
-            fctx.drawImage(logo, x, y, logoSize, logoSize);
-
-            qrPreviewBox.innerHTML = "";
-            qrPreviewBox.appendChild(finalCanvas);
-        };
-
-        logo.onerror = function () {
-            qrPreviewBox.innerHTML = "";
-            qrPreviewBox.appendChild(finalCanvas);
-        };
-
-        logo.src =
-            document.getElementById("qrLogoInput")?.files?.[0]
-                ? URL.createObjectURL(document.getElementById("qrLogoInput").files[0])
-                : "assets/atqn-logo.png";
+    function generateQR(text) {
 
         qrPreviewBox.innerHTML = "";
-        qrPreviewBox.appendChild(finalCanvas);
 
-    }, 120);
-}
+        if (!text) {
+            qrPreviewBox.innerHTML = "أدخل نص لتوليد QR";
+            return;
+        }
 
-["qrColorInput", "qrSizeInput", "qrStyleInput"].forEach(id => {
+        const size =
+            parseInt(document.getElementById("qrSizeInput")?.value || 240);
 
-    const el = document.getElementById(id);
+        const color =
+            document.getElementById("qrColorInput")?.value || "#000";
 
-    if (el) {
+        const container = document.createElement("div");
+        qrPreviewBox.appendChild(container);
 
-        el.addEventListener("change", function () {
-
-            const text =
-                qrContentInput.value.trim();
-
-            if (text) generateQR(text);
+        new QRCode(container, {
+            text,
+            width: size,
+            height: size,
+            colorDark: color,
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
         });
+
+        // =========================
+        // FINAL RENDER AFTER QR
+        // =========================
+        setTimeout(() => {
+
+            const canvas = container.querySelector("canvas");
+            if (!canvas) return;
+
+            const finalCanvas = document.createElement("canvas");
+            const ctx = finalCanvas.getContext("2d");
+
+            finalCanvas.width = size;
+            finalCanvas.height = size;
+
+            ctx.drawImage(canvas, 0, 0);
+
+            const logo = new Image();
+
+            logo.onload = function () {
+
+                const logoSize = size * 0.22;
+
+                const x = (size - logoSize) / 2;
+                const y = (size - logoSize) / 2;
+
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(x, y, logoSize, logoSize);
+
+                ctx.drawImage(logo, x, y, logoSize, logoSize);
+
+                qrPreviewBox.innerHTML = "";
+                qrPreviewBox.appendChild(finalCanvas);
+            };
+
+            logo.onerror = function () {
+                qrPreviewBox.innerHTML = "";
+                qrPreviewBox.appendChild(finalCanvas);
+            };
+
+            logo.src =
+                logoInput?.files?.[0]
+                    ? URL.createObjectURL(logoInput.files[0])
+                    : "assets/atqn-logo.png";
+
+            qrPreviewBox.innerHTML = "";
+            qrPreviewBox.appendChild(finalCanvas);
+
+        }, 120);
     }
-});
-    
+
     // أول تشغيل
     generateQR(qr.content || "");
 
@@ -176,32 +135,32 @@ function generateQR(text) {
 
             const text = qrContentInput.value.trim();
 
-            if (!text) {
-                alert("أدخل محتوى QR");
-                return;
-            }
+            if (!text) return;
 
             generateQR(text);
         });
     }
 
     // =========================
-    // إعادة توليد عند تغيير الإعدادات
+    // الإعدادات (مرة واحدة فقط - FIXED)
     // =========================
-    ["qrColorInput", "qrSizeInput", "qrStyleInput"].forEach(id => {
+    ["qrColorInput", "qrSizeInput"].forEach(id => {
 
         const el = document.getElementById(id);
 
         if (el) {
+
             el.addEventListener("change", function () {
+
                 const text = qrContentInput.value.trim();
+
                 if (text) generateQR(text);
             });
         }
     });
 
     // =========================
-    // الحفظ (مضمون 100%)
+    // الحفظ (100% مستقر)
     // =========================
     if (saveBtn) {
 
@@ -228,7 +187,10 @@ function generateQR(text) {
                 content
             };
 
-            localStorage.setItem("atqn_books", JSON.stringify(books));
+            localStorage.setItem(
+                "atqn_books",
+                JSON.stringify(books)
+            );
 
             alert("تم حفظ التعديلات بنجاح");
 
