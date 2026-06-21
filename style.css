@@ -984,3 +984,9 @@ body{
     line-height: 1.6;
     border-radius: 12px;
 }
+
+.preview-actions button{
+    padding: 9px 12px;   /* تقليل الارتفاع */
+    font-size: 13px;     /* تصغير النص */
+    border-radius: 9px;
+}
