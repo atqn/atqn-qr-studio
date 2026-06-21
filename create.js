@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        alert("تم الحفظ بنجاح");
+        showToast("تم حفظ الباركود بنجاح", "success");
 
         window.location.href = "book.html?id=" + bookId;
     });
