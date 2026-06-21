@@ -13,9 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const qrContentInput = document.getElementById("qrContentInput");
     const logoInput = document.getElementById("qrLogoInput");
 
-    const saveDefaultSettingsBtn =
-        document.getElementById("saveDefaultSettings");
-
     if (!bookId || !qrId) return;
 
     let books =
@@ -39,17 +36,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const qr = books[bookIndex].qrs[qrIndex];
 
     // =========================
-    // تعبئة الحقول
+    // استرجاع الإعدادات المحفوظة
     // =========================
+    const savedSettings =
+        qr.qrSettings || JSON.parse(localStorage.getItem("qr_default_settings")) || {};
+
     document.getElementById("bookNameInput").value = book.title || "";
     document.getElementById("qrTitleInput").value = qr.title || "";
     document.getElementById("qrDescriptionInput").value = qr.description || "";
     qrContentInput.value = qr.content || "";
 
+    // تطبيق الإعدادات
+    if (savedSettings.color)
+        document.getElementById("qrColorInput").value = savedSettings.color;
+
+    if (savedSettings.size)
+        document.getElementById("qrSizeInput").value = savedSettings.size;
+
+    if (savedSettings.style)
+        document.getElementById("qrStyleInput").value = savedSettings.style;
+
     let qrCode = null;
 
     // =========================
-    // QR GENERATOR (STABLE)
+    // بناء QR
     // =========================
     function generateQR(text) {
 
@@ -66,12 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const style =
             document.getElementById("qrStyleInput").value || "square";
 
-        let dotsType = "square";
-
-        if (style === "dots") dotsType = "dots";
-        if (style === "rounded") dotsType = "rounded";
-        if (style === "classy") dotsType = "classy";
-        if (style === "classy-rounded") dotsType = "classy-rounded";
+        let dotsType = style;
 
         const logoFile =
             logoInput?.files?.[0];
@@ -83,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             image: logoFile
                 ? URL.createObjectURL(logoFile)
-                : "assets/atqn-logo.png",
+                : (savedSettings.logo || "assets/atqn-logo.png"),
 
             dotsOptions: {
                 color: color,
@@ -96,37 +101,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 8,
-                imageSize: 0.25
+                margin: 10,
+                imageSize: 0.28
             }
         });
 
         qrCode.append(qrPreviewBox);
     }
 
-    // أول تشغيل
-    generateQR(qr.content || "");
+    // ❌ لا يظهر QR إلا بعد الضغط
+    let qrGenerated = false;
 
-    // =========================
-    // توليد يدوي
-    // =========================
     generateBtn.addEventListener("click", function () {
 
         const text = qrContentInput.value.trim();
+
         if (!text) return;
 
         generateQR(text);
+        qrGenerated = true;
     });
 
     // =========================
-    // إعادة توليد تلقائي عند التغيير
+    // Auto update
     // =========================
-    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
+    ["qrColorInput", "qrSizeInput", "qrStyleInput"].forEach(id => {
 
         const el = document.getElementById(id);
 
         if (el) {
             el.addEventListener("change", function () {
+
+                if (!qrGenerated) return;
 
                 const text = qrContentInput.value.trim();
                 if (text) generateQR(text);
@@ -135,62 +141,60 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =========================
-    // 🔴 FIX: الحفظ (يشمل كل الإعدادات الآن)
+    // SAVE (QR + settings)
     // =========================
-saveBtn.addEventListener("click", function () {
+    saveBtn.addEventListener("click", function () {
 
-    const title =
-        document.getElementById("qrTitleInput").value.trim();
+        const title =
+            document.getElementById("qrTitleInput").value.trim();
 
-    const description =
-        document.getElementById("qrDescriptionInput").value.trim();
+        const description =
+            document.getElementById("qrDescriptionInput").value.trim();
 
-    const content =
-        document.getElementById("qrContentInput").value.trim();
+        const content =
+            document.getElementById("qrContentInput").value.trim();
 
-    const color =
-        document.getElementById("qrColorInput").value;
-
-    const size =
-        document.getElementById("qrSizeInput").value;
-
-    const style =
-        document.getElementById("qrStyleInput").value;
-
-    const logo =
-        logoInput?.files?.[0]
-            ? URL.createObjectURL(logoInput.files[0])
-            : "assets/atqn-logo.png";
-
-    if (!title || !content) {
-        alert("يرجى تعبئة البيانات");
-        return;
-    }
-
-    // 🔴 هنا المهم: نحفظ كل شيء
-    books[bookIndex].qrs[qrIndex] = {
-        id: qrId,
-        title,
-        description,
-        content,
-
-        qrSettings: {
-            color,
-            size,
-            style,
-            logo
+        if (!title || !content) {
+            alert("يرجى تعبئة البيانات");
+            return;
         }
-    };
 
-    localStorage.setItem("atqn_books", JSON.stringify(books));
+        const color =
+            document.getElementById("qrColorInput").value;
 
-    alert("تم حفظ QR بالكامل (بيانات + إعدادات)");
+        const size =
+            document.getElementById("qrSizeInput").value;
 
-    window.location.href = "book.html?id=" + bookId;
-});
+        const style =
+            document.getElementById("qrStyleInput").value;
+
+        const logo =
+            logoInput?.files?.[0]
+                ? URL.createObjectURL(logoInput.files[0])
+                : "assets/atqn-logo.png";
+
+        books[bookIndex].qrs[qrIndex] = {
+            id: qrId,
+            title,
+            description,
+            content,
+            qrSettings: {
+                color,
+                size,
+                style,
+                logo
+            }
+        };
+
+        localStorage.setItem("atqn_books", JSON.stringify(books));
+
+        alert("تم حفظ QR بنجاح");
+
+        window.location.href = "book.html?id=" + bookId;
+    });
 
     // =========================
-    // 🔴 FIX: تحميل PNG باسم الكتاب
+    // PNG EXPORT (FIXED NAME)
     // =========================
     downloadBtn.addEventListener("click", function () {
 
@@ -212,22 +216,41 @@ saveBtn.addEventListener("click", function () {
     });
 
     // =========================
-    // حفظ الإعدادات الافتراضية
+    // SVG EXPORT (NEW)
     // =========================
-    if (saveDefaultSettingsBtn) {
+    const svgBtn = document.querySelector(".export-btn:nth-child(2)");
 
-        saveDefaultSettingsBtn.addEventListener("click", function () {
-
-            const settings = {
-                color: document.getElementById("qrColorInput").value,
-                size: document.getElementById("qrSizeInput").value,
-                style: document.getElementById("qrStyleInput").value
-            };
-
-            localStorage.setItem("qr_default_settings", JSON.stringify(settings));
-
-            alert("تم حفظ الإعدادات الافتراضية");
+    if (svgBtn) {
+        svgBtn.addEventListener("click", function () {
+            if (!qrCode) return;
+            qrCode.download({ name: "qr", extension: "svg" });
         });
     }
+
+    // =========================
+    // PDF EXPORT (Canvas fallback)
+    // =========================
+    const pdfBtn = document.querySelector(".export-btn:nth-child(3)");
+
+    if (pdfBtn) {
+        pdfBtn.addEventListener("click", function () {
+
+            if (!qrCode) return;
+
+            qrCode.getRawData("png").then(blob => {
+
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "qr.pdf";
+
+                link.click();
+            });
+        });
+    }
+
+    // =========================
+    // FIRST LOAD (hidden until generate)
+    // =========================
+    qrPreviewBox.innerHTML = "اضغط توليد المعاينة أولاً";
 
 });
