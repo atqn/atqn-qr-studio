@@ -997,3 +997,9 @@ body{
     height: 36px;
     padding: 4px 8px;
 }
+
+.settings-divider{
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 14px 0;
+}
