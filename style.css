@@ -1003,3 +1003,9 @@ body{
 .panel:nth-child(2) input{
     margin-top: 4px;
 }
+
+#qrPreviewBox canvas,
+#qrPreviewBox img{
+    width: 100% !important;
+    height: auto !important;
+}
