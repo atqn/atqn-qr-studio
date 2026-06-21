@@ -1004,3 +1004,17 @@ body{
     margin-top: 4px;
 }
 
+#qrPreviewBox{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+}
+
+/* تكبير المعاينة فقط */
+#qrPreviewBox canvas,
+#qrPreviewBox img,
+#qrPreviewBox svg{
+    transform: scale(1.4);   /* 👈 هنا التحكم في التكبير */
+    transform-origin: center;
+}
