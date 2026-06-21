@@ -992,10 +992,10 @@ body{
 }
 
 
-.panel select,
-.panel input[type="color"]{
-    height: 36px;
-    padding: 4px 8px;
+.preview-actions button{
+    padding: 8px 10px;   /* كان أكبر */
+    font-size: 13px;
+    border-radius: 8px;
 }
 
 .settings-divider{
