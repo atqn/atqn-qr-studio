@@ -1,8 +1,15 @@
-document.addEventListener("DOMContentLoaded", function () {
+
 
 function showToast(message, type = "success") {
-    const toast = document.getElementById("toast");
-    if (!toast) return;
+
+    let toast = document.getElementById("toast");
+
+    // 🔴 لو غير موجود ننشئه تلقائياً (هذا هو الحل الذكي)
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toast";
+        document.body.appendChild(toast);
+    }
 
     toast.textContent = message;
     toast.className = type + " show";
@@ -150,8 +157,7 @@ function showToast(message, type = "success") {
     // ======================
     saveBtn?.addEventListener("click", function () {
 
-        console.log("SAVE CLICKED");
-        
+                
         let title = document.getElementById("qrTitleInput").value.trim();
         let description = document.getElementById("qrDescriptionInput").value.trim();
         let content = qrContentInput.value.trim();
