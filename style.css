@@ -966,11 +966,6 @@ body{
     color:#fff;
 }
 
-/* حركة بسيطة */
-.action-btn:hover{
-    transform: translateY(-2px);
-}
-
 .info-card{
     padding: 18px;
     min-height: 120px;
@@ -978,13 +973,22 @@ body{
     border-radius: 12px;
 }
 
+.preview-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .preview-actions button{
     width: 100%;
-    padding: 8px 10px;   /* 👈 الحجم المناسب المتوازن */
+    padding: 9px 10px;
     font-size: 13px;
     border-radius: 8px;
-    font-family: "Cairo";
-    font-weight: 600;
+    transition: 0.2s;
+}
+
+.preview-actions button:hover{
+    transform: translateY(-2px);
 }
 
 .settings-divider{
