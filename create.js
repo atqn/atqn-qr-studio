@@ -1,3 +1,5 @@
+console.log("CREATE JS LOADED");
+
 document.addEventListener("DOMContentLoaded", function () {
 
 function showToast(message, type = "success") {
