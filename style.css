@@ -992,8 +992,9 @@ body{
 }
 
 
-.panel select,
-.panel input[type="color"]{
-    height: 36px;
-    padding: 4px 8px;
+#qrSizeInput,
+#qrStyleInput,
+#qrColorInput{
+    transform: scale(0.95);
+    font-size: 13px;
 }
