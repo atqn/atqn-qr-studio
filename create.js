@@ -189,18 +189,24 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======================
     // DOWNLOAD FIX
     // ======================
-    downloadBtn.addEventListener("click", function () {
+downloadBtn.addEventListener("click", function () {
 
-        if (!qrCode) return;
+    if (!qrCode) return;
 
-        let bookName = document.getElementById("bookNameInput").value || "Book";
-        let qrTitle = document.getElementById("qrTitleInput").value || "QR";
+    const bookName =
+        document.getElementById("bookNameInput")?.value?.trim() || "Book";
 
-        qrCode.download({
-            name: `${bookName}_${qrTitle}`,
-            extension: "png"
-        });
+    const qrTitle =
+        document.getElementById("qrTitleInput")?.value?.trim() || "QR";
+
+    const safeName =
+        `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
+
+    qrCode.download({
+        name: safeName,
+        extension: "png"
     });
+});
 
 const downloadSvgBtn = document.getElementById("downloadSvgBtn");
     
