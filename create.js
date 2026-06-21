@@ -88,7 +88,18 @@ qrCode = new QRCodeStyling({
     }
 });
 
-        qrCode.append(qrPreviewBox);
+        qrPreviewBox.innerHTML = "";
+
+const wrapper = document.createElement("div");
+wrapper.style.display = "flex";
+wrapper.style.justifyContent = "center";
+wrapper.style.alignItems = "center";
+wrapper.style.transform = "scale(1.35)";  // 👈 التكبير هنا فقط
+wrapper.style.transformOrigin = "center";
+
+qrPreviewBox.appendChild(wrapper);
+
+qrCode.append(wrapper);
         isGenerated = true;
     }
 
