@@ -1001,5 +1001,12 @@ body{
 .settings-divider{
     height: 1px;
     background: rgba(255,255,255,0.08);
-    margin: 14px 0;
+    margin: 25px 0;   /* ⬅️ كان صغير → الآن نزلناه فعلياً */
+}
+
+/* نزول عناصر الإعدادات بالكامل */
+.panel:nth-child(2) label,
+.panel:nth-child(2) select,
+.panel:nth-child(2) input{
+    margin-top: 10px;
 }
