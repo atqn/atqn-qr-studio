@@ -150,6 +150,8 @@ function showToast(message, type = "success") {
     // ======================
     saveBtn?.addEventListener("click", function () {
 
+        console.log("SAVE CLICKED");
+        
         let title = document.getElementById("qrTitleInput").value.trim();
         let description = document.getElementById("qrDescriptionInput").value.trim();
         let content = qrContentInput.value.trim();
