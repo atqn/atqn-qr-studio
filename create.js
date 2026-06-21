@@ -59,16 +59,10 @@ document.addEventListener("DOMContentLoaded", function () {
         generateQR(text);
     });
 
-    // ===== تحميل احترافي PNG =====
+    // ===== تحميل احترافي PNG (بدون cloneNode) =====
     if (downloadBtn) {
 
-        const fixedBtn = downloadBtn.cloneNode(true);
-        downloadBtn.parentNode.replaceChild(fixedBtn, downloadBtn);
-
-        const newDownloadBtn =
-            document.getElementById("downloadQrBtn");
-
-        newDownloadBtn.addEventListener("click", function () {
+        downloadBtn.addEventListener("click", function () {
 
             const canvas =
                 qrPreviewBox.querySelector("canvas");
