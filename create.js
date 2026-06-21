@@ -1,5 +1,17 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.className = type + " show";
+
+    setTimeout(() => {
+        toast.className = "";
+    }, 2500);
+}
+    
     const params = new URLSearchParams(window.location.search);
 
     const bookId = Number(params.get("book"));
