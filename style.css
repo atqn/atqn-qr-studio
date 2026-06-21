@@ -980,9 +980,9 @@ body{
 
 .preview-actions button{
     padding: 7px 10px;   /* تصغير فعلي */
-    font-size: 12.5px;
+    font-size: 13px;
     border-radius: 8px;
-    height: 38px;        /* 🔥 مهم جدًا */
+    height: 40px;        /* 🔥 مهم جدًا */
     line-height: 1;
 }
 
