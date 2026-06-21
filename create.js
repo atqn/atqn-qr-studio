@@ -1,17 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-
-
 function showToast(message, type = "success") {
-
-    let toast = document.getElementById("toast");
-
-    // 🔴 لو غير موجود ننشئه تلقائياً (هذا هو الحل الذكي)
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "toast";
-        document.body.appendChild(toast);
-    }
+    const toast = document.getElementById("toast");
+    if (!toast) return;
 
     toast.textContent = message;
     toast.className = type + " show";
