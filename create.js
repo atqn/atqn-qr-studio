@@ -1,3 +1,5 @@
+document.addEventListener("DOMContentLoaded", function () {
+
 
 
 function showToast(message, type = "success") {
