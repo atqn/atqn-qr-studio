@@ -995,9 +995,9 @@ body{
 }
 
 .settings-divider{
-    height: 8px;
+    height: 3px;
     background: rgba(255,255,255,0.08);
-    margin: 2px 0;   /* ⬅️ كان صغير → الآن نزلناه فعلياً */
+    margin: 5px 0;   /* ⬅️ كان صغير → الآن نزلناه فعلياً */
 }
 
 /* نزول عناصر الإعدادات بالكامل */
