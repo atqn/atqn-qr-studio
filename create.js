@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             imageOptions: {
                 margin: 6,
-                imageSize: 0.35
+                imageSize: 0.8
             }
         });
 
