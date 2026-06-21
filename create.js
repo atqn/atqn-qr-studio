@@ -11,18 +11,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const saveBtn = document.getElementById("saveQrChangesBtn");
 
     const qrContentInput = document.getElementById("qrContentInput");
+    const logoInput = document.getElementById("qrLogoInput");
 
-    // =========================
-    // حماية
-    // =========================
-    if (!bookId || !qrId) {
-        console.log("Missing bookId or qrId");
-        return;
-    }
+    if (!bookId || !qrId) return;
 
-    // =========================
-    // تحميل البيانات
-    // =========================
     let books =
         JSON.parse(localStorage.getItem("atqn_books")) || [];
 
@@ -52,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     qrContentInput.value = qr.content || "";
 
     // =========================
-    // توليد QR (نسخة مستقرة 100%)
+    // توليد QR + STYLE + LOGO
     // =========================
     function generateQR(text) {
 
@@ -63,18 +55,51 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const size =
+            parseInt(document.getElementById("qrSizeInput")?.value || 240);
+
+        const color =
+            document.getElementById("qrColorInput")?.value || "#000000";
+
+        const style =
+            document.getElementById("qrStyleInput")?.value || "square";
+
         const container = document.createElement("div");
         qrPreviewBox.appendChild(container);
 
-        // إنشاء QR مباشرة داخل DOM (الأكثر استقرارًا)
         new QRCode(container, {
             text: text,
-            width: 240,
-            height: 240,
-            colorDark: "#000000",
+            width: size,
+            height: size,
+            colorDark: color,
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
         });
+
+        // ===== إضافة الشعار =====
+        setTimeout(() => {
+
+            const canvas = container.querySelector("canvas");
+            if (!canvas) return;
+
+            const ctx = canvas.getContext("2d");
+
+            const logo = new Image();
+            logo.src = logoInput?.files?.[0]
+                ? URL.createObjectURL(logoInput.files[0])
+                : "assets/atqn-logo.png";
+
+            logo.onload = function () {
+
+                const logoSize = canvas.width * 0.22;
+
+                const x = (canvas.width - logoSize) / 2;
+                const y = (canvas.height - logoSize) / 2;
+
+                ctx.drawImage(logo, x, y, logoSize, logoSize);
+            };
+
+        }, 120);
     }
 
     // أول تشغيل
@@ -99,6 +124,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
+    // إعادة توليد عند تغيير الإعدادات
+    // =========================
+    ["qrColorInput", "qrSizeInput", "qrStyleInput"].forEach(id => {
+
+        const el = document.getElementById(id);
+
+        if (el) {
+            el.addEventListener("change", function () {
+                const text = qrContentInput.value.trim();
+                if (text) generateQR(text);
+            });
+        }
+    });
+
+    // =========================
     // الحفظ (مضمون 100%)
     // =========================
     if (saveBtn) {
@@ -115,18 +155,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("qrContentInput").value.trim();
 
             if (!title || !content) {
-                alert("يرجى تعبئة العنوان والمحتوى");
+                alert("يرجى تعبئة البيانات");
                 return;
             }
-
-            let books =
-                JSON.parse(localStorage.getItem("atqn_books")) || [];
-
-            const bookIndex =
-                books.findIndex(b => b.id === bookId);
-
-            const qrIndex =
-                books[bookIndex].qrs.findIndex(q => q.id === qrId);
 
             books[bookIndex].qrs[qrIndex] = {
                 id: qrId,
@@ -144,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // تحميل PNG (مستقر)
+    // تحميل PNG
     // =========================
     if (downloadBtn) {
 
