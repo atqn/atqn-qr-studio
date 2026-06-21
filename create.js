@@ -44,86 +44,66 @@ document.addEventListener("DOMContentLoaded", function () {
     qrContentInput.value = qr.content || "";
 
     // =========================
-    // QR ENGINE (PRO STABLE)
+    // QR OBJECT (GLOBAL)
     // =========================
+    let qrCode = null;
+
     function generateQR(text) {
 
         qrPreviewBox.innerHTML = "";
 
-        if (!text) {
-            qrPreviewBox.innerHTML = "أدخل نص لتوليد QR";
-            return;
-        }
+        if (!text) return;
 
         const size =
-            parseInt(document.getElementById("qrSizeInput")?.value || 240);
+            parseInt(document.getElementById("qrSizeInput").value || 300);
 
         const color =
-            document.getElementById("qrColorInput")?.value || "#000";
+            document.getElementById("qrColorInput").value || "#000000";
 
-        const container = document.createElement("div");
-        qrPreviewBox.appendChild(container);
+        const style =
+            document.getElementById("qrStyleInput").value || "square";
 
-        new QRCode(container, {
-            text,
+        let dotsType = "square";
+
+        if (style === "dots") dotsType = "dots";
+        if (style === "rounded") dotsType = "rounded";
+        if (style === "classy") dotsType = "classy";
+        if (style === "classy-rounded") dotsType = "classy-rounded";
+
+        const logoFile =
+            logoInput?.files?.[0];
+
+        qrCode = new QRCodeStyling({
             width: size,
             height: size,
-            colorDark: color,
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
+            data: text,
+
+            image: logoFile
+                ? URL.createObjectURL(logoFile)
+                : "assets/atqn-logo.png",
+
+            dotsOptions: {
+                color: color,
+                type: dotsType
+            },
+
+            backgroundOptions: {
+                color: "#ffffff"
+            },
+
+            imageOptions: {
+                crossOrigin: "anonymous",
+                margin: 6,
+                imageSize: 0.25
+            }
         });
 
-        // =========================
-        // FINAL RENDER AFTER QR
-        // =========================
-        setTimeout(() => {
-
-            const canvas = container.querySelector("canvas");
-            if (!canvas) return;
-
-            const finalCanvas = document.createElement("canvas");
-            const ctx = finalCanvas.getContext("2d");
-
-            finalCanvas.width = size;
-            finalCanvas.height = size;
-
-            ctx.drawImage(canvas, 0, 0);
-
-            const logo = new Image();
-
-            logo.onload = function () {
-
-                const logoSize = size * 0.22;
-
-                const x = (size - logoSize) / 2;
-                const y = (size - logoSize) / 2;
-
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(x, y, logoSize, logoSize);
-
-                ctx.drawImage(logo, x, y, logoSize, logoSize);
-
-                qrPreviewBox.innerHTML = "";
-                qrPreviewBox.appendChild(finalCanvas);
-            };
-
-            logo.onerror = function () {
-                qrPreviewBox.innerHTML = "";
-                qrPreviewBox.appendChild(finalCanvas);
-            };
-
-            logo.src =
-                logoInput?.files?.[0]
-                    ? URL.createObjectURL(logoInput.files[0])
-                    : "assets/atqn-logo.png";
-
-            qrPreviewBox.innerHTML = "";
-            qrPreviewBox.appendChild(finalCanvas);
-
-        }, 120);
+        qrCode.append(qrPreviewBox);
     }
 
+    // =========================
     // أول تشغيل
+    // =========================
     generateQR(qr.content || "");
 
     // =========================
@@ -142,9 +122,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // الإعدادات (مرة واحدة فقط - FIXED)
+    // تحديث مباشر للإعدادات
     // =========================
-    ["qrColorInput", "qrSizeInput"].forEach(id => {
+    ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
 
         const el = document.getElementById(id);
 
@@ -152,7 +132,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             el.addEventListener("change", function () {
 
-                const text = qrContentInput.value.trim();
+                const text =
+                    qrContentInput.value.trim();
 
                 if (text) generateQR(text);
             });
@@ -160,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =========================
-    // الحفظ (100% مستقر)
+    // الحفظ
     // =========================
     if (saveBtn) {
 
@@ -187,10 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 content
             };
 
-            localStorage.setItem(
-                "atqn_books",
-                JSON.stringify(books)
-            );
+            localStorage.setItem("atqn_books", JSON.stringify(books));
 
             alert("تم حفظ التعديلات بنجاح");
 
@@ -199,55 +177,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // تحميل PNG
+    // تحميل PNG احترافي
     // =========================
     if (downloadBtn) {
 
         downloadBtn.addEventListener("click", function () {
 
-            const canvas =
-                qrPreviewBox.querySelector("canvas");
+            if (!qrCode) return;
 
-            if (!canvas) {
-                alert("قم بتوليد QR أولاً");
-                return;
-            }
-
-            const scale = 4;
-
-            const tempCanvas =
-                document.createElement("canvas");
-
-            const ctx =
-                tempCanvas.getContext("2d");
-
-            tempCanvas.width = canvas.width * scale;
-            tempCanvas.height = canvas.height * scale;
-
-            ctx.scale(scale, scale);
-            ctx.drawImage(canvas, 0, 0);
-
-            const imageURL =
-                tempCanvas.toDataURL("image/png");
-
-            const bookName =
-                document.getElementById("bookNameInput").value || "Book";
-
-            const qrTitle =
-                document.getElementById("qrTitleInput").value || "QR";
-
-            const fileName =
-                `${bookName} - ${qrTitle}.png`.replace(/\s+/g, "_");
-
-            const link =
-                document.createElement("a");
-
-            link.download = fileName;
-            link.href = imageURL;
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            qrCode.download({
+                name: "qr-code",
+                extension: "png"
+            });
         });
     }
 
