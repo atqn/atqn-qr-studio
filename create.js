@@ -224,18 +224,21 @@ saveBtn?.addEventListener("click", function () {
         logo = URL.createObjectURL(logoInput.files[0]);
     }
 
-    books[bIndex].qrs[qIndex] = {
-        id: qrId,
-        title,
-        description,
-        content,
-        qrSettings: {
-            color: document.getElementById("qrColorInput").value,
-            size: document.getElementById("qrSizeInput").value,
-            style: document.getElementById("qrStyleInput").value,
-            logo: logo
-        }
-    };
+books[bIndex].qrs[qIndex] = {
+    id: qrId,
+    title: title || "",
+    description: description || "",
+    content: content || "",
+
+    qrSettings: {
+        color: document.getElementById("qrColorInput").value || "#000000",
+        size: Number(document.getElementById("qrSizeInput").value || 300),
+        style: document.getElementById("qrStyleInput").value || "square",
+        logo: logo || "assets/atqn-logo.png"
+    },
+
+    updatedAt: Date.now()
+};
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
