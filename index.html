@@ -1,97 +1,30 @@
-<header class="topbar">
-
-    <div class="brand">
-        <img src="assets/atqn-logo.png">
-        <h1>ATQN QR Studio</h1>
-    </div>
-
-    <nav>
-        <a href="index.html" class="active">الرئيسة</a>
-        <a href="create.html">إنشاء QR</a>
-        <a href="library.html">مكتبة الكتب</a>
-    </nav>
-
-</header>
-
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ATQN QR Studio</title>
-
-<link rel="stylesheet" href="style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-</head>
-
-<body>
-
-<div class="container">
-
-    <div class="hero">
-
-        <div class="logo-box">
-            <h1>ATQN QR Studio</h1>
-        </div>
-
-        <p class="subtitle">
-            إدارة وإنشاء أكواد QR للكتب التعليمية
-        </p>
-
-    </div>
-
-    <div class="stats">
-
-        <div class="card">
-            <div class="number">0</div>
-            <div class="label">عدد الكتب</div>
-        </div>
-
-        <div class="card">
-            <div class="number">0</div>
-            <div class="label">عدد الباركودات</div>
-        </div>
-
-    </div>
-
-    <div class="actions">
-
-        <a href="create.html" class="action-card">
-            <span>➕</span>
-            <h2>إنشاء QR جديد</h2>
-        </a>
-
-        <a href="library.html" class="action-card">
-            <span>📚</span>
-            <h2>مكتبة الكتب</h2>
-        </a>
-
-    </div>
-
-</div>
-
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
+import { getFirestore, doc, onSnapshot } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
+const app = initializeApp({
+  apiKey: "AIzaSy...",
   authDomain: "atqn-qr1.firebaseapp.com",
-  projectId: "atqn-qr1",
-  storageBucket: "atqn-qr1.firebasestorage.app",
-  messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-};
+  projectId: "atqn-qr1"
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const ref = doc(db, "books", "app");
 
-window.db = db;
-window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
+onSnapshot(ref, (snap) => {
+
+    const data = snap.data();
+    const books = data?.items || [];
+
+    let qrCount = 0;
+
+    books.forEach(b => qrCount += (b.count || 0));
+
+    document.querySelectorAll(".number")[0].textContent = books.length;
+    document.querySelectorAll(".number")[1].textContent = qrCount;
+
+});
+
 </script>
-    
-</body>
-</html>
