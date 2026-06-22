@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
 const firestore = window.firebaseFirestore || {};
-const { doc, setDoc } = firestore;
+const { doc, setDoc, onSnapshot } = firestore;
 
 function safeGet(callback, fallback = null) {
     try {
@@ -29,7 +29,7 @@ function showToast(message, type = "success") {
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
-}
+});
 
 /* ======================
    PARAMS
@@ -86,6 +86,41 @@ if (qr.qrSettings) {
     document.getElementById("qrColorInput").value = qr.qrSettings.color || "#000000";
     document.getElementById("qrSizeInput").value = qr.qrSettings.size || 300;
     document.getElementById("qrStyleInput").value = qr.qrSettings.style || "square";
+}
+
+/* ======================
+   🔥 FIREBASE REALTIME SYNC (READ)
+====================== */
+
+const bookRef = db && doc ? doc(db, "books", String(bookId)) : null;
+
+if (bookRef && firestore.onSnapshot) {
+
+    onSnapshot(bookRef, (snap) => {
+
+        if (!snap.exists()) return;
+
+        const remoteData = snap.data();
+
+        // تحديث البيانات المحلية
+        books[bookIndex] = remoteData;
+
+        localStorage.setItem("atqn_books", JSON.stringify(books));
+
+        // تحديث الواجهة فقط (بدون كسر QR)
+        if (remoteData.qrs && remoteData.qrs[qrIndex]) {
+
+            const remoteQR = remoteData.qrs[qrIndex];
+
+            qr.title = remoteQR.title;
+            qr.description = remoteQR.description;
+            qr.content = remoteQR.content;
+
+            qrContentInput.value = remoteQR.content || "";
+
+            console.log("🔄 Synced from Firebase");
+        }
+    });
 }
 
 /* ======================
@@ -188,7 +223,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE
+   SAVE + FIREBASE WRITE
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -229,20 +264,14 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
-    /* ======================
-       FIREBASE SYNC (SAFE FIXED)
-    ====================== */
+    /* 🔥 WRITE TO FIREBASE */
     try {
-
         if (db && doc && setDoc) {
-            const bookRef = doc(db, "books", String(bookId));
-            setDoc(bookRef, books[bIndex]);
-        } else {
-            console.warn("Firebase not ready");
+            const ref = doc(db, "books", String(bookId));
+            setDoc(ref, books[bIndex]);
         }
-
     } catch (e) {
-        console.warn("Firebase sync failed:", e);
+        console.warn("Firebase write failed:", e);
     }
 
     showToast("تم الحفظ بنجاح");
