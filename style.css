@@ -1064,3 +1064,62 @@ body{
     transform: scale(1.4);
     transform-origin: center;
 }
+
+
+@media (max-width: 1024px) {
+
+    /* تحويل الأعمدة إلى شكل مريح */
+    .create-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* تقليل الحشو داخل البانلات */
+    .panel {
+        padding: 16px;
+    }
+
+    /* تحسين المعاينة */
+    #qrPreviewBox {
+        min-height: 180px;
+    }
+
+    /* تكبير الأزرار قليلاً للمس */
+    .action-btn,
+    .primary-btn,
+    .save-btn,
+    .export-btn {
+        height: 44px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /* تحسين إضافي للموبايل الصغير */
+    body {
+        font-size: 14px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .topbar nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* تقليل padding أكثر */
+    .panel {
+        padding: 12px;
+    }
+
+    /* منع أي ضغط زائد على QR */
+    #qrPreviewBox canvas {
+        transform: scale(1.2);
+    }
+}
