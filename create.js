@@ -6,11 +6,23 @@ function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
     if (!toast) return;
 
+    // ضع النص
     toast.textContent = message;
-    toast.className = "toast show " + type;
 
-    setTimeout(() => {
-        toast.className = "toast";
+    // إعادة ضبط آمنة بدون كسر CSS
+    toast.classList.remove("show", "success", "error");
+
+    // إعادة رسم (حل مشكلة عدم الظهور أحياناً)
+    void toast.offsetWidth;
+
+    // إضافة الحالة
+    toast.classList.add("show", type);
+
+    // إخفاء تدريجي
+    clearTimeout(toast._timer);
+
+    toast._timer = setTimeout(() => {
+        toast.classList.remove("show");
     }, 2000);
 }
 
