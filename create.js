@@ -28,11 +28,12 @@ function showToast(message, type = "success") {
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
-});
+};
 
 /* ======================
    PARAMS
 ====================== */
+
 const params = new URLSearchParams(window.location.search);
 
 const bookId = Number(params.get("book"));
@@ -53,6 +54,7 @@ if (!bookId || !qrId) return;
 /* ======================
    LOAD DB
 ====================== */
+
 let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
 let bookIndex = books.findIndex(b => b.id === bookId);
@@ -69,6 +71,7 @@ let qr = books[bookIndex].qrs[qrIndex];
 /* ======================
    FILL INPUTS
 ====================== */
+
 document.getElementById("bookNameInput").value = book.title || "";
 document.getElementById("qrTitleInput").value = qr.title || "";
 document.getElementById("qrDescriptionInput").value = qr.description || "";
@@ -77,6 +80,7 @@ qrContentInput.value = qr.content || "";
 /* ======================
    RESTORE SETTINGS
 ====================== */
+
 if (qr.qrSettings) {
     document.getElementById("qrColorInput").value = qr.qrSettings.color || "#000000";
     document.getElementById("qrSizeInput").value = qr.qrSettings.size || 300;
@@ -86,6 +90,7 @@ if (qr.qrSettings) {
 /* ======================
    QR ENGINE
 ====================== */
+
 let qrCode = null;
 
 function generateQR(text) {
@@ -151,12 +156,14 @@ function generateQR(text) {
 /* ======================
    FIRST LOAD
 ====================== */
+
 qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 generateQR(qr.content || "");
 
 /* ======================
    EVENTS
 ====================== */
+
 generateBtn?.addEventListener("click", () => {
     generateQR(qrContentInput.value.trim());
 });
@@ -182,6 +189,7 @@ qrContentInput?.addEventListener("input", () => {
 /* ======================
    SAVE
 ====================== */
+
 saveBtn?.addEventListener("click", function () {
 
     let title = document.getElementById("qrTitleInput").value.trim();
@@ -220,9 +228,6 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
-    /* ======================
-       FIREBASE SYNC (SAFE)
-    ====================== */
     try {
         const bookRef = doc(db, "books", String(bookId));
         setDoc(bookRef, books[bIndex]);
@@ -240,6 +245,7 @@ saveBtn?.addEventListener("click", function () {
 /* ======================
    DEFAULT SETTINGS
 ====================== */
+
 saveDefaultBtn?.addEventListener("click", function () {
 
     let settings = {
@@ -256,6 +262,7 @@ saveDefaultBtn?.addEventListener("click", function () {
 /* ======================
    DOWNLOAD PNG
 ====================== */
+
 downloadBtn?.addEventListener("click", function () {
 
     if (!qrCode) return;
@@ -271,6 +278,7 @@ downloadBtn?.addEventListener("click", function () {
 /* ======================
    DOWNLOAD SVG
 ====================== */
+
 svgBtn?.addEventListener("click", function () {
 
     if (!qrCode) return;
