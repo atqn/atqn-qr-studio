@@ -1017,7 +1017,7 @@ body{
 
 #toast {
     position: fixed;
-    top: 20px;
+    top: 25px;
     left: 50%;
     transform: translateX(-50%) translateY(-20px);
 
@@ -1027,11 +1027,12 @@ body{
     padding: 12px 18px;
     border-radius: 12px;
 
-    font-family: Cairo;
+    font-family: "Cairo", sans-serif;
     font-size: 14px;
+    font-weight: 700;
 
     opacity: 0;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 
     z-index: 9999;
     pointer-events: none;
@@ -1039,21 +1040,24 @@ body{
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
+/* ظهور */
 #toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
 
+/* نجاح */
 #toast.success {
     background: #16a34a;
 }
 
+/* خطأ */
 #toast.error {
     background: #dc2626;
 }
 
 /* ========================= */
-/* QR ZOOM FIX (ADD HERE)    */
+/* QR ZOOM FIX (KEEP ONLY IF NEEDED) */
 /* ========================= */
 
 #qrPreviewBox canvas {
