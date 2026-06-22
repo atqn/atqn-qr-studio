@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
