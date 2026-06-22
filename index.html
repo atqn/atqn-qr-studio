@@ -86,8 +86,13 @@ function logout(){
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
@@ -101,13 +106,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// مهم جدًا: نضمن التصدير بشكل صحيح
 window.db = db;
-window.firebaseFirestore = {
-    doc: doc,
-    setDoc: setDoc,
-    getDoc: getDoc,
-    onSnapshot: onSnapshot
-};
+
+window.firebaseFirestore = Object.freeze({
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot
+});
+
+console.log("🔥 Firebase initialized");
 </script>
 
 <script>
