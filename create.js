@@ -126,7 +126,7 @@ function generateQR(text) {
 
             imageOptions: {
                 margin: 8,
-                imageSize: 0.35
+                imageSize: 0.60
             }
         });
 
@@ -146,7 +146,7 @@ function generateQR(text) {
         },
         imageOptions: {
             margin: 8,
-            imageSize: 0.35
+            imageSize: 0.60
         }
     });
 }
