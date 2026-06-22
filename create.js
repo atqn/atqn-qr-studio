@@ -1,5 +1,9 @@
-document.addEventListener("DOMContentLoaded", function () {
+console.log("CREATE JS LOADED");
 
+document.addEventListener("DOMContentLoaded", function () {
+window.addEventListener("load", () => {
+    console.log("PAGE FULLY LOADED");
+});
 function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
     if (!toast) return;
@@ -37,7 +41,8 @@ const svgBtn = document.getElementById("downloadSvgBtn");
 const qrContentInput = document.getElementById("qrContentInput");
 const logoInput = document.getElementById("qrLogoInput");
 
-if (!bookId || !qrId) return;
+
+console.log("bookId:", bookId, "qrId:", qrId);
 
 /* ======================
    LOAD DB
