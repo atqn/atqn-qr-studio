@@ -29,7 +29,7 @@ function showToast(message, type = "success") {
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
-});
+}
 
 /* ======================
    PARAMS
