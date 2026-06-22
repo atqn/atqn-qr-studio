@@ -216,8 +216,9 @@ localStorage.setItem("atqn_books", JSON.stringify(books));
 
 showToast("تم الحفظ بنجاح");
 
-window.location.href = "book.html?id=" + bookId;
-});
+setTimeout(() => {
+    window.location.href = "book.html?id=" + bookId;
+}, 800);
 
 /* ======================
    SAVE DEFAULT SETTINGS
