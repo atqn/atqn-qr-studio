@@ -102,12 +102,12 @@ function generateQR(text) {
         logoSrc = URL.createObjectURL(logoInput.files[0]);
     }
 
-    qrPreviewBox.innerHTML = "";
-
     /* ======================
-       FIRST CREATE ONLY
+       FIRST INIT ONLY
     ====================== */
     if (!qrCode) {
+
+        qrPreviewBox.innerHTML = "";
 
         qrCode = new QRCodeStyling({
             width: size,
@@ -166,6 +166,7 @@ generateBtn?.addEventListener("click", () => {
 
 ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
 .forEach(id => {
+
     const el = document.getElementById(id);
     if (!el) return;
 
