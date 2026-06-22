@@ -236,12 +236,29 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
+    /* ======================
+       FIREBASE SYNC (إضافة فقط بدون حذف أي شيء)
+    ====================== */
+    try {
+
+        const db = window.db;
+        const { doc, setDoc } = window.firebaseFirestore;
+
+        const bookRef = doc(db, "books", String(bookId));
+
+        setDoc(bookRef, books[bIndex]);
+
+    } catch (e) {
+        console.warn("Firebase sync failed:", e);
+    }
+
     showToast("تم الحفظ بنجاح");
 
     setTimeout(() => {
         window.location.href = "book.html?id=" + bookId;
     }, 800);
 });
+
 
 /* ======================
    DEFAULT SETTINGS
@@ -259,6 +276,7 @@ saveDefaultBtn?.addEventListener("click", function () {
     showToast("تم حفظ الإعدادات الافتراضية");
 });
 
+
 /* ======================
    DOWNLOAD PNG
 ====================== */
@@ -273,6 +291,7 @@ downloadBtn?.addEventListener("click", function () {
 
     qrCode.download({ name, extension: "png" });
 });
+
 
 /* ======================
    DOWNLOAD SVG
