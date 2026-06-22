@@ -6,6 +6,9 @@ from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 
+const db = window.db;
+const { doc, getDoc, setDoc, updateDoc, arrayUnion } = window.firebaseFirestore;
+
 function safeGet(callback, fallback = null) {
     try {
         return callback();
