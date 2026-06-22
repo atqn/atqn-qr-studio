@@ -116,6 +116,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
+
+<script>
+if(localStorage.getItem("logged") !== "true"){
+    window.location.href = "login.html";
+}
+</script>
     
 </body>
 </html>
