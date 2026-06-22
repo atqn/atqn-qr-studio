@@ -1,29 +1,10 @@
-let deleteBookId = null;
-
 const db = window.db;
-const { doc, setDoc, onSnapshot } = window.firebaseFirestore;
+const fs = window.firebaseFirestore || {};
+const { doc, onSnapshot } = fs;
 
-/* ======================
-   REALTIME FIREBASE LOAD
-====================== */
+const bookRef = doc(db, "books", "app");
 
-function listenBooks() {
-    const ref = doc(db, "app", "books");
-
-    onSnapshot(ref, (snap) => {
-        const data = snap.data();
-
-        const books = data?.items || [];
-
-        renderBooks(books);
-    });
-}
-
-/* ======================
-   RENDER
-====================== */
-
-function renderBooks(books = []) {
+function renderBooks(books) {
 
     const grid = document.getElementById("booksGrid");
     if (!grid) return;
@@ -33,32 +14,31 @@ function renderBooks(books = []) {
     books.forEach(book => {
 
         grid.innerHTML += `
-<div class="book-card">
+        <div class="book-card">
 
-    <div class="book-icon">${book.icon}</div>
+            <div class="book-icon">${book.icon}</div>
 
-    <h3>${book.title}</h3>
+            <h3>${book.title}</h3>
 
-    <div class="book-count">${book.count} QR</div>
+            <div class="book-count">${book.count} QR</div>
 
-    <button onclick="openBook(${book.id})">📖 فتح</button>
+            <button onclick="openBook(${book.id})">فتح</button>
 
-</div>
-`;
+        </div>`;
     });
 }
 
-/* ======================
-   INIT
-====================== */
+/* REALTIME LISTENER */
 
-document.addEventListener("DOMContentLoaded", () => {
-    listenBooks();
+onSnapshot(bookRef, (snap) => {
+
+    if (!snap.exists()) return;
+
+    const books = snap.data().items || [];
+
+    renderBooks(books);
+
 });
-
-/* ======================
-   NAV
-====================== */
 
 function openBook(id) {
     window.location.href = "book.html?id=" + id;
