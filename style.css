@@ -17,7 +17,7 @@ body{
     padding:8px 20px;
 }
 
-/* ================= HERO ================= */
+/* ================= HOME ================= */
 .hero{ display:none; }
 
 .logo-box h1{
@@ -31,7 +31,6 @@ body{
     font-size:18px;
 }
 
-/* ================= STATS ================= */
 .stats{
     margin-top:45px;
     display:grid;
@@ -39,7 +38,6 @@ body{
     gap:20px;
 }
 
-/* ================= ACTIONS ================= */
 .actions{
     margin-top:60px;
     display:grid;
@@ -47,7 +45,6 @@ body{
     gap:20px;
 }
 
-/* ================= CARDS ================= */
 .card,
 .action-card{
     background:#1e293b;
@@ -59,8 +56,8 @@ body{
 
 .action-card{
     padding:25px;
-    color:#fff;
     text-decoration:none;
+    color:#fff;
     transition:.25s;
 }
 
@@ -69,26 +66,13 @@ body{
     background:#243247;
 }
 
-/* ================= TEXT ================= */
 .number{
     font-size:42px;
     font-weight:800;
     color:#38bdf8;
 }
 
-.label{
-    margin-top:10px;
-    color:#cbd5e1;
-}
-
-.action-card span{ font-size:38px; }
-.action-card h2{ margin-top:10px; font-size:22px; }
-
-/* ================= RESPONSIVE HOME ================= */
-@media(max-width:768px){
-    .stats,.actions{ grid-template-columns:1fr; }
-    .logo-box h1{ font-size:34px; }
-}
+.label{ color:#cbd5e1; margin-top:10px; }
 
 /* ================= TOPBAR ================= */
 .topbar{
@@ -103,7 +87,11 @@ body{
     z-index:9999;
 }
 
-.brand{ display:flex; align-items:center; gap:12px; }
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
 
 .brand img{
     width:42px;
@@ -111,29 +99,10 @@ body{
     object-fit:contain;
 }
 
-.brand h1{
-    font-size:22px;
-}
-
-.topbar nav{
-    display:flex;
-    gap:25px;
-}
-
-.topbar nav a{
-    color:#cbd5e1;
-    text-decoration:none;
-    font-weight:700;
-}
-
-.topbar nav a.active{
-    color:#38bdf8;
-}
-
-/* ================= CREATE LAYOUT (FIXED) ================= */
+/* ================= CREATE ================= */
 .create-layout{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:1fr 1fr 1fr;
     gap:20px;
     align-items:stretch;
 }
@@ -143,20 +112,9 @@ body{
     border-radius:20px;
     padding:20px;
     min-height:340px;
-    height:100%;
 }
 
-.panel h3{
-    margin-bottom:10px;
-    color:#38bdf8;
-    font-size:18px;
-}
-
-.panel label{
-    display:block;
-    margin:8px 0 4px;
-}
-
+/* INPUTS */
 .panel input,
 .panel select{
     width:100%;
@@ -167,23 +125,9 @@ body{
     color:#fff;
 }
 
-/* ================= LOGO ================= */
-.logo-options{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
-
-.radio-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-/* ================= PREVIEW ================= */
+/* ================= PREVIEW (FIXED) ================= */
 .preview-box{
-    height: 160px;
-    min-height: 160px;
+    height:120px;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -193,7 +137,13 @@ body{
     overflow:hidden;
 }
 
-
+/* ❌ FIX: إزالة أي scaling يسبب كسر */
+#qrPreviewBox canvas,
+#qrPreviewBox img{
+    transform:none !important;
+    max-width:100%;
+    max-height:100%;
+}
 
 /* ================= BUTTONS ================= */
 .preview-actions{
@@ -205,26 +155,17 @@ body{
 .preview-actions button{
     width:100%;
     padding:10px;
-    font-size:14px;
     border-radius:8px;
     border:none;
-    cursor:pointer;
 }
 
-/* ================= INFO CARD ================= */
+/* ================= INFO ================= */
 .info-card{
     margin-top:15px;
     padding:16px;
     background:#0f172a;
     border:1px solid #334155;
     border-radius:14px;
-}
-
-/* ================= DIVIDER ================= */
-.settings-divider{
-    height:2px;
-    background:rgba(255,255,255,0.08);
-    margin:15px 0;
 }
 
 /* ================= LIBRARY ================= */
@@ -246,7 +187,7 @@ body{
 .modal-overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.6);
+    background:rgba(0,0,0,.65);
     display:none;
     justify-content:center;
     align-items:center;
@@ -260,7 +201,7 @@ body{
     border-radius:16px;
 }
 
-/* ================= TOAST (FIXED) ================= */
+/* ================= TOAST (UNCHANGED BUT STABLE) ================= */
 #toast{
     position:fixed;
     top:20px;
@@ -273,6 +214,7 @@ body{
     opacity:0;
     transition:.25s;
     z-index:9999;
+    pointer-events:none;
 }
 
 #toast.show{
@@ -283,8 +225,7 @@ body{
 #toast.success{ background:#16a34a; }
 #toast.error{ background:#dc2626; }
 
-/* ================= RESPONSIVE ================= */
-
+/* ================= RESPONSIVE (CLEAN ONLY) ================= */
 @media(max-width:1024px){
     .create-layout{
         grid-template-columns:1fr 1fr;
@@ -304,5 +245,9 @@ body{
     .topbar nav{
         flex-wrap:wrap;
         justify-content:center;
+    }
+
+    .stats,.actions{
+        grid-template-columns:1fr;
     }
 }
