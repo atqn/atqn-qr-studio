@@ -1,15 +1,24 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-function showToast(message) {
+function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
     if (!toast) return;
 
     toast.textContent = message;
-    toast.className = "show";
+
+    toast.className = "";
+    toast.classList.add("toast", type, "show");
+
+    // ضمان الظهور بدون اختفاء فوري
+    toast.style.display = "block";
+    toast.style.opacity = "1";
+    toast.style.transform = "translateY(0)";
 
     setTimeout(() => {
-        toast.className = "";
-    }, 2000);
+        toast.classList.remove("show");
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(20px)";
+    }, 2500);
 }
 
 const params = new URLSearchParams(window.location.search);
