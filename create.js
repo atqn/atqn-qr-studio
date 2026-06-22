@@ -29,7 +29,7 @@ function showToast(message, type = "success") {
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
-}
+});
 
 /* ======================
    PARAMS
@@ -89,12 +89,12 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 FIREBASE REALTIME SYNC (READ)
+   🔥 REALTIME SYNC (READ)
 ====================== */
 
 const bookRef = db && doc ? doc(db, "books", String(bookId)) : null;
 
-if (bookRef && firestore.onSnapshot) {
+if (bookRef && onSnapshot) {
 
     onSnapshot(bookRef, (snap) => {
 
@@ -102,12 +102,10 @@ if (bookRef && firestore.onSnapshot) {
 
         const remoteData = snap.data();
 
-        // تحديث البيانات المحلية
         books[bookIndex] = remoteData;
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        // تحديث الواجهة فقط (بدون كسر QR)
         if (remoteData.qrs && remoteData.qrs[qrIndex]) {
 
             const remoteQR = remoteData.qrs[qrIndex];
@@ -117,8 +115,6 @@ if (bookRef && firestore.onSnapshot) {
             qr.content = remoteQR.content;
 
             qrContentInput.value = remoteQR.content || "";
-
-            console.log("🔄 Synced from Firebase");
         }
     });
 }
@@ -204,6 +200,59 @@ generateBtn?.addEventListener("click", () => {
     generateQR(qrContentInput.value.trim());
 });
 
+/* ======================
+   🔥 REALTIME WRITE (NEW)
+====================== */
+
+let syncTimer = null;
+
+function realtimeSave() {
+
+    clearTimeout(syncTimer);
+
+    syncTimer = setTimeout(() => {
+
+        let title = document.getElementById("qrTitleInput").value.trim();
+        let description = document.getElementById("qrDescriptionInput").value.trim();
+        let content = qrContentInput.value.trim();
+
+        if (!title || !content) return;
+
+        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+
+        let bIndex = books.findIndex(b => b.id === bookId);
+        if (bIndex === -1) return;
+
+        let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+        if (qIndex === -1) return;
+
+        books[bIndex].qrs[qIndex] = {
+            ...books[bIndex].qrs[qIndex],
+            title,
+            description,
+            content,
+            updatedAt: Date.now()
+        };
+
+        localStorage.setItem("atqn_books", JSON.stringify(books));
+
+        try {
+            if (db && doc && setDoc) {
+                const ref = doc(db, "books", String(bookId));
+                setDoc(ref, books[bIndex]);
+            }
+        } catch (e) {
+            console.warn("Realtime sync failed:", e);
+        }
+
+    }, 700);
+}
+
+/* bind realtime inputs */
+qrContentInput?.addEventListener("input", realtimeSave);
+document.getElementById("qrTitleInput")?.addEventListener("input", realtimeSave);
+document.getElementById("qrDescriptionInput")?.addEventListener("input", realtimeSave);
+
 ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
 .forEach(id => {
 
@@ -223,7 +272,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE + FIREBASE WRITE
+   SAVE BUTTON (kept as fallback)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -264,15 +313,10 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
-    /* 🔥 WRITE TO FIREBASE */
     try {
-        if (db && doc && setDoc) {
-            const ref = doc(db, "books", String(bookId));
-            setDoc(ref, books[bIndex]);
-        }
-    } catch (e) {
-        console.warn("Firebase write failed:", e);
-    }
+        const ref = doc(db, "books", String(bookId));
+        setDoc(ref, books[bIndex]);
+    } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
 
@@ -299,11 +343,10 @@ saveDefaultBtn?.addEventListener("click", function () {
 });
 
 /* ======================
-   DOWNLOAD PNG
+   DOWNLOAD PNG / SVG
 ====================== */
 
 downloadBtn?.addEventListener("click", function () {
-
     if (!qrCode) return;
 
     const name = (
@@ -314,12 +357,7 @@ downloadBtn?.addEventListener("click", function () {
     qrCode.download({ name, extension: "png" });
 });
 
-/* ======================
-   DOWNLOAD SVG
-====================== */
-
 svgBtn?.addEventListener("click", function () {
-
     if (!qrCode) return;
 
     const name = (
