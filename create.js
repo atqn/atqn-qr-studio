@@ -70,12 +70,20 @@ if (!bookId || !qrId) return;
 let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
 let bookIndex = books.findIndex(b => b.id === bookId);
-if (bookIndex === -1) return;
 
-if (!books[bookIndex].qrs) books[bookIndex].qrs = [];
+if (bookIndex === -1) {
+    console.warn("Book not found");
+    return;
+}
+
+books[bookIndex].qrs = books[bookIndex].qrs || [];
 
 let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
-if (qrIndex === -1) return;
+
+if (qrIndex === -1) {
+    console.warn("QR not found");
+    return;
+}
 
 let book = books[bookIndex];
 let qr = books[bookIndex].qrs[qrIndex];
