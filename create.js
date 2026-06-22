@@ -15,16 +15,20 @@ function showToast(message, type = "success") {
 
     toast.textContent = message;
 
-    toast.classList.remove("show", "success", "error");
+    // reset state
+    toast.className = "toast";
+
+    // force reflow
     void toast.offsetWidth;
 
+    // show
     toast.classList.add("show", type);
 
     clearTimeout(toast._timer);
 
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
-    }, 2000);
+    }, 2500);
 }
 
 /* ======================
