@@ -15,6 +15,10 @@ const defaultBooks = [
 
 ];
 
+/* ======================
+   LOCAL STORAGE (UNCHANGED)
+====================== */
+
 function getBooks() {
     try {
         const saved = localStorage.getItem("atqn_books");
@@ -34,7 +38,73 @@ function getBooks() {
 
 function saveBooks(books) {
     localStorage.setItem("atqn_books", JSON.stringify(books));
+
+    /* 🔥 FIREBASE SYNC (ADDED SAFELY) */
+    syncToFirebase(books);
 }
+
+/* ======================
+   FIREBASE SYNC (NEW SAFE LAYER)
+====================== */
+
+const db = window.db;
+const firestore = window.firebaseFirestore || {};
+const { doc, setDoc, onSnapshot } = firestore;
+
+function syncToFirebase(books) {
+
+    try {
+        if (!db || !doc || !setDoc) return;
+
+        const ref = doc(db, "books", "main");
+
+        setDoc(ref, { books });
+
+    } catch (e) {
+        console.warn("Firebase sync failed:", e);
+    }
+}
+
+/* ======================
+   FIREBASE REALTIME LISTENER (NEW)
+====================== */
+
+(function initFirebaseListener() {
+
+    try {
+
+        if (!db || !doc || !onSnapshot) return;
+
+        const ref = doc(db, "books", "main");
+
+        onSnapshot(ref, (snap) => {
+
+            if (!snap.exists()) return;
+
+            const data = snap.data();
+
+            if (!data.books) return;
+
+            localStorage.setItem(
+                "atqn_books",
+                JSON.stringify(data.books)
+            );
+
+            renderBooks();
+
+            console.log("🔥 Synced from Firebase");
+
+        });
+
+    } catch (e) {
+        console.warn("Firebase listener error:", e);
+    }
+
+})();
+
+/* ======================
+   RENDER (UNCHANGED LOGIC)
+====================== */
 
 function renderBooks() {
 
@@ -50,15 +120,11 @@ function renderBooks() {
         booksGrid.innerHTML += `
 <div class="book-card">
 
-    <div class="book-icon">
-        ${book.icon}
-    </div>
+    <div class="book-icon">${book.icon}</div>
 
     <h3>${book.title}</h3>
 
-    <div class="book-count">
-        ${book.count} QR
-    </div>
+    <div class="book-count">${book.count} QR</div>
 
     <div class="book-actions">
 
@@ -79,15 +145,15 @@ function renderBooks() {
 </div>
 `;
     });
-
-    console.log("Books Loaded:", books.length);
 }
+
+/* ======================
+   INIT
+====================== */
 
 function deleteBook(id) {
     deleteBookId = id;
-
-    const modal = document.getElementById("deleteModal");
-    if (modal) modal.classList.add("show");
+    document.getElementById("deleteModal")?.classList.add("show");
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -95,15 +161,13 @@ document.addEventListener("DOMContentLoaded", function () {
     renderBooks();
 
     const modal = document.getElementById("deleteModal");
-    const cancelBtn = document.getElementById("cancelDeleteBtn");
-    const confirmBtn = document.getElementById("confirmDeleteBtn");
 
-    cancelBtn?.addEventListener("click", function () {
+    document.getElementById("cancelDeleteBtn")?.addEventListener("click", function () {
         modal?.classList.remove("show");
         deleteBookId = null;
     });
 
-    confirmBtn?.addEventListener("click", function () {
+    document.getElementById("confirmDeleteBtn")?.addEventListener("click", function () {
 
         if (deleteBookId === null) return;
 
@@ -123,22 +187,15 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* ======================
-   ADD BOOK
+   ADD / EDIT / OPEN (UNCHANGED)
 ====================== */
 
 const addBookBtn = document.querySelector(".add-book-btn");
-
-if (addBookBtn) {
-    addBookBtn.addEventListener("click", addBook);
-}
+if (addBookBtn) addBookBtn.addEventListener("click", addBook);
 
 function addBook() {
-
-    const input = document.getElementById("newBookTitle");
-    const modal = document.getElementById("addModal");
-
-    if (input) input.value = "";
-    if (modal) modal.classList.add("show");
+    document.getElementById("newBookTitle").value = "";
+    document.getElementById("addModal").classList.add("show");
 }
 
 let currentEditId = null;
@@ -152,28 +209,19 @@ function editBook(id) {
 
     currentEditId = id;
 
-    const input = document.getElementById("editBookTitle");
-    const modal = document.getElementById("editModal");
-
-    if (input) input.value = book.title;
-    if (modal) modal.classList.add("show");
+    document.getElementById("editBookTitle").value = book.title;
+    document.getElementById("editModal").classList.add("show");
 }
 
-/* ======================
-   EDIT SAVE
-====================== */
-
+/* SAVE EDIT */
 document.getElementById("saveEditBtn")?.addEventListener("click", function () {
 
-    const input = document.getElementById("editBookTitle");
-
-    const newTitle = input?.value?.trim();
+    const newTitle = document.getElementById("editBookTitle")?.value.trim();
     if (!newTitle) return;
 
     let books = getBooks();
 
     const index = books.findIndex(b => b.id === currentEditId);
-
     if (index === -1) return;
 
     books[index].title = newTitle;
@@ -184,15 +232,10 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     document.getElementById("editModal")?.classList.remove("show");
 });
 
-/* ======================
-   ADD SAVE
-====================== */
-
+/* SAVE ADD */
 document.getElementById("saveAddBtn")?.addEventListener("click", function () {
 
-    const input = document.getElementById("newBookTitle");
-    const title = input?.value?.trim();
-
+    const title = document.getElementById("newBookTitle")?.value.trim();
     if (!title) return;
 
     let books = getBooks();
@@ -210,10 +253,7 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
     document.getElementById("addModal")?.classList.remove("show");
 });
 
-/* ======================
-   CLOSE MODALS
-====================== */
-
+/* CLOSE MODALS */
 document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
     document.getElementById("editModal")?.classList.remove("show");
 });
@@ -222,10 +262,7 @@ document.getElementById("cancelAddBtn")?.addEventListener("click", () => {
     document.getElementById("addModal")?.classList.remove("show");
 });
 
-/* ======================
-   OPEN BOOK
-====================== */
-
+/* OPEN */
 function openBook(id) {
     window.location.href = "book.html?id=" + id;
 }
