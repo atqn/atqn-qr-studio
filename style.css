@@ -182,7 +182,8 @@ body{
 
 /* ================= PREVIEW ================= */
 .preview-box{
-    height:120px;
+    height: 160px;
+    min-height: 160px;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -192,12 +193,7 @@ body{
     overflow:hidden;
 }
 
-/* QR scaling ONLY */
-#qrPreviewBox canvas,
-#qrPreviewBox img{
-    transform:scale(1.25);
-    transform-origin:center;
-}
+
 
 /* ================= BUTTONS ================= */
 .preview-actions{
@@ -288,6 +284,7 @@ body{
 #toast.error{ background:#dc2626; }
 
 /* ================= RESPONSIVE ================= */
+
 @media(max-width:1024px){
     .create-layout{
         grid-template-columns:1fr 1fr;
