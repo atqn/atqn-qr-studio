@@ -14,6 +14,9 @@ function showToast(message, type = "success") {
     }, 2000);
 }
 
+/* ======================
+   PARAMS
+====================== */
 const params = new URLSearchParams(window.location.search);
 
 const bookId = Number(params.get("book"));
@@ -132,21 +135,21 @@ generateBtn?.addEventListener("click", function () {
 });
 
 /* ======================
-   LIVE UPDATE
+   LIVE UPDATE (CLEANED)
 ====================== */
-["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
+["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
+.forEach(id => {
 
     const el = document.getElementById(id);
-
     if (!el) return;
 
-    el.addEventListener("input", () => {
-        generateQR(qrContentInput.value.trim());
-    });
+    const update = () => {
+        const text = qrContentInput.value.trim();
+        if (text) generateQR(text);
+    };
 
-    el.addEventListener("change", () => {
-        generateQR(qrContentInput.value.trim());
-    });
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
 });
 
 qrContentInput?.addEventListener("input", () => {
