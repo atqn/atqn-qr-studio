@@ -44,6 +44,17 @@ const svgBtn = document.getElementById("downloadSvgBtn");
 const qrContentInput = document.getElementById("qrContentInput");
 const logoInput = document.getElementById("qrLogoInput");
 
+const UI = {
+    qrPreviewBox,
+    generateBtn,
+    downloadBtn,
+    saveBtn,
+    saveDefaultBtn,
+    svgBtn,
+    qrContentInput,
+    logoInput
+};
+    
 if (!bookId || !qrId) return;
 
 /* ======================
