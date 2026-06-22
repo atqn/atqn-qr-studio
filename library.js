@@ -1,5 +1,9 @@
 let deleteBookId = null;
 
+/* ======================
+   DEFAULT DATA (first run only)
+====================== */
+
 const defaultBooks = [
     { id:1, title:"كتاب المدود", icon:"📘", count:24 },
     { id:2, title:"كتاب الهمزات", icon:"📗", count:18 },
@@ -14,7 +18,17 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE ONLY (FIXED STABILITY)
+   FIREBASE INIT (SAFE)
+====================== */
+
+const db = window.db;
+const fs = window.firebaseFirestore || {};
+const { doc, setDoc, onSnapshot } = fs;
+
+const BOOKS_REF = db && doc ? doc(db, "books", "main") : null;
+
+/* ======================
+   LOAD BOOKS (fallback)
 ====================== */
 
 function getBooks() {
@@ -28,17 +42,52 @@ function getBooks() {
     try {
         return JSON.parse(saved);
     } catch (e) {
-        console.warn("Parse error:", e);
         return defaultBooks;
     }
 }
 
+/* ======================
+   SAVE BOOKS (LOCAL + FIREBASE)
+====================== */
+
 function saveBooks(books) {
+
     localStorage.setItem("atqn_books", JSON.stringify(books));
+
+    // 🔥 write to firebase
+    try {
+        if (BOOKS_REF && setDoc) {
+            setDoc(BOOKS_REF, { books });
+        }
+    } catch (e) {
+        console.warn("Firebase write error:", e);
+    }
 }
 
 /* ======================
-   RENDER
+   REALTIME SYNC (READ)
+====================== */
+
+if (BOOKS_REF && onSnapshot) {
+
+    onSnapshot(BOOKS_REF, (snap) => {
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+
+        if (!data.books) return;
+
+        localStorage.setItem("atqn_books", JSON.stringify(data.books));
+
+        renderBooks();
+
+        console.log("🔥 Sync active (real-time)");
+    });
+}
+
+/* ======================
+   RENDER UI
 ====================== */
 
 function renderBooks() {
@@ -112,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let books = getBooks();
 
-        books = books.filter(book => book.id !== deleteBookId);
+        books = books.filter(b => b.id !== deleteBookId);
 
         saveBooks(books);
 
@@ -126,21 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* ======================
-   ADD BOOK
-====================== */
-
-document.querySelector(".add-book-btn")?.addEventListener("click", function () {
-    document.getElementById("newBookTitle").value = "";
-    document.getElementById("addModal").classList.add("show");
-});
-
-function addBook() {
-    document.getElementById("newBookTitle").value = "";
-    document.getElementById("addModal").classList.add("show");
-}
-
-/* ======================
-   EDIT BOOK
+   ADD / EDIT
 ====================== */
 
 let currentEditId = null;
@@ -161,15 +196,15 @@ function editBook(id) {
 /* SAVE EDIT */
 document.getElementById("saveEditBtn")?.addEventListener("click", function () {
 
-    const newTitle = document.getElementById("editBookTitle")?.value.trim();
-    if (!newTitle) return;
+    const title = document.getElementById("editBookTitle")?.value.trim();
+    if (!title) return;
 
     let books = getBooks();
 
     const index = books.findIndex(b => b.id === currentEditId);
     if (index === -1) return;
 
-    books[index].title = newTitle;
+    books[index].title = title;
 
     saveBooks(books);
     renderBooks();
@@ -177,7 +212,7 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     document.getElementById("editModal")?.classList.remove("show");
 });
 
-/* SAVE ADD */
+/* ADD BOOK */
 document.getElementById("saveAddBtn")?.addEventListener("click", function () {
 
     const title = document.getElementById("newBookTitle")?.value.trim();
@@ -207,7 +242,7 @@ document.getElementById("cancelAddBtn")?.addEventListener("click", () => {
     document.getElementById("addModal")?.classList.remove("show");
 });
 
-/* OPEN BOOK */
+/* OPEN */
 function openBook(id) {
     window.location.href = "book.html?id=" + id;
 }
