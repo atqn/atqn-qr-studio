@@ -1013,12 +1013,7 @@ body{
     overflow: hidden;
 }
 
-/* 👇 هذا هو الحل الحقيقي */
-#qrPreviewBox canvas,
-#qrPreviewBox img {
-    transform: scale(1.35);
-    transform-origin: center;
-}
+
 
 #toast {
     position: fixed;
