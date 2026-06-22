@@ -7,7 +7,7 @@ from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
-const { doc, getDoc, setDoc, updateDoc, arrayUnion } = window.firebaseFirestore;
+const { doc, getDoc, setDoc, updateDoc } = window.firebaseFirestore;
 
 function safeGet(callback, fallback = null) {
     try {
@@ -24,13 +24,9 @@ function showToast(message, type = "success") {
 
     toast.textContent = message;
 
-    // reset state
     toast.className = "toast";
-
-    // force reflow
     void toast.offsetWidth;
 
-    // show
     toast.classList.add("show", type);
 
     clearTimeout(toast._timer);
@@ -38,7 +34,7 @@ function showToast(message, type = "success") {
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
-}
+});
 
 /* ======================
    PARAMS
@@ -115,9 +111,6 @@ function generateQR(text) {
         logoSrc = URL.createObjectURL(logoInput.files[0]);
     }
 
-    /* ======================
-       FIRST INIT ONLY
-    ====================== */
     if (!qrCode) {
 
         qrPreviewBox.innerHTML = "";
@@ -147,9 +140,6 @@ function generateQR(text) {
         return;
     }
 
-    /* ======================
-       UPDATE ONLY
-    ====================== */
     qrCode.update({
         data: text,
         image: logoSrc,
@@ -237,12 +227,9 @@ saveBtn?.addEventListener("click", function () {
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
     /* ======================
-       FIREBASE SYNC (إضافة فقط بدون حذف أي شيء)
+       FIREBASE SYNC (FIXED + SAFE)
     ====================== */
     try {
-
-        const db = window.db;
-        const { doc, setDoc } = window.firebaseFirestore;
 
         const bookRef = doc(db, "books", String(bookId));
 
@@ -258,7 +245,6 @@ saveBtn?.addEventListener("click", function () {
         window.location.href = "book.html?id=" + bookId;
     }, 800);
 });
-
 
 /* ======================
    DEFAULT SETTINGS
@@ -276,7 +262,6 @@ saveDefaultBtn?.addEventListener("click", function () {
     showToast("تم حفظ الإعدادات الافتراضية");
 });
 
-
 /* ======================
    DOWNLOAD PNG
 ====================== */
@@ -291,7 +276,6 @@ downloadBtn?.addEventListener("click", function () {
 
     qrCode.download({ name, extension: "png" });
 });
-
 
 /* ======================
    DOWNLOAD SVG
