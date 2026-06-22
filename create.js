@@ -2,8 +2,23 @@
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
-const firestore = window.firebaseFirestore || {};
-const { doc, setDoc, onSnapshot } = firestore;
+// ======================
+// FIREBASE SAFE INIT
+// ======================
+
+const firestore = window.firebaseFirestore;
+
+const doc = firestore?.doc || null;
+const setDoc = firestore?.setDoc || null;
+const onSnapshot = firestore?.onSnapshot || null;
+
+if (!firestore || !doc || !setDoc) {
+    console.warn("⚠️ Firebase not fully initialized");
+}
+
+// ======================
+// SAFE HELPER
+// ======================
 
 function safeGet(callback, fallback = null) {
     try {
