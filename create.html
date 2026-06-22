@@ -34,9 +34,7 @@
 
     <div class="create-layout">
 
-        <!-- ========================= -->
-        <!-- العمود الأول -->
-        <!-- ========================= -->
+        <!-- العمود 1 -->
         <div class="panel">
 
             <h3>بيانات الباركود</h3>
@@ -56,16 +54,13 @@
             <div class="info-card">
                 <div class="info-title">📚 تنظيم الباركودات</div>
                 <p>
-                    استخدم اسم الكتاب لتجميع جميع أكواد QR الخاصة به
-                    داخل مكتبة واحدة، ثم أضف عنوانًا ليسهل العثور عليه لاحقًا.
+                    استخدم اسم الكتاب لتجميع جميع أكواد QR داخل مكتبة واحدة.
                 </p>
             </div>
 
         </div>
 
-        <!-- ========================= -->
-        <!-- العمود الثاني -->
-        <!-- ========================= -->
+        <!-- العمود 2 -->
         <div class="panel">
 
             <h3>الإعدادات</h3>
@@ -84,12 +79,11 @@
 
             </div>
 
-            <!-- ✅ FIX: هذا هو العنصر المفقود -->
             <label>رفع الشعار داخل QR</label>
             <input type="file" id="qrLogoInput" accept="image/*">
 
             <div class="settings-divider"></div>
-            
+
             <label>اللون</label>
             <input id="qrColorInput" type="color" value="#38bdf8">
 
@@ -111,37 +105,34 @@
                 <option value="2400">2400</option>
             </select>
 
-
         </div>
 
-        <!-- ========================= -->
-        <!-- العمود الثالث -->
-        <!-- ========================= -->
+        <!-- العمود 3 -->
         <div class="panel preview-panel">
 
             <h3>المعاينة</h3>
 
             <div id="qrPreviewBox" class="preview-box"></div>
 
-<div class="preview-actions vertical-actions">
+            <div class="preview-actions vertical-actions">
 
-    <button id="generatePreviewBtn" class="action-btn primary">
-        ⚡ توليد المعاينة
-    </button>
+                <button id="generatePreviewBtn" class="action-btn primary">
+                    ⚡ توليد المعاينة
+                </button>
 
-    <button id="saveQrChangesBtn" class="action-btn success">
-        📚 حفظ في المكتبة
-    </button>
+                <button id="saveQrChangesBtn" class="action-btn success">
+                    📚 حفظ في المكتبة
+                </button>
 
-    <button id="downloadQrBtn" class="action-btn dark">
-        ⬇️ تحميل PNG
-    </button>
+                <button id="downloadQrBtn" class="action-btn dark">
+                    ⬇️ تحميل PNG
+                </button>
 
-    <button id="downloadSvgBtn" class="action-btn dark">
-        ⬇️ تحميل SVG
-    </button>
+                <button id="downloadSvgBtn" class="action-btn dark">
+                    ⬇️ تحميل SVG
+                </button>
 
-</div>
+            </div>
 
         </div>
 
@@ -152,9 +143,7 @@
 <!-- QR Library -->
 <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 
-<div id="toast"></div>
-
-<!-- Firebase (NEW) -->
+<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } 
@@ -176,12 +165,11 @@
   window.firebaseFirestore = { doc, getDoc, setDoc, updateDoc, arrayUnion };
 </script>
 
-<!-- QR Library -->
-<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
-
-<!-- JS -->
+<!-- Toast -->
 <div id="toast"></div>
 
+<!-- JS -->
 <script src="create.js"></script>
+
 </body>
 </html>
