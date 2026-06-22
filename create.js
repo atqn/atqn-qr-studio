@@ -6,19 +6,20 @@ function showToast(message, type = "success") {
 
     toast.textContent = message;
 
-    toast.className = "";
-    toast.classList.add("toast", type, "show");
+    // تنظيف أي ستايل سابق
+    toast.style = "";
 
-    // ضمان الظهور بدون اختفاء فوري
-    toast.style.display = "block";
-    toast.style.opacity = "1";
-    toast.style.transform = "translateY(0)";
+    // إعادة ضبط الكلاسات
+    toast.className = "toast";
+
+    // إجبار إعادة الرسم (important fix)
+    void toast.offsetWidth;
+
+    toast.classList.add("show", type);
 
     setTimeout(() => {
-        toast.classList.remove("show");
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(20px)";
-    }, 2500);
+        toast.classList.remove("show", "success", "error");
+    }, 2000);
 }
 
 const params = new URLSearchParams(window.location.search);
