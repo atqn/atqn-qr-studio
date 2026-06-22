@@ -1,11 +1,6 @@
 let deleteBookId = null;
 
-/* ======================
-   DEFAULT DATA (first run only)
-====================== */
-
 const defaultBooks = [
-
     { id:1, title:"كتاب المدود", icon:"📘", count:24 },
     { id:2, title:"كتاب الهمزات", icon:"📗", count:18 },
     { id:3, title:"كتاب التنوين", icon:"📙", count:35 },
@@ -16,21 +11,10 @@ const defaultBooks = [
     { id:8, title:"كتاب المخارج", icon:"📒", count:27 },
     { id:9, title:"كتاب الصفات", icon:"📖", count:14 },
     { id:10, title:"كتاب الوقف والابتداء", icon:"📑", count:31 }
-
 ];
 
 /* ======================
-   FIREBASE SETUP
-====================== */
-
-const db = window.db;
-const firestore = window.firebaseFirestore || {};
-const { doc, setDoc, onSnapshot } = firestore;
-
-const BOOKS_DOC = doc(db, "books", "main");
-
-/* ======================
-   GET INITIAL DATA (fallback)
+   LOCAL STORAGE ONLY (FIXED STABILITY)
 ====================== */
 
 function getBooks() {
@@ -41,52 +25,20 @@ function getBooks() {
         return defaultBooks;
     }
 
-    return JSON.parse(saved);
-}
-
-/* ======================
-   SAVE LOCAL + FIREBASE
-====================== */
-
-function saveBooks(books) {
-
-    // local backup
-    localStorage.setItem("atqn_books", JSON.stringify(books));
-
-    // firebase sync
     try {
-        if (db && setDoc) {
-            setDoc(BOOKS_DOC, { books });
-        }
+        return JSON.parse(saved);
     } catch (e) {
-        console.warn("Firebase sync error:", e);
+        console.warn("Parse error:", e);
+        return defaultBooks;
     }
 }
 
-/* ======================
-   REALTIME SYNC (READ)
-====================== */
-
-if (db && onSnapshot) {
-
-    onSnapshot(BOOKS_DOC, (snap) => {
-
-        if (!snap.exists()) return;
-
-        const data = snap.data();
-
-        if (!data.books) return;
-
-        localStorage.setItem("atqn_books", JSON.stringify(data.books));
-
-        renderBooks();
-
-        console.log("🔥 Firebase sync active");
-    });
+function saveBooks(books) {
+    localStorage.setItem("atqn_books", JSON.stringify(books));
 }
 
 /* ======================
-   RENDER UI
+   RENDER
 ====================== */
 
 function renderBooks() {
@@ -178,11 +130,14 @@ document.addEventListener("DOMContentLoaded", function () {
 ====================== */
 
 document.querySelector(".add-book-btn")?.addEventListener("click", function () {
-
     document.getElementById("newBookTitle").value = "";
     document.getElementById("addModal").classList.add("show");
-
 });
+
+function addBook() {
+    document.getElementById("newBookTitle").value = "";
+    document.getElementById("addModal").classList.add("show");
+}
 
 /* ======================
    EDIT BOOK
@@ -212,7 +167,6 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     let books = getBooks();
 
     const index = books.findIndex(b => b.id === currentEditId);
-
     if (index === -1) return;
 
     books[index].title = newTitle;
