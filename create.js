@@ -4,28 +4,22 @@ function safeGet(callback, fallback = null) {
     try {
         return callback();
     } catch (e) {
-        console.warn("Safe Error Caught:", e);
+        console.warn("Safe Error:", e);
         return fallback;
     }
 }
-    
+
 function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
     if (!toast) return;
 
-    // ضع النص
     toast.textContent = message;
 
-    // إعادة ضبط آمنة بدون كسر CSS
     toast.classList.remove("show", "success", "error");
-
-    // إعادة رسم (حل مشكلة عدم الظهور أحياناً)
     void toast.offsetWidth;
 
-    // إضافة الحالة
     toast.classList.add("show", type);
 
-    // إخفاء تدريجي
     clearTimeout(toast._timer);
 
     toast._timer = setTimeout(() => {
@@ -51,17 +45,6 @@ const svgBtn = document.getElementById("downloadSvgBtn");
 const qrContentInput = document.getElementById("qrContentInput");
 const logoInput = document.getElementById("qrLogoInput");
 
-const UI = {
-    qrPreviewBox,
-    generateBtn,
-    downloadBtn,
-    saveBtn,
-    saveDefaultBtn,
-    svgBtn,
-    qrContentInput,
-    logoInput
-};
-    
 if (!bookId || !qrId) return;
 
 /* ======================
@@ -70,20 +53,12 @@ if (!bookId || !qrId) return;
 let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
 let bookIndex = books.findIndex(b => b.id === bookId);
-
-if (bookIndex === -1) {
-    console.warn("Book not found");
-    return;
-}
+if (bookIndex === -1) return;
 
 books[bookIndex].qrs = books[bookIndex].qrs || [];
 
 let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
-
-if (qrIndex === -1) {
-    console.warn("QR not found");
-    return;
-}
+if (qrIndex === -1) return;
 
 let book = books[bookIndex];
 let qr = books[bookIndex].qrs[qrIndex];
@@ -100,14 +75,9 @@ qrContentInput.value = qr.content || "";
    RESTORE SETTINGS
 ====================== */
 if (qr.qrSettings) {
-    document.getElementById("qrColorInput").value =
-        qr.qrSettings.color || "#000000";
-
-    document.getElementById("qrSizeInput").value =
-        qr.qrSettings.size || 300;
-
-    document.getElementById("qrStyleInput").value =
-        qr.qrSettings.style || "square";
+    document.getElementById("qrColorInput").value = qr.qrSettings.color || "#000000";
+    document.getElementById("qrSizeInput").value = qr.qrSettings.size || 300;
+    document.getElementById("qrStyleInput").value = qr.qrSettings.style || "square";
 }
 
 /* ======================
@@ -132,8 +102,41 @@ function generateQR(text) {
         logoSrc = URL.createObjectURL(logoInput.files[0]);
     }
 
-    // 🟢 أهم تحسين: إعادة استخدام QR بدل إعادة إنشاء DOM بشكل فوضوي
-if (qrCode) {
+    qrPreviewBox.innerHTML = "";
+
+    /* ======================
+       FIRST CREATE ONLY
+    ====================== */
+    if (!qrCode) {
+
+        qrCode = new QRCodeStyling({
+            width: size,
+            height: size,
+            data: text,
+            image: logoSrc,
+
+            dotsOptions: {
+                color: color,
+                type: style
+            },
+
+            backgroundOptions: {
+                color: "#ffffff"
+            },
+
+            imageOptions: {
+                margin: 8,
+                imageSize: 0.35
+            }
+        });
+
+        qrCode.append(qrPreviewBox);
+        return;
+    }
+
+    /* ======================
+       UPDATE ONLY
+    ====================== */
     qrCode.update({
         data: text,
         image: logoSrc,
@@ -146,35 +149,7 @@ if (qrCode) {
             imageSize: 0.35
         }
     });
-
-    return;
 }
-
-    // 🟢 أول مرة فقط
-    qrPreviewBox.innerHTML = "";
-
-qrCode = new QRCodeStyling({
-    width: size,
-    height: size,
-    data: text,
-    image: logoSrc,
-
-    dotsOptions: {
-        color: color,
-        type: style
-    },
-
-    backgroundOptions: {
-        color: "#ffffff"
-    },
-
-    imageOptions: {
-        margin: 8,
-        imageSize: 0.35
-    }
-});
-
-qrCode.append(qrPreviewBox); // ✔ مرة واحدة فقط
 
 /* ======================
    FIRST LOAD
@@ -183,24 +158,19 @@ qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 generateQR(qr.content || "");
 
 /* ======================
-   GENERATE BUTTON
+   EVENTS
 ====================== */
-generateBtn?.addEventListener("click", function () {
+generateBtn?.addEventListener("click", () => {
     generateQR(qrContentInput.value.trim());
 });
 
-/* ======================
-   LIVE UPDATE (CLEANED)
-====================== */
 ["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
 .forEach(id => {
-
     const el = document.getElementById(id);
     if (!el) return;
 
     const update = () => {
-        const text = qrContentInput.value.trim();
-        if (text) generateQR(text);
+        generateQR(qrContentInput.value.trim());
     };
 
     el.addEventListener("input", update);
@@ -212,7 +182,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE QR
+   SAVE
 ====================== */
 saveBtn?.addEventListener("click", function () {
 
@@ -236,21 +206,19 @@ saveBtn?.addEventListener("click", function () {
         logo = URL.createObjectURL(logoInput.files[0]);
     }
 
-books[bIndex].qrs[qIndex] = {
-    id: qrId,
-    title: title || "",
-    description: description || "",
-    content: content || "",
-
-    qrSettings: {
-        color: document.getElementById("qrColorInput").value || "#000000",
-        size: Number(document.getElementById("qrSizeInput").value || 300),
-        style: document.getElementById("qrStyleInput").value || "square",
-        logo: logo || "assets/atqn-logo.png"
-    },
-
-    updatedAt: Date.now()
-};
+    books[bIndex].qrs[qIndex] = {
+        id: qrId,
+        title,
+        description,
+        content,
+        qrSettings: {
+            color: document.getElementById("qrColorInput").value || "#000000",
+            size: Number(document.getElementById("qrSizeInput").value || 300),
+            style: document.getElementById("qrStyleInput").value || "square",
+            logo
+        },
+        updatedAt: Date.now()
+    };
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
@@ -284,15 +252,12 @@ downloadBtn?.addEventListener("click", function () {
 
     if (!qrCode) return;
 
-    const name =
-        (document.getElementById("bookNameInput").value + "_" +
-        document.getElementById("qrTitleInput").value)
-        .replace(/\s+/g, "_");
+    const name = (
+        document.getElementById("bookNameInput").value + "_" +
+        document.getElementById("qrTitleInput").value
+    ).replace(/\s+/g, "_");
 
-    qrCode.download({
-        name,
-        extension: "png"
-    });
+    qrCode.download({ name, extension: "png" });
 });
 
 /* ======================
@@ -302,15 +267,12 @@ svgBtn?.addEventListener("click", function () {
 
     if (!qrCode) return;
 
-    const name =
-        (document.getElementById("bookNameInput").value + "_" +
-        document.getElementById("qrTitleInput").value)
-        .replace(/\s+/g, "_");
+    const name = (
+        document.getElementById("bookNameInput").value + "_" +
+        document.getElementById("qrTitleInput").value
+    ).replace(/\s+/g, "_");
 
-    qrCode.download({
-        name,
-        extension: "svg"
-    });
+    qrCode.download({ name, extension: "svg" });
 });
 
 });
