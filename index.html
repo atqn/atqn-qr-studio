@@ -102,7 +102,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 window.db = db;
-window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
+window.firebaseFirestore = {
+    doc: doc,
+    setDoc: setDoc,
+    getDoc: getDoc,
+    onSnapshot: onSnapshot
+};
 </script>
 
 <script>
