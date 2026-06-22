@@ -172,7 +172,7 @@ function generateQR(text) {
 
         imageOptions: {
             margin: 8,
-            imageSize: 0.28
+            imageSize: 0.35
         }
     });
 
