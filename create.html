@@ -145,24 +145,50 @@
 
 <!-- Firebase -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } 
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
-    authDomain: "atqn-qr1.firebaseapp.com",
-    projectId: "atqn-qr1",
-    storageBucket: "atqn-qr1.firebasestorage.app",
-    messagingSenderId: "867770918097",
-    appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-  };
+/* ======================
+   Firebase Config
+====================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
+  authDomain: "atqn-qr1.firebaseapp.com",
+  projectId: "atqn-qr1",
+  storageBucket: "atqn-qr1.firebasestorage.app",
+  messagingSenderId: "867770918097",
+  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+/* ======================
+   Init Firebase
+====================== */
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  window.db = db;
-  window.firebaseFirestore = { doc, getDoc, setDoc, updateDoc, arrayUnion };
+/* ======================
+   Expose SAFE GLOBAL API
+====================== */
+window.db = db;
+
+window.firebaseFirestore = {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot
+};
+
+console.log("🔥 Firebase initialized successfully");
 </script>
 
 <!-- Toast -->
