@@ -133,51 +133,48 @@ function generateQR(text) {
     }
 
     // 🟢 أهم تحسين: إعادة استخدام QR بدل إعادة إنشاء DOM بشكل فوضوي
-    if (qrCode) {
-        qrPreviewBox.innerHTML = "";
-        qrCode.update({
-            data: text,
-            image: logoSrc,
-            dotsOptions: {
-                color: color,
-                type: style
-            },
-            imageOptions: {
-                margin: 8,
-                imageSize: 0.28
-            }
-        });
-
-        qrCode.append(qrPreviewBox);
-        return;
-    }
-
-    // 🟢 أول مرة فقط
-    qrPreviewBox.innerHTML = "";
-
-    qrCode = new QRCodeStyling({
-        width: size,
-        height: size,
+if (qrCode) {
+    qrCode.update({
         data: text,
         image: logoSrc,
-
         dotsOptions: {
             color: color,
             type: style
         },
-
-        backgroundOptions: {
-            color: "#ffffff"
-        },
-
         imageOptions: {
             margin: 8,
             imageSize: 0.35
         }
     });
 
-    qrCode.append(qrPreviewBox);
+    return;
 }
+
+    // 🟢 أول مرة فقط
+    qrPreviewBox.innerHTML = "";
+
+qrCode = new QRCodeStyling({
+    width: size,
+    height: size,
+    data: text,
+    image: logoSrc,
+
+    dotsOptions: {
+        color: color,
+        type: style
+    },
+
+    backgroundOptions: {
+        color: "#ffffff"
+    },
+
+    imageOptions: {
+        margin: 8,
+        imageSize: 0.35
+    }
+});
+
+qrCode.append(qrPreviewBox); // ✔ مرة واحدة فقط
 
 /* ======================
    FIRST LOAD
