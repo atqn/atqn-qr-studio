@@ -1,7 +1,14 @@
-
-
 document.addEventListener("DOMContentLoaded", function () {
 
+function safeGet(callback, fallback = null) {
+    try {
+        return callback();
+    } catch (e) {
+        console.warn("Safe Error Caught:", e);
+        return fallback;
+    }
+}
+    
 function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
     if (!toast) return;
