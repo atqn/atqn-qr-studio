@@ -196,28 +196,12 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
-function showToast(message, type = "success") {
-    const toast = document.getElementById("toast");
-    if (!toast) return;
+    showToast("تم الحفظ بنجاح");
 
-    toast.textContent = message;
-
-    // تنظيف كامل
-    toast.className = "toast";
-
-    // إجبار إعادة الرسم (حل مشكلة الوميض)
-    void toast.offsetWidth;
-
-    // إضافة الحالة
-    toast.classList.add("show", type);
-
-    // إخفاء ناعم
-    clearTimeout(toast._t);
-
-    toast._t = setTimeout(() => {
-        toast.classList.remove("show");
-    }, 2200);
-}
+    setTimeout(() => {
+        window.location.href = "book.html?id=" + bookId;
+    }, 800);
+});
 
 /* ======================
    DEFAULT SETTINGS
