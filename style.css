@@ -1052,3 +1052,11 @@ body{
     background: #dc2626;
 }
 
+/* ========================= */
+/* QR ZOOM FIX (ADD HERE)    */
+/* ========================= */
+
+#qrPreviewBox canvas {
+    transform: scale(1.4);
+    transform-origin: center;
+}
