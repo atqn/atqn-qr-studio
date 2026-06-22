@@ -1,32 +1,6 @@
-
-<header class="topbar">
-
-
-
-<script>
-function logout(){
-    localStorage.removeItem("logged");
-    window.location.href = "login.html";
-}
-</script>
-
-    
-    <div class="brand">
-        <img src="assets/atqn-logo.png">
-        <h1>ATQN QR Studio</h1>
-    </div>
-
-<nav>
-    <a href="index.html">الرئيسة</a>
-    <a href="create.html">إنشاء QR</a>
-    <a href="library.html">مكتبة الكتب</a>
-    <a href="#" onclick="logout()">خروج</a>
-</nav>
-
-</header>
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,12 +8,29 @@ function logout(){
 <title>ATQN QR Studio</title>
 
 <link rel="stylesheet" href="style.css">
-
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
+<!-- ================= TOPBAR ================= -->
+<header class="topbar">
+
+    <div class="brand">
+        <img src="assets/atqn-logo.png">
+        <h1>ATQN QR Studio</h1>
+    </div>
+
+    <nav>
+        <a href="index.html">الرئيسة</a>
+        <a href="create.html">إنشاء QR</a>
+        <a href="library.html">مكتبة الكتب</a>
+        <a href="#" onclick="logout()">خروج</a>
+    </nav>
+
+</header>
+
+<!-- ================= MAIN ================= -->
 <div class="container">
 
     <div class="hero">
@@ -84,6 +75,7 @@ function logout(){
 
 </div>
 
+<!-- ================= FIREBASE ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -106,7 +98,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// مهم جدًا: نضمن التصدير بشكل صحيح
 window.db = db;
 
 window.firebaseFirestore = Object.freeze({
@@ -119,6 +110,7 @@ window.firebaseFirestore = Object.freeze({
 console.log("🔥 Firebase initialized");
 </script>
 
+<!-- ================= STATS ================= -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -142,11 +134,20 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<!-- ================= AUTH ================= -->
 <script>
 if(localStorage.getItem("logged") !== "true"){
     window.location.href = "login.html";
 }
 </script>
-    
+
+<!-- ================= LOGOUT ================= -->
+<script>
+function logout(){
+    localStorage.removeItem("logged");
+    window.location.href = "login.html";
+}
+</script>
+
 </body>
 </html>
