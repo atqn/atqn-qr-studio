@@ -1,3 +1,9 @@
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+</script>
+
 document.addEventListener("DOMContentLoaded", function () {
 
 function safeGet(callback, fallback = null) {
