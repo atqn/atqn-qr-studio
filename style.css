@@ -8,7 +8,6 @@ body{
     font-family:'Cairo',sans-serif;
     background:#0f172a;
     color:#fff;
-
     overflow-x:hidden;
 }
 
@@ -18,9 +17,11 @@ body{
     padding:8px 20px;
 }
 
-.hero{
-    display:none;
-}
+/* =========================
+   HERO / HOME
+========================= */
+
+.hero{ display:none; }
 
 .logo-box h1{
     font-size:48px;
@@ -58,6 +59,10 @@ body{
     color:#cbd5e1;
 }
 
+/* =========================
+   ACTIONS
+========================= */
+
 .actions{
     margin-top:60px;
     display:grid;
@@ -89,47 +94,29 @@ body{
     font-size:22px;
 }
 
-@media(max-width:768px){
-
-    .stats,
-    .actions{
-        grid-template-columns:1fr;
-    }
-
-    .logo-box h1{
-        font-size:34px;
-    }
-
-}
-
-.page-header{
-    text-align:center;
-    margin-bottom:40px;
-}
-
-.back-btn{
-    display:inline-block;
-    margin-bottom:20px;
-    text-decoration:none;
-    color:#38bdf8;
-    font-weight:700;
-}
+/* =========================
+   CREATE LAYOUT
+========================= */
 
 .create-layout{
     display:grid;
     grid-template-columns:1fr 1fr 1fr;
     gap:20px;
     align-items:stretch;
+    height:auto;
 }
 
 .panel{
     background:#1e293b;
     border-radius:20px;
     padding:25px;
+    min-height:340px;
 }
 
-.panel h2{
-    margin-bottom:20px;
+.panel h3{
+    margin-bottom:8px;
+    color:#38bdf8;
+    font-size:18px;
 }
 
 .panel label{
@@ -149,17 +136,9 @@ body{
     font-family:'Cairo',sans-serif;
 }
 
-.primary-btn,
-.save-btn{
-    width:100%;
-    border:none;
-    border-radius:12px;
-    padding:10px;
-    margin-top:10px;
-    font-size:14px;
-    font-weight:700;
-    cursor:pointer;
-}
+/* =========================
+   BUTTONS (Unified)
+========================= */
 
 .primary-btn{
     background:#38bdf8;
@@ -171,53 +150,100 @@ body{
     color:white;
 }
 
-.primary-btn:hover,
-.save-btn:hover{
-    transform:translateY(-3px);
+.primary-btn,
+.save-btn{
+    width:100%;
+    height:38px;
+    border:none;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
 }
 
-.preview-box{
-    min-height:220px;
-    height:220px;
+/* =========================
+   PREVIEW
+========================= */
 
+.preview-box{
+    height:110px;
     display:flex;
     justify-content:center;
     align-items:center;
-
     border:2px dashed #334155;
     border-radius:16px;
     margin-bottom:15px;
+    overflow:hidden;
 }
 
-.preview-info{
+#qrPreviewBox canvas,
+#qrPreviewBox img{
+    transform:scale(1.35);
+    transform-origin:center;
+}
+
+/* =========================
+   PREVIEW ACTIONS
+========================= */
+
+.preview-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:15px;
+}
+
+.preview-actions button{
+    width:100%;
+    padding:9px 10px;
+    font-size:13px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.preview-actions button:hover{
+    transform:translateY(-2px);
+}
+
+/* =========================
+   INFO CARD
+========================= */
+
+.info-card{
+    margin-top:20px;
     background:#0f172a;
-    padding:20px;
-    border-radius:15px;
+    border:1px solid #334155;
+    border-radius:14px;
+    padding:18px;
+    line-height:1.6;
 }
 
-.preview-info p{
-    margin:10px 0;
+.info-title{
+    color:#38bdf8;
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:7px;
 }
 
-@media(max-width:900px){
-
-    .create-layout{
-        grid-template-columns:1fr;
-    }
-
+.info-card p{
+    color:#cbd5e1;
+    font-size:13px;
 }
 
-/* ===== Top Bar ===== */
+/* =========================
+   TOPBAR
+========================= */
 
 .topbar{
     background:#111827;
     border-bottom:1px solid #334155;
     padding:12px 25px;
-
     display:flex;
     justify-content:space-between;
     align-items:center;
-
     position:sticky;
     top:0;
     z-index:9999;
@@ -255,259 +281,16 @@ body{
     color:#38bdf8;
 }
 
-.page-title{
-    text-align:center;
-    margin-bottom:25px;
-}
-
-.page-title h2{
-    margin-bottom:8px;
-}
-
-.page-title p{
-    color:#94a3b8;
-}
-
-.divider{
-    margin:18px 0;
-    border:none;
-    border-top:1px solid #334155;
-}
-
-.radio-box{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.radio-box label{
-    margin:0;
-}
-
-.panel h3{
-    margin-bottom:8px;
-    color:#38bdf8;
-    font-size:18px;
-}
-
-.preview-box{
-    height:150px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.preview-box img,
-.preview-box canvas{
-    max-width:140px;
-    max-height:140px;
-}
-.secondary-btn{
-    width:100%;
-    border:none;
-    border-radius:14px;
-    padding:14px;
-    margin-top:12px;
-    background:#475569;
-    color:white;
-    font-weight:700;
-    cursor:pointer;
-}
-
-.export-btn{
-    width:100%;
-    border:none;
-    border-radius:14px;
-    padding:14px;
-    margin-top:12px;
-    background:#334155;
-    color:white;
-    font-weight:700;
-    cursor:pointer;
-    transition:.25s;
-}
-
-.export-btn:hover,
-.secondary-btn:hover{
-    transform:translateY(-2px);
-}
-
-@media(max-width:900px){
-
-    .topbar{
-        flex-direction:column;
-        gap:15px;
-    }
-
-    .topbar nav{
-        flex-wrap:wrap;
-        justify-content:center;
-    }
-
-}
-
-@media(max-width:1100px){
-
-    .create-layout{
-        grid-template-columns:1fr;
-    }
-
-}
-
-.create-layout{
-    align-items:stretch;
-}
-
-.panel{
-    height:100%;
-}
-
-.logo-options{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    margin-bottom:15px;
-}
-
-.radio-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    cursor:pointer;
-    margin:0;
-}
-
-.radio-item input{
-    width:auto;
-    margin:0;
-}
-
-.radio-item span{
-    font-size:14px;
-    color:#fff;
-}
-
-
-
-.create-layout .panel{
-    padding:10px;
-}
-
-.create-layout{
-    height:auto;
-}
-
-.create-layout .panel{
-    min-height:340px;
-}
-
-.preview-box{
-    height:110px;
-}
-
-.export-btn{
-    width:100%;
-    padding:8px;
-    margin-top:6px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-.primary-btn,
-.save-btn,
-.export-btn{
-    width:100%;
-    height:42px;
-}
-
-.export-group{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    margin-top:12px;
-}
-
-.primary-btn{
-    margin-top:15px;
-}
-
-.save-btn{
-    margin-top:10px;
-}
-
-.preview-box{
-    margin-bottom:15px;
-}
-
-.panel .primary-btn{
-    margin-bottom:8px;
-}
-
-.panel .save-btn{
-    margin-bottom:8px;
-}
-
-.primary-btn,
-.save-btn,
-.export-btn{
-    width:100%;
-    height:38px;
-    padding:0;
-    margin:0;
-    font-size:14px;
-    font-weight:700;
-    border-radius:10px;
-}
-
-.preview-actions{
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 18px;
-}
-
-
-
-.info-card{
-    margin-top:20px;
-    background:#0f172a;
-    border:1px solid #334155;
-    border-radius:14px;
-    padding:16px;
-}
-
-.info-title{
-    color:#38bdf8;
-    font-size:16px;
-    font-weight:700;
-    margin-bottom:7px;
-}
-
-.info-card p{
-    color:#cbd5e1;
-    font-size:13px;
-    line-height:1.5;
-}
-
 /* =========================
-   Library
+   BOOKS / LIBRARY
 ========================= */
 
-.library-header{
-    text-align:center;
-    margin-bottom:25px;
-}
-
-.library-header h2{
-    font-size:30px;
-    margin-bottom:8px;
-}
-
-.library-header p{
-    color:#94a3b8;
+.books-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,250px));
+    gap:40px;
+    justify-content:center;
+    padding:20px;
 }
 
 .book-card{
@@ -515,20 +298,13 @@ body{
     border-radius:18px;
     padding:25px;
     text-align:center;
-    transition:.25s;
-}
-
-.book-card:hover{
-    transform:translateY(-4px);
+    width:250px;
+    min-height:260px;
 }
 
 .book-icon{
     font-size:52px;
     margin-bottom:15px;
-}
-
-.book-card h3{
-    margin-bottom:10px;
 }
 
 .book-count{
@@ -548,502 +324,31 @@ body{
     cursor:pointer;
 }
 
-.add-book-card{
-    border:2px dashed #334155;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    cursor:pointer;
-}
-
-.add-icon{
-    font-size:55px;
-    margin-bottom:10px;
-    color:#38bdf8;
-}
-
-@media(max-width:900px){
-
-    .books-grid{
-        grid-template-columns:1fr;
-    }
-
-}
-
-.book-card,
-.add-book-card{
-    min-width:220px;
-    max-width:220px;
-}
-
-.book-card,
-.add-book-card{
-    min-height:260px;
-}
-
-.books-grid::-webkit-scrollbar{
-    display:none;
-}
-
-.books-grid{
-    scrollbar-width:none;
-}
-
 /* =========================
-   Library Toolbar
+   TOAST (FIXED SINGLE VERSION)
 ========================= */
 
-.library-toolbar{
-    display:flex;
-    justify-content:flex-start;
-    margin-bottom:18px;
-}
-
-.add-book-btn{
-    background:#38bdf8;
-    color:#0f172a;
-    border:none;
-    border-radius:12px;
-    padding:12px 20px;
-    font-weight:700;
-    cursor:pointer;
-}
-
-/* =========================
-   Horizontal Books
-========================= */
-
-.books-scroll{
-    width:100%;
-}
-
-.books-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,250px));
-    gap:40px;
-    justify-content:center;
-    padding:20px;
-}
-
-.book-card{
-    width:250px;
-    min-width:250px;
-}
-
-/* شريط تمرير خفيف */
-
-.books-scroll::-webkit-scrollbar{
-    height:6px;
-}
-
-.books-scroll::-webkit-scrollbar-thumb{
-    background:#334155;
-    border-radius:10px;
-}
-
-.books-scroll::-webkit-scrollbar-track{
-    background:transparent;
-}
-
-
-.add-book-btn{
-    position:relative;
-    left:-20px;
-}
-
-.book-actions{
-    display:flex;
-    gap:10px;
-    margin-bottom:10px;
-}
-
-.action-btn{
-    flex:1;
-    height:36px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-family:'Cairo',sans-serif;
-    font-weight:700;
-}
-
-.edit-btn{
-    background:#f59e0b;
-    color:#fff;
-}
-
-.delete-btn{
-    background:#ef4444;
-    color:#fff;
-}
-
-/* =========================
-   Delete Modal
-========================= */
-
-.modal-overlay{
-
+#toast{
     position:fixed;
-    inset:0;
-
-    background:rgba(0,0,0,.65);
-
-    display:none;
-
-    justify-content:center;
-    align-items:center;
-
-    z-index:99999;
-}
-
-.modal-overlay.show{
-    display:flex;
-}
-
-.modal-box{
-
-    width:90%;
-    max-width:360px;
-
-    background:#1e293b;
-
-    border-radius:20px;
-
-    padding:25px;
-
-    text-align:center;
-
-    box-shadow:
-    0 15px 40px rgba(0,0,0,.45);
-
-    animation:modalShow .25s ease;
-}
-
-.modal-icon{
-
-    font-size:50px;
-
-    margin-bottom:10px;
-}
-
-.modal-box h3{
-
-    margin-bottom:10px;
-}
-
-.modal-box p{
-
-    color:#cbd5e1;
-
-    margin-bottom:20px;
-}
-
-.modal-actions{
-
-    display:flex;
-
-    gap:12px;
-}
-
-.modal-btn{
-
-    flex:1;
-
-    border:none;
-
-    height:42px;
-
-    border-radius:12px;
-
-    cursor:pointer;
-
-    font-family:'Cairo',sans-serif;
-
-    font-weight:700;
-
-    transition:.2s;
-}
-
-.modal-btn:hover{
-
-    transform:translateY(-2px);
-}
-
-.cancel-btn{
-
-    background:#475569;
-
-    color:white;
-}
-
-.danger-btn{
-
-    background:#ef4444;
-
-    color:white;
-}
-
-@keyframes modalShow{
-
-    from{
-
-        opacity:0;
-
-        transform:scale(.9);
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:scale(1);
-    }
-}
-
-.modal-input{
-
-    width:100%;
-
-    height:42px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#0f172a;
-
-    color:white;
-
-    padding:0 12px;
-
-    margin-bottom:20px;
-
-    font-family:'Cairo',sans-serif;
-}
-
-.modal-input{
-
-    width:100%;
-
-    height:42px;
-
-    border:none;
-
-    border-radius:12px;
-
-    padding:0 12px;
-
-    background:#0f172a;
-
-    color:white;
-
-    font-family:'Cairo',sans-serif;
-
-    margin-bottom:20px;
-}
-
-/* =========================
-   Book Page Toolbar
-========================= */
-
-.library-toolbar{
-    display:flex;
-    gap:15px;
-    align-items:center;
-    margin-bottom:25px;
-}
-
-.library-toolbar .add-book-btn{
-    height:44px;
-    padding:0 18px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:14px;
-}
-
-.library-toolbar .add-book-btn{
-    padding:10px 18px;
-    font-size:14px;
-}
-
-.book-count{
-    word-break:break-word;
-    line-height:1.5;
-}
-
-.qr-description{
-    color:#cbd5e1;
-    font-size:14px;
-    line-height:1.6;
-    margin-bottom:12px;
-    min-height:42px;
-}
-
-.qr-link-badge{
-    background:#0f172a;
-    border:1px solid #334155;
-    color:#38bdf8;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#111;
+    color:#fff;
+    padding:12px 18px;
     border-radius:10px;
-    padding:7px 10px;
-    font-size:13px;
-    margin-bottom:14px;
+    font-family:Cairo;
+    font-size:14px;
+    opacity:0;
+    transition:.25s;
+    z-index:9999;
+    pointer-events:none;
 }
 
-.clean-actions{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 15px;
+#toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
 }
 
-.action-btn{
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-family: "Cairo", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-/* ألوان موحدة */
-.action-btn.primary{
-    background:#38bdf8;
-    color:#fff;
-}
-
-.action-btn.success{
-    background:#22c55e;
-    color:#fff;
-}
-
-.action-btn.dark{
-    background:#334155;
-    color:#fff;
-}
-
-.action-btn:hover{
-    transform: scale(1.02);
-}
-
-.vertical-actions{
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 15px;
-}
-
-/* توحيد حجم الأزرار */
-.vertical-actions .action-btn{
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-family: "Cairo", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-/* الألوان */
-.action-btn.primary{
-    background:#38bdf8;
-    color:#fff;
-}
-
-.action-btn.success{
-    background:#22c55e;
-    color:#fff;
-}
-
-.action-btn.dark{
-    background:#334155;
-    color:#fff;
-}
-
-.info-card{
-    padding: 18px;
-    min-height: 120px;
-    line-height: 1.6;
-    border-radius: 12px;
-}
-
-.preview-actions{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.preview-actions button{
-    width: 100%;
-    padding: 9px 10px;
-    font-size: 13px;
-    border-radius: 8px;
-    transition: 0.2s;
-}
-
-.preview-actions button:hover{
-    transform: translateY(-2px);
-}
-
-.settings-divider{
-    height: 5px;
-    background: rgba(255,255,255,0.08);
-    margin: 18px 0;   /* ⬅️ كان صغير → الآن نزلناه فعلياً */
-}
-
-/* نزول عناصر الإعدادات بالكامل */
-.panel:nth-child(2) label,
-.panel:nth-child(2) select,
-.panel:nth-child(2) input{
-    margin-top: 4px;
-}
-
-
-#qrPreviewBox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
-/* 👇 هذا هو الحل الحقيقي */
-#qrPreviewBox canvas,
-#qrPreviewBox img {
-    transform: scale(1.35);
-    transform-origin: center;
-}
-
-#toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #111;
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-family: Cairo;
-    font-size: 14px;
-    opacity: 0;
-    transition: 0.3s;
-    z-index: 9999;
-}
-
-#toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-#toast.success {
-    background: #16a34a;
-}
-
-#toast.error {
-    background: #dc2626;
-}
+#toast.success{ background:#16a34a; }
+#toast.error{ background:#dc2626; }
