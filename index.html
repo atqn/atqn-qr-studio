@@ -1,6 +1,16 @@
 
 <header class="topbar">
 
+    <button onclick="logout()" class="logout-btn">خروج</button>
+
+<script>
+function logout(){
+    localStorage.removeItem("logged");
+    window.location.href = "login.html";
+}
+</script>
+
+    
     <div class="brand">
         <img src="assets/atqn-logo.png">
         <h1>ATQN QR Studio</h1>
