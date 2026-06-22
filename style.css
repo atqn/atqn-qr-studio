@@ -1123,3 +1123,23 @@ body{
         transform: scale(1.2);
     }
 }
+
+
+/* =========================
+   FIX MOBILE AUTO ZOOM ISSUE
+========================= */
+
+input,
+select,
+textarea {
+    font-size: 16px !important;
+}
+
+/* منع zoom غير المرغوب في iOS */
+@media screen and (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
