@@ -1,9 +1,3 @@
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-</script>
-
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
@@ -227,14 +221,11 @@ saveBtn?.addEventListener("click", function () {
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
     /* ======================
-       FIREBASE SYNC (FIXED + SAFE)
+       FIREBASE SYNC (SAFE)
     ====================== */
     try {
-
         const bookRef = doc(db, "books", String(bookId));
-
         setDoc(bookRef, books[bIndex]);
-
     } catch (e) {
         console.warn("Firebase sync failed:", e);
     }
