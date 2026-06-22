@@ -107,8 +107,6 @@ function generateQR(text) {
         return;
     }
 
-    qrPreviewBox.innerHTML = "";
-
     const size = parseInt(document.getElementById("qrSizeInput").value || 300);
     const color = document.getElementById("qrColorInput").value || "#000000";
     const style = document.getElementById("qrStyleInput").value || "square";
@@ -119,11 +117,33 @@ function generateQR(text) {
         logoSrc = URL.createObjectURL(logoInput.files[0]);
     }
 
+    // 🟢 أهم تحسين: إعادة استخدام QR بدل إعادة إنشاء DOM بشكل فوضوي
+    if (qrCode) {
+        qrPreviewBox.innerHTML = "";
+        qrCode.update({
+            data: text,
+            image: logoSrc,
+            dotsOptions: {
+                color: color,
+                type: style
+            },
+            imageOptions: {
+                margin: 8,
+                imageSize: 0.28
+            }
+        });
+
+        qrCode.append(qrPreviewBox);
+        return;
+    }
+
+    // 🟢 أول مرة فقط
+    qrPreviewBox.innerHTML = "";
+
     qrCode = new QRCodeStyling({
         width: size,
         height: size,
         data: text,
-
         image: logoSrc,
 
         dotsOptions: {
