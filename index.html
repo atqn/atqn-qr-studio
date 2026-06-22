@@ -93,6 +93,29 @@ const db = getFirestore(app);
 window.db = db;
 window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+
+    const booksCount = books.length;
+
+    let qrCount = 0;
+
+    books.forEach(book => {
+        qrCount += (book.count || 0);
+    });
+
+    const numbers = document.querySelectorAll(".number");
+
+    if (numbers.length >= 2) {
+        numbers[0].textContent = booksCount;
+        numbers[1].textContent = qrCount;
+    }
+
+});
+</script>
     
 </body>
 </html>
