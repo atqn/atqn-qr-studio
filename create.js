@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
-const { doc, getDoc, setDoc, updateDoc } = window.firebaseFirestore;
+const firestore = window.firebaseFirestore || {};
+const { doc, setDoc } = firestore;
 
 function safeGet(callback, fallback = null) {
     try {
@@ -28,7 +29,7 @@ function showToast(message, type = "success") {
     toast._timer = setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
-};
+});
 
 /* ======================
    PARAMS
@@ -228,9 +229,18 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
+    /* ======================
+       FIREBASE SYNC (SAFE FIXED)
+    ====================== */
     try {
-        const bookRef = doc(db, "books", String(bookId));
-        setDoc(bookRef, books[bIndex]);
+
+        if (db && doc && setDoc) {
+            const bookRef = doc(db, "books", String(bookId));
+            setDoc(bookRef, books[bIndex]);
+        } else {
+            console.warn("Firebase not ready");
+        }
+
     } catch (e) {
         console.warn("Firebase sync failed:", e);
     }
