@@ -1,8 +1,18 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
 const firestore = window.firebaseFirestore || {};
 const { doc, setDoc, onSnapshot } = firestore;
+
+function safeGet(callback, fallback = null) {
+    try {
+        return callback();
+    } catch (e) {
+        console.warn("Safe Error:", e);
+        return fallback;
+    }
+}
 
 function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
@@ -44,7 +54,7 @@ const logoInput = document.getElementById("qrLogoInput");
 if (!bookId || !qrId) return;
 
 /* ======================
-   LOCAL DB
+   LOAD DB
 ====================== */
 
 let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
@@ -80,78 +90,32 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   SAFE MERGE
+   🔥 REALTIME SYNC (READ)
 ====================== */
 
-function mergeBooks(local, remote) {
+const bookRef = db && doc ? doc(db, "books", String(bookId)) : null;
 
-    const map = new Map();
+if (bookRef && onSnapshot) {
 
-    local.forEach(b => map.set(b.id, b));
-
-    remote.forEach(r => {
-        const existing = map.get(r.id);
-
-        if (!existing) {
-            map.set(r.id, {
-                ...r,
-                qrs: r.qrs || []
-            });
-        } else {
-
-            const localQrs = Array.isArray(existing.qrs) ? existing.qrs : [];
-            const remoteQrs = Array.isArray(r.qrs) ? r.qrs : [];
-
-            const mergedQrs = [...localQrs];
-
-            remoteQrs.forEach(qr => {
-                const exists = mergedQrs.find(x => x.id === qr.id);
-                if (!exists) mergedQrs.push(qr);
-            });
-
-            map.set(r.id, {
-                ...existing,
-                ...r,
-                qrs: mergedQrs
-            });
-        }
-    });
-
-    return Array.from(map.values());
-}
-
-/* ======================
-   FIREBASE LISTENER
-====================== */
-
-const globalRef = db && doc ? doc(db, "books", "global") : null;
-
-if (globalRef && onSnapshot) {
-
-    onSnapshot(globalRef, (snap) => {
+    onSnapshot(bookRef, (snap) => {
 
         if (!snap.exists()) return;
 
-        const data = snap.data();
-        if (!data.books) return;
+        const remoteData = snap.data();
 
-        const remoteBooks = data.books;
+        books[bookIndex] = remoteData;
 
-        books = mergeBooks(books, remoteBooks);
+        localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        const bIndex = books.findIndex(b => b.id === bookId);
+        if (remoteData.qrs && remoteData.qrs[qrIndex]) {
 
-        if (bIndex !== -1) {
+            const remoteQR = remoteData.qrs[qrIndex];
 
-            const qIndex = books[bIndex].qrs?.findIndex(q => q.id === qrId);
+            qr.title = remoteQR.title;
+            qr.description = remoteQR.description;
+            qr.content = remoteQR.content;
 
-            if (qIndex !== -1) {
-                qr = books[bIndex].qrs[qIndex];
-
-                qrContentInput.value = qr.content || "";
-                document.getElementById("qrTitleInput").value = qr.title || "";
-                document.getElementById("qrDescriptionInput").value = qr.description || "";
-            }
+            qrContentInput.value = remoteQR.content || "";
         }
     });
 }
@@ -188,9 +152,20 @@ function generateQR(text) {
             height: size,
             data: text,
             image: logoSrc,
-            dotsOptions: { color, type: style },
-            backgroundOptions: { color: "#ffffff" },
-            imageOptions: { margin: 8, imageSize: 0.60 }
+
+            dotsOptions: {
+                color: color,
+                type: style
+            },
+
+            backgroundOptions: {
+                color: "#ffffff"
+            },
+
+            imageOptions: {
+                margin: 8,
+                imageSize: 0.60
+            }
         });
 
         qrCode.append(qrPreviewBox);
@@ -200,8 +175,14 @@ function generateQR(text) {
     qrCode.update({
         data: text,
         image: logoSrc,
-        dotsOptions: { color, type: style },
-        imageOptions: { margin: 8, imageSize: 0.60 }
+        dotsOptions: {
+            color: color,
+            type: style
+        },
+        imageOptions: {
+            margin: 8,
+            imageSize: 0.60
+        }
     });
 }
 
@@ -213,7 +194,15 @@ qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 generateQR(qr.content || "");
 
 /* ======================
-   REALTIME SAVE
+   EVENTS
+====================== */
+
+generateBtn?.addEventListener("click", () => {
+    generateQR(qrContentInput.value.trim());
+});
+
+/* ======================
+   🔥 REALTIME WRITE (NEW)
 ====================== */
 
 let syncTimer = null;
@@ -222,47 +211,45 @@ function realtimeSave() {
 
     clearTimeout(syncTimer);
 
-    syncTimer = setTimeout(async () => {
+    syncTimer = setTimeout(() => {
 
-        const title = document.getElementById("qrTitleInput").value.trim();
-        const description = document.getElementById("qrDescriptionInput").value.trim();
-        const content = qrContentInput.value.trim();
+        let title = document.getElementById("qrTitleInput").value.trim();
+        let description = document.getElementById("qrDescriptionInput").value.trim();
+        let content = qrContentInput.value.trim();
 
         if (!title || !content) return;
 
-        let localBooks = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-        const bIndex = localBooks.findIndex(b => b.id === bookId);
+        let bIndex = books.findIndex(b => b.id === bookId);
         if (bIndex === -1) return;
 
-        const qIndex = localBooks[bIndex].qrs.findIndex(q => q.id === qrId);
+        let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
         if (qIndex === -1) return;
 
-        localBooks[bIndex].qrs[qIndex] = {
-            ...localBooks[bIndex].qrs[qIndex],
+        books[bIndex].qrs[qIndex] = {
+            ...books[bIndex].qrs[qIndex],
             title,
             description,
             content,
             updatedAt: Date.now()
         };
 
-        const ref = doc(db, "books", "global");
+        localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        const snap = await window.firebaseFirestore.getDoc(ref);
-        const remoteBooks = snap.exists() ? snap.data().books : [];
+        try {
+            if (db && doc && setDoc) {
+                const ref = doc(db, "books", String(bookId));
+                setDoc(ref, books[bIndex]);
+            }
+        } catch (e) {
+            console.warn("Realtime sync failed:", e);
+        }
 
-        setDoc(ref, {
-            books: mergeBooks(localBooks, remoteBooks),
-            updatedAt: Date.now()
-        });
-
-    }, 600);
+    }, 700);
 }
 
-/* ======================
-   INPUTS
-====================== */
-
+/* bind realtime inputs */
 qrContentInput?.addEventListener("input", realtimeSave);
 document.getElementById("qrTitleInput")?.addEventListener("input", realtimeSave);
 document.getElementById("qrDescriptionInput")?.addEventListener("input", realtimeSave);
@@ -273,8 +260,12 @@ document.getElementById("qrDescriptionInput")?.addEventListener("input", realtim
     const el = document.getElementById(id);
     if (!el) return;
 
-    el.addEventListener("input", () => generateQR(qrContentInput.value.trim()));
-    el.addEventListener("change", () => generateQR(qrContentInput.value.trim()));
+    const update = () => {
+        generateQR(qrContentInput.value.trim());
+    };
+
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
 });
 
 qrContentInput?.addEventListener("input", () => {
@@ -282,27 +273,32 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON
+   SAVE BUTTON (kept as fallback)
 ====================== */
 
-saveBtn?.addEventListener("click", async function () {
+saveBtn?.addEventListener("click", function () {
 
-    const title = document.getElementById("qrTitleInput").value.trim();
-    const description = document.getElementById("qrDescriptionInput").value.trim();
-    const content = qrContentInput.value.trim();
+    let title = document.getElementById("qrTitleInput").value.trim();
+    let description = document.getElementById("qrDescriptionInput").value.trim();
+    let content = qrContentInput.value.trim();
 
     if (!title || !content) {
         alert("أدخل البيانات");
         return;
     }
 
-    let localBooks = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+    let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-    const bIndex = localBooks.findIndex(b => b.id === bookId);
-    const qIndex = localBooks[bIndex].qrs.findIndex(q => q.id === qrId);
+    let bIndex = books.findIndex(b => b.id === bookId);
+    let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
 
-    localBooks[bIndex].qrs[qIndex] = {
-        ...localBooks[bIndex].qrs[qIndex],
+    let logo = "assets/atqn-logo.png";
+
+    if (logoInput?.files?.[0]) {
+        logo = URL.createObjectURL(logoInput.files[0]);
+    }
+
+    books[bIndex].qrs[qIndex] = {
         id: qrId,
         title,
         description,
@@ -311,20 +307,17 @@ saveBtn?.addEventListener("click", async function () {
             color: document.getElementById("qrColorInput").value || "#000000",
             size: Number(document.getElementById("qrSizeInput").value || 300),
             style: document.getElementById("qrStyleInput").value || "square",
-            logo: "assets/atqn-logo.png"
+            logo
         },
         updatedAt: Date.now()
     };
 
-    const ref = doc(db, "books", "global");
+    localStorage.setItem("atqn_books", JSON.stringify(books));
 
-    const snap = await window.firebaseFirestore.getDoc(ref);
-    const remoteBooks = snap.exists() ? snap.data().books : [];
-
-    setDoc(ref, {
-        books: mergeBooks(localBooks, remoteBooks),
-        updatedAt: Date.now()
-    });
+    try {
+        const ref = doc(db, "books", String(bookId));
+        setDoc(ref, books[bIndex]);
+    } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
 
@@ -334,12 +327,12 @@ saveBtn?.addEventListener("click", async function () {
 });
 
 /* ======================
-   SETTINGS + DOWNLOAD (UNCHANGED)
+   DEFAULT SETTINGS
 ====================== */
 
 saveDefaultBtn?.addEventListener("click", function () {
 
-    const settings = {
+    let settings = {
         color: document.getElementById("qrColorInput").value,
         size: document.getElementById("qrSizeInput").value,
         style: document.getElementById("qrStyleInput").value
@@ -349,6 +342,10 @@ saveDefaultBtn?.addEventListener("click", function () {
 
     showToast("تم حفظ الإعدادات الافتراضية");
 });
+
+/* ======================
+   DOWNLOAD PNG / SVG
+====================== */
 
 downloadBtn?.addEventListener("click", function () {
     if (!qrCode) return;
