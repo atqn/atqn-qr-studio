@@ -61,7 +61,7 @@ let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 let bookIndex = books.findIndex(b => b.id === bookId);
 if (bookIndex === -1) return;
 
-/* 🔥 FIX: ensure qrs always exists */
+/* FIX */
 books[bookIndex].qrs = books[bookIndex].qrs || [];
 
 let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
@@ -90,7 +90,7 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 REALTIME SYNC (FIXED SAFELY)
+   FIREBASE SYNC (READ)
 ====================== */
 
 const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
@@ -211,7 +211,7 @@ generateBtn?.addEventListener("click", () => {
 });
 
 /* ======================
-   🔥 REALTIME WRITE (FIXED SAFE)
+   REALTIME SAVE (FIXED ONLY)
 ====================== */
 
 let syncTimer = null;
@@ -290,7 +290,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (UNCHANGED LOGIC)
+   SAVE BUTTON (FIXED ONLY)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
