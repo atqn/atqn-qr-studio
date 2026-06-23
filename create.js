@@ -43,7 +43,8 @@ let syncTimer = null;
 const params = new URLSearchParams(window.location.search);
 
 const bookId = Number(params.get("book"));
-const qrId = Number(params.get("qr"));
+let qrId = params.get("qr");
+qrId = qrId ? Number(qrId) : null;
 
 const qrPreviewBox = document.getElementById("qrPreviewBox");
 const generateBtn = document.getElementById("generatePreviewBtn");
@@ -55,7 +56,7 @@ const svgBtn = document.getElementById("downloadSvgBtn");
 const qrContentInput = document.getElementById("qrContentInput");
 const logoInput = document.getElementById("qrLogoInput");
 
-if (!bookId || !qrId) return;
+if (!bookId) return;
 
 /* ======================
    LOAD LOCAL
