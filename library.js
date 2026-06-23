@@ -14,19 +14,20 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE (UNCHANGED)
+   LOCAL STORAGE (UNCHANGED BUT SAFER)
 ====================== */
 
 function getBooks() {
-    const saved = localStorage.getItem("atqn_books");
-
-    if (!saved) {
-        localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
-        return defaultBooks;
-    }
-
     try {
-        return JSON.parse(saved);
+        const saved = localStorage.getItem("atqn_books");
+
+        if (!saved) {
+            localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
+            return defaultBooks;
+        }
+
+        return JSON.parse(saved) || defaultBooks;
+
     } catch (e) {
         console.warn("Parse error:", e);
         return defaultBooks;
@@ -38,19 +39,22 @@ function saveBooks(books) {
 }
 
 /* ======================
-   🔥 FIREBASE SYNC LAYER (NEW SAFE ADDITION)
+   🔥 FIREBASE SAFE SYNC (FIXED)
 ====================== */
 
 function syncToFirebase(books) {
     try {
         if (!window.db || !window.firebaseFirestore) return;
 
-        const ref = window.firebaseFirestore.doc(window.db, "books/global");
+        const { doc, setDoc } = window.firebaseFirestore;
 
-        window.firebaseFirestore.setDoc(ref, {
+        const ref = doc(window.db, "books/global");
+
+        setDoc(ref, {
             books: books,
             updatedAt: Date.now()
         });
+
     } catch (e) {
         console.warn("Firebase sync error:", e);
     }
@@ -60,9 +64,11 @@ function listenFirebase(callback) {
     try {
         if (!window.db || !window.firebaseFirestore) return;
 
-        const ref = window.firebaseFirestore.doc(window.db, "books/global");
+        const { doc, onSnapshot } = window.firebaseFirestore;
 
-        window.firebaseFirestore.onSnapshot(ref, (snap) => {
+        const ref = doc(window.db, "books/global");
+
+        onSnapshot(ref, (snap) => {
             if (!snap.exists()) return;
 
             const data = snap.data();
@@ -71,6 +77,7 @@ function listenFirebase(callback) {
                 callback(data.books);
             }
         });
+
     } catch (e) {
         console.warn("Firebase listener error:", e);
     }
@@ -138,10 +145,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     renderBooks();
 
-    /* 🔥 REALTIME LISTENER */
+    /* 🔥 REALTIME SYNC FROM FIREBASE */
     listenFirebase((remoteBooks) => {
+
+        if (!Array.isArray(remoteBooks)) return;
+
         saveBooks(remoteBooks);
         renderBooks();
+
     });
 
     const modal = document.getElementById("deleteModal");
@@ -206,7 +217,10 @@ function editBook(id) {
     document.getElementById("editModal").classList.add("show");
 }
 
-/* SAVE EDIT */
+/* ======================
+   SAVE EDIT
+====================== */
+
 document.getElementById("saveEditBtn")?.addEventListener("click", function () {
 
     const newTitle = document.getElementById("editBookTitle")?.value.trim();
@@ -229,7 +243,10 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     document.getElementById("editModal")?.classList.remove("show");
 });
 
-/* SAVE ADD */
+/* ======================
+   SAVE ADD
+====================== */
+
 document.getElementById("saveAddBtn")?.addEventListener("click", function () {
 
     const title = document.getElementById("newBookTitle")?.value.trim();
@@ -254,7 +271,10 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
     document.getElementById("addModal")?.classList.remove("show");
 });
 
-/* CLOSE MODALS */
+/* ======================
+   CLOSE MODALS
+====================== */
+
 document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
     document.getElementById("editModal")?.classList.remove("show");
 });
@@ -263,7 +283,10 @@ document.getElementById("cancelAddBtn")?.addEventListener("click", () => {
     document.getElementById("addModal")?.classList.remove("show");
 });
 
-/* OPEN BOOK */
+/* ======================
+   OPEN BOOK
+====================== */
+
 function openBook(id) {
     window.location.href = "book.html?id=" + id;
 }
