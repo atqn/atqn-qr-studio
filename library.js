@@ -1,86 +1,92 @@
 let deleteBookId = null;
 
+/* ======================
+   FIREBASE SAFE INIT
+====================== */
+
+function getFirebaseRef() {
+    if (!window.db || !window.firebaseFirestore) return null;
+    return window.firebaseFirestore.doc(window.db, "books", "global");
+}
+
+/* ======================
+   DEFAULT FALLBACK (only first run)
+====================== */
+
 const defaultBooks = [
-    { id:1, title:"كتاب المدود", icon:"📘", count:24 },
-    { id:2, title:"كتاب الهمزات", icon:"📗", count:18 },
-    { id:3, title:"كتاب التنوين", icon:"📙", count:35 },
-    { id:4, title:"كتاب الشدة", icon:"📕", count:12 },
-    { id:5, title:"كتاب السكون", icon:"📔", count:16 },
-    { id:6, title:"كتاب التفخيم", icon:"📓", count:21 },
-    { id:7, title:"كتاب الترقيق", icon:"📚", count:19 },
-    { id:8, title:"كتاب المخارج", icon:"📒", count:27 },
-    { id:9, title:"كتاب الصفات", icon:"📖", count:14 },
-    { id:10, title:"كتاب الوقف والابتداء", icon:"📑", count:31 }
+    { id: 1, title: "كتاب المدود", icon: "📘", count: 24, qrs: [] },
+    { id: 2, title: "كتاب الهمزات", icon: "📗", count: 18, qrs: [] },
+    { id: 3, title: "كتاب التنوين", icon: "📙", count: 35, qrs: [] },
+    { id: 4, title: "كتاب الشدة", icon: "📕", count: 12, qrs: [] }
 ];
 
 /* ======================
-   LOCAL STORAGE (UNCHANGED BUT SAFER)
+   STATE
 ====================== */
 
-function getBooks() {
-    try {
-        const saved = localStorage.getItem("atqn_books");
+let books = [];
 
-        if (!saved) {
-            localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
-            return defaultBooks;
+/* ======================
+   LOAD + INIT
+====================== */
+
+function initBooks() {
+    const saved = localStorage.getItem("atqn_books");
+
+    if (saved) {
+        try {
+            books = JSON.parse(saved);
+        } catch {
+            books = defaultBooks;
         }
-
-        return JSON.parse(saved) || defaultBooks;
-
-    } catch (e) {
-        console.warn("Parse error:", e);
-        return defaultBooks;
+    } else {
+        books = defaultBooks;
+        localStorage.setItem("atqn_books", JSON.stringify(books));
     }
 }
 
-function saveBooks(books) {
+/* ======================
+   SAVE LOCAL
+====================== */
+
+function saveLocal() {
     localStorage.setItem("atqn_books", JSON.stringify(books));
 }
 
 /* ======================
-   🔥 FIREBASE SAFE SYNC (FIXED)
+   FIREBASE SYNC
 ====================== */
 
-function syncToFirebase(books) {
-    try {
-        if (!window.db || !window.firebaseFirestore) return;
+function syncFirebase() {
+    const ref = getFirebaseRef();
+    if (!ref) return;
 
-        const { doc, setDoc } = window.firebaseFirestore;
-
-        const ref = doc(window.db, "books/global");
-
-        setDoc(ref, {
-            books: books,
-            updatedAt: Date.now()
-        });
-
-    } catch (e) {
-        console.warn("Firebase sync error:", e);
-    }
+    window.firebaseFirestore.setDoc(ref, {
+        books,
+        updatedAt: Date.now()
+    });
 }
 
-function listenFirebase(callback) {
-    try {
-        if (!window.db || !window.firebaseFirestore) return;
+/* ======================
+   LISTENER (REALTIME)
+====================== */
 
-        const { doc, onSnapshot } = window.firebaseFirestore;
+function listenFirebase() {
+    const ref = getFirebaseRef();
+    if (!ref) return;
 
-        const ref = doc(window.db, "books/global");
+    window.firebaseFirestore.onSnapshot(ref, (snap) => {
+        if (!snap.exists()) return;
 
-        onSnapshot(ref, (snap) => {
-            if (!snap.exists()) return;
+        const data = snap.data();
 
-            const data = snap.data();
+        if (!data.books) return;
 
-            if (data?.books) {
-                callback(data.books);
-            }
-        });
+        books = data.books;
 
-    } catch (e) {
-        console.warn("Firebase listener error:", e);
-    }
+        saveLocal();
+        renderBooks();
+    });
 }
 
 /* ======================
@@ -88,17 +94,13 @@ function listenFirebase(callback) {
 ====================== */
 
 function renderBooks() {
+    const grid = document.getElementById("booksGrid");
+    if (!grid) return;
 
-    const booksGrid = document.getElementById("booksGrid");
-    if (!booksGrid) return;
-
-    const books = getBooks();
-
-    booksGrid.innerHTML = "";
+    grid.innerHTML = "";
 
     books.forEach(book => {
-
-        booksGrid.innerHTML += `
+        grid.innerHTML += `
 <div class="book-card">
 
     <div class="book-icon">${book.icon}</div>
@@ -123,8 +125,7 @@ function renderBooks() {
         📖 فتح الكتاب
     </button>
 
-</div>
-`;
+</div>`;
     });
 }
 
@@ -138,48 +139,30 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT + REALTIME SYNC
+   INIT
 ====================== */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
 
+    initBooks();
     renderBooks();
+    listenFirebase();
 
-    /* 🔥 REALTIME SYNC FROM FIREBASE */
-    listenFirebase((remoteBooks) => {
-
-        if (!Array.isArray(remoteBooks)) return;
-
-        saveBooks(remoteBooks);
-        renderBooks();
-
+    document.getElementById("cancelDeleteBtn")?.addEventListener("click", () => {
+        document.getElementById("deleteModal")?.classList.remove("show");
     });
 
-    const modal = document.getElementById("deleteModal");
+    document.getElementById("confirmDeleteBtn")?.addEventListener("click", () => {
 
-    document.getElementById("cancelDeleteBtn")?.addEventListener("click", function () {
-        modal?.classList.remove("show");
-        deleteBookId = null;
-    });
+        books = books.filter(b => b.id !== deleteBookId);
 
-    document.getElementById("confirmDeleteBtn")?.addEventListener("click", function () {
-
-        if (deleteBookId === null) return;
-
-        let books = getBooks();
-
-        books = books.filter(book => book.id !== deleteBookId);
-
-        saveBooks(books);
-
-        /* 🔥 PUSH TO FIREBASE */
-        syncToFirebase(books);
-
-        modal?.classList.remove("show");
-
-        deleteBookId = null;
+        saveLocal();
+        syncFirebase();
 
         renderBooks();
+
+        document.getElementById("deleteModal")?.classList.remove("show");
+        deleteBookId = null;
     });
 
 });
@@ -188,103 +171,81 @@ document.addEventListener("DOMContentLoaded", function () {
    ADD BOOK
 ====================== */
 
-document.querySelector(".add-book-btn")?.addEventListener("click", function () {
-    document.getElementById("newBookTitle").value = "";
+document.querySelector(".add-book-btn")?.addEventListener("click", () => {
     document.getElementById("addModal").classList.add("show");
 });
 
 function addBook() {
-    document.getElementById("newBookTitle").value = "";
     document.getElementById("addModal").classList.add("show");
 }
 
+document.getElementById("saveAddBtn")?.addEventListener("click", () => {
+
+    const title = document.getElementById("newBookTitle").value.trim();
+    if (!title) return;
+
+    books.push({
+        id: Date.now(),
+        title,
+        icon: "📘",
+        count: 0,
+        qrs: []
+    });
+
+    saveLocal();
+    syncFirebase();
+    renderBooks();
+
+    document.getElementById("addModal").classList.remove("show");
+});
+
 /* ======================
-   EDIT BOOK
+   EDIT
 ====================== */
 
 let currentEditId = null;
 
 function editBook(id) {
-
-    const books = getBooks();
-    const book = books.find(b => b.id === id);
-
-    if (!book) return;
-
     currentEditId = id;
+
+    const book = books.find(b => b.id === id);
+    if (!book) return;
 
     document.getElementById("editBookTitle").value = book.title;
     document.getElementById("editModal").classList.add("show");
 }
 
-/* ======================
-   SAVE EDIT
-====================== */
+document.getElementById("saveEditBtn")?.addEventListener("click", () => {
 
-document.getElementById("saveEditBtn")?.addEventListener("click", function () {
-
-    const newTitle = document.getElementById("editBookTitle")?.value.trim();
+    const newTitle = document.getElementById("editBookTitle").value.trim();
     if (!newTitle) return;
-
-    let books = getBooks();
 
     const index = books.findIndex(b => b.id === currentEditId);
     if (index === -1) return;
 
     books[index].title = newTitle;
 
-    saveBooks(books);
-
-    /* 🔥 PUSH */
-    syncToFirebase(books);
-
+    saveLocal();
+    syncFirebase();
     renderBooks();
 
-    document.getElementById("editModal")?.classList.remove("show");
+    document.getElementById("editModal").classList.remove("show");
 });
 
 /* ======================
-   SAVE ADD
+   MODALS CANCEL
 ====================== */
-
-document.getElementById("saveAddBtn")?.addEventListener("click", function () {
-
-    const title = document.getElementById("newBookTitle")?.value.trim();
-    if (!title) return;
-
-    let books = getBooks();
-
-    books.push({
-        id: Date.now(),
-        title,
-        icon: "📘",
-        count: 0
-    });
-
-    saveBooks(books);
-
-    /* 🔥 PUSH */
-    syncToFirebase(books);
-
-    renderBooks();
-
-    document.getElementById("addModal")?.classList.remove("show");
-});
-
-/* ======================
-   CLOSE MODALS
-====================== */
-
-document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
-    document.getElementById("editModal")?.classList.remove("show");
-});
 
 document.getElementById("cancelAddBtn")?.addEventListener("click", () => {
-    document.getElementById("addModal")?.classList.remove("show");
+    document.getElementById("addModal").classList.remove("show");
+});
+
+document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
+    document.getElementById("editModal").classList.remove("show");
 });
 
 /* ======================
-   OPEN BOOK
+   OPEN
 ====================== */
 
 function openBook(id) {
