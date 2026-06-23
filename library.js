@@ -39,7 +39,7 @@ function saveBooks(books) {
 }
 
 /* ======================
-   🔥 FIREBASE SAFE SYNC (FIXED)
+   🔥 FIREBASE SAFE SYNC
 ====================== */
 
 function syncToFirebase(books) {
@@ -89,6 +89,24 @@ function listenFirebase(callback) {
     } catch (e) {
         console.warn("Firebase listener error:", e);
     }
+}
+
+/* ======================
+   SAFE MERGE (NEW FIX)
+====================== */
+
+function mergeBooks(local, remote) {
+
+    if (!Array.isArray(remote)) return local;
+    if (!Array.isArray(local)) return remote;
+
+    // نحافظ على الإضافات الجديدة المحلية إذا كانت أحدث
+    const map = new Map();
+
+    remote.forEach(b => map.set(b.id, b));
+    local.forEach(b => map.set(b.id, b));
+
+    return Array.from(map.values());
 }
 
 /* ======================
@@ -153,14 +171,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     renderBooks();
 
-    /* 🔥 REALTIME SYNC */
     listenFirebase((remoteBooks) => {
 
-        if (!Array.isArray(remoteBooks)) return;
+        const local = getBooks();
 
-        saveBooks(remoteBooks);
+        const merged = mergeBooks(local, remoteBooks);
+
+        saveBooks(merged);
         renderBooks();
-
     });
 
     const modal = document.getElementById("deleteModal");
@@ -179,11 +197,9 @@ document.addEventListener("DOMContentLoaded", function () {
         books = books.filter(book => book.id !== deleteBookId);
 
         saveBooks(books);
-
         syncToFirebase(books);
 
         modal?.classList.remove("show");
-
         deleteBookId = null;
 
         renderBooks();
@@ -242,6 +258,7 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
 
     saveBooks(books);
     syncToFirebase(books);
+
     renderBooks();
 
     document.getElementById("editModal")?.classList.remove("show");
@@ -267,6 +284,7 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
 
     saveBooks(books);
     syncToFirebase(books);
+
     renderBooks();
 
     document.getElementById("addModal")?.classList.remove("show");
