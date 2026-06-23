@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
@@ -89,10 +90,10 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 REALTIME SYNC (FIXED PATH)
+   🔥 REALTIME SYNC (READ)
 ====================== */
 
-const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
+const bookRef = db && doc ? doc(db, "books", String(bookId)) : null;
 
 if (bookRef && onSnapshot) {
 
@@ -102,17 +103,13 @@ if (bookRef && onSnapshot) {
 
         const remoteData = snap.data();
 
-        if (!remoteData?.books) return;
-
-        books = remoteData.books;
+        books[bookIndex] = remoteData;
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        let bIndex = books.findIndex(b => b.id === bookId);
+        if (remoteData.qrs && remoteData.qrs[qrIndex]) {
 
-        if (bIndex !== -1 && books[bIndex].qrs?.[qrIndex]) {
-
-            const remoteQR = books[bIndex].qrs[qrIndex];
+            const remoteQR = remoteData.qrs[qrIndex];
 
             qr.title = remoteQR.title;
             qr.description = remoteQR.description;
@@ -205,7 +202,7 @@ generateBtn?.addEventListener("click", () => {
 });
 
 /* ======================
-   🔥 REALTIME WRITE (FIXED ONLY)
+   🔥 REALTIME WRITE (NEW)
 ====================== */
 
 let syncTimer = null;
@@ -227,8 +224,6 @@ function realtimeSave() {
         let bIndex = books.findIndex(b => b.id === bookId);
         if (bIndex === -1) return;
 
-        books[bIndex].qrs = books[bIndex].qrs || [];
-
         let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
         if (qIndex === -1) return;
 
@@ -243,9 +238,9 @@ function realtimeSave() {
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
         try {
-            if (db && firestore.doc && firestore.setDoc) {
-                const ref = doc(db, "books/main");
-                setDoc(ref, { books: books }, { merge: true });
+            if (db && doc && setDoc) {
+                const ref = doc(db, "books", String(bookId));
+                setDoc(ref, books[bIndex]);
             }
         } catch (e) {
             console.warn("Realtime sync failed:", e);
@@ -278,7 +273,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (UNCHANGED LOGIC)
+   SAVE BUTTON (kept as fallback)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -320,8 +315,8 @@ saveBtn?.addEventListener("click", function () {
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
     try {
-        const ref = doc(db, "books/main");
-        setDoc(ref, { books: books }, { merge: true });
+        const ref = doc(db, "books", String(bookId));
+        setDoc(ref, books[bIndex]);
     } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
