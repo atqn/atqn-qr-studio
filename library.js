@@ -108,11 +108,30 @@ function mergeBooks(local, remote) {
     const map = new Map();
 
     // remote أولاً (مصدر الحقيقة)
-    remote.forEach(b => map.set(b.id, b));
+function mergeBooks(local, remote) {
 
-    // local فقط لإضافة الجديد غير الموجود في remote
+    if (!Array.isArray(remote)) return local;
+    if (!Array.isArray(local)) return remote;
+
+    const map = new Map();
+
+    remote.forEach(b => {
+        map.set(b.id, {
+            ...b,
+            qrs: b.qrs || []
+        });
+    });
+
     local.forEach(b => {
-        if (!map.has(b.id)) {
+        if (map.has(b.id)) {
+            const existing = map.get(b.id);
+
+            map.set(b.id, {
+                ...existing,
+                qrs: existing.qrs || b.qrs || []
+            });
+
+        } else {
             map.set(b.id, b);
         }
     });
@@ -142,7 +161,9 @@ function renderBooks() {
 
     <h3>${book.title}</h3>
 
-    <div class="book-count">${book.count} QR</div>
+    <div class="book-count">${
+    Array.isArray(book.qrs) ? book.qrs.length : book.count
+} QR</div>
 
     <div class="book-actions">
 
