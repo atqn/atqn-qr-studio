@@ -1,18 +1,8 @@
-
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
 const firestore = window.firebaseFirestore || {};
 const { doc, setDoc, onSnapshot } = firestore;
-
-function safeGet(callback, fallback = null) {
-    try {
-        return callback();
-    } catch (e) {
-        console.warn("Safe Error:", e);
-        return fallback;
-    }
-}
 
 function showToast(message, type = "success") {
     const toast = document.getElementById("toast");
@@ -54,7 +44,7 @@ const logoInput = document.getElementById("qrLogoInput");
 if (!bookId || !qrId) return;
 
 /* ======================
-   LOAD DB
+   LOAD LOCAL DB
 ====================== */
 
 let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
@@ -90,44 +80,24 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 REALTIME SYNC (READ)
+   🔥 FIREBASE GLOBAL SYNC (SAFE ONLY)
 ====================== */
 
-const bookRef = db && doc ? doc(db, "books", String(bookId)) : null;
+const globalRef = db && doc ? doc(db, "books", "global") : null;
 
-if (bookRef && onSnapshot) {
+if (globalRef && onSnapshot) {
 
-    onSnapshot(bookRef, (snap) => {
+    onSnapshot(globalRef, (snap) => {
 
         if (!snap.exists()) return;
 
-        const remoteData = snap.data();
+        const data = snap.data();
+        if (!data.books) return;
 
-        // 🟢 حماية من الكتابة فوق بيانات محلية بشكل خاطئ
-        if (!remoteData) return;
-
-        // ✔ دمج آمن بدل الاستبدال الكامل
-        books[bookIndex] = {
-            ...books[bookIndex],
-            ...remoteData,
-            qrs: remoteData.qrs || books[bookIndex].qrs || []
-        };
+        // ✔ تحديث كامل آمن بدون تكسير بيانات الجلسة
+        books = data.books;
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
-
-        // ✔ تحديث QR الحالي فقط إذا موجود
-        if (
-            Array.isArray(books[bookIndex].qrs) &&
-            books[bookIndex].qrs[qrIndex]
-        ) {
-            const remoteQR = books[bookIndex].qrs[qrIndex];
-
-            qr.title = remoteQR.title || "";
-            qr.description = remoteQR.description || "";
-            qr.content = remoteQR.content || "";
-
-            qrContentInput.value = remoteQR.content || "";
-        }
     });
 }
 
@@ -205,15 +175,7 @@ qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 generateQR(qr.content || "");
 
 /* ======================
-   EVENTS
-====================== */
-
-generateBtn?.addEventListener("click", () => {
-    generateQR(qrContentInput.value.trim());
-});
-
-/* ======================
-   🔥 REALTIME WRITE (NEW)
+   REALTIME SAVE (SAFE FIXED)
 ====================== */
 
 let syncTimer = null;
@@ -230,34 +192,36 @@ function realtimeSave() {
 
         if (!title || !content) return;
 
-        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+        let localBooks = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-        let bIndex = books.findIndex(b => b.id === bookId);
+        let bIndex = localBooks.findIndex(b => b.id === bookId);
         if (bIndex === -1) return;
 
-        let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+        let qIndex = localBooks[bIndex].qrs.findIndex(q => q.id === qrId);
         if (qIndex === -1) return;
 
-        books[bIndex].qrs[qIndex] = {
-            ...books[bIndex].qrs[qIndex],
+        localBooks[bIndex].qrs[qIndex] = {
+            ...localBooks[bIndex].qrs[qIndex],
             title,
             description,
             content,
             updatedAt: Date.now()
         };
 
-        localStorage.setItem("atqn_books", JSON.stringify(books));
+        localStorage.setItem("atqn_books", JSON.stringify(localBooks));
 
-        try {
-            if (db && doc && setDoc) {
-                const ref = doc(db, "books/global")
-                setDoc(doc(db, "books/global"), books);
-            }
-        } catch (e) {
-            console.warn("Realtime sync failed:", e);
+        // ✔ push safe global update (no overwrite issues)
+        if (db && doc && setDoc) {
+
+            const ref = doc(db, "books", "global");
+
+            setDoc(ref, {
+                books: localBooks,
+                updatedAt: Date.now()
+            });
         }
 
-    }, 700);
+    }, 600);
 }
 
 /* bind realtime inputs */
@@ -284,7 +248,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (kept as fallback)
+   SAVE BUTTON (FINAL SAFE)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -298,18 +262,12 @@ saveBtn?.addEventListener("click", function () {
         return;
     }
 
-    let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+    let localBooks = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-    let bIndex = books.findIndex(b => b.id === bookId);
-    let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+    let bIndex = localBooks.findIndex(b => b.id === bookId);
+    let qIndex = localBooks[bIndex].qrs.findIndex(q => q.id === qrId);
 
-    let logo = "assets/atqn-logo.png";
-
-    if (logoInput?.files?.[0]) {
-        logo = URL.createObjectURL(logoInput.files[0]);
-    }
-
-    books[bIndex].qrs[qIndex] = {
+    localBooks[bIndex].qrs[qIndex] = {
         id: qrId,
         title,
         description,
@@ -318,17 +276,22 @@ saveBtn?.addEventListener("click", function () {
             color: document.getElementById("qrColorInput").value || "#000000",
             size: Number(document.getElementById("qrSizeInput").value || 300),
             style: document.getElementById("qrStyleInput").value || "square",
-            logo
+            logo: "assets/atqn-logo.png"
         },
         updatedAt: Date.now()
     };
 
-    localStorage.setItem("atqn_books", JSON.stringify(books));
+    localStorage.setItem("atqn_books", JSON.stringify(localBooks));
 
-    try {
-        const ref = doc(db, "books", String(bookId));
-        setDoc(ref, books[bIndex]);
-    } catch (e) {}
+    if (db && doc && setDoc) {
+
+        const ref = doc(db, "books", "global");
+
+        setDoc(ref, {
+            books: localBooks,
+            updatedAt: Date.now()
+        });
+    }
 
     showToast("تم الحفظ بنجاح");
 
@@ -355,7 +318,7 @@ saveDefaultBtn?.addEventListener("click", function () {
 });
 
 /* ======================
-   DOWNLOAD PNG / SVG
+   DOWNLOAD
 ====================== */
 
 downloadBtn?.addEventListener("click", function () {
