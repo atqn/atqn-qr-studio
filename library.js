@@ -10,7 +10,7 @@ function getFirebaseRef() {
 }
 
 /* ======================
-   DEFAULT FALLBACK (only first run)
+   DEFAULT FALLBACK
 ====================== */
 
 const defaultBooks = [
@@ -27,7 +27,7 @@ const defaultBooks = [
 let books = [];
 
 /* ======================
-   LOAD + INIT
+   INIT
 ====================== */
 
 function initBooks() {
@@ -54,6 +54,35 @@ function saveLocal() {
 }
 
 /* ======================
+   MERGE FIX (🔥 أهم إصلاح)
+====================== */
+
+function mergeBooks(local, remote) {
+
+    const map = new Map();
+
+    // local first
+    local.forEach(b => map.set(b.id, b));
+
+    // merge remote safely
+    remote.forEach(r => {
+        const existing = map.get(r.id);
+
+        if (!existing) {
+            map.set(r.id, r);
+        } else {
+            map.set(r.id, {
+                ...existing,
+                ...r,
+                qrs: r.qrs || existing.qrs || []
+            });
+        }
+    });
+
+    return Array.from(map.values());
+}
+
+/* ======================
    FIREBASE SYNC
 ====================== */
 
@@ -68,7 +97,7 @@ function syncFirebase() {
 }
 
 /* ======================
-   LISTENER (REALTIME)
+   LISTENER (FIXED)
 ====================== */
 
 function listenFirebase() {
@@ -76,13 +105,16 @@ function listenFirebase() {
     if (!ref) return;
 
     window.firebaseFirestore.onSnapshot(ref, (snap) => {
+
         if (!snap.exists()) return;
 
         const data = snap.data();
+        if (!data || !Array.isArray(data.books)) return;
 
-        if (!data.books) return;
+        const remoteBooks = data.books;
 
-        books = data.books;
+        // 🔥 FIX: safe merge instead of overwrite
+        books = mergeBooks(books, remoteBooks);
 
         saveLocal();
         renderBooks();
@@ -139,7 +171,7 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT
+   INIT START
 ====================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -158,7 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         saveLocal();
         syncFirebase();
-
         renderBooks();
 
         document.getElementById("deleteModal")?.classList.remove("show");
@@ -233,7 +264,7 @@ document.getElementById("saveEditBtn")?.addEventListener("click", () => {
 });
 
 /* ======================
-   MODALS CANCEL
+   CANCEL MODALS
 ====================== */
 
 document.getElementById("cancelAddBtn")?.addEventListener("click", () => {
@@ -245,7 +276,7 @@ document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
 });
 
 /* ======================
-   OPEN
+   OPEN BOOK
 ====================== */
 
 function openBook(id) {
