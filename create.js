@@ -44,7 +44,7 @@ const logoInput = document.getElementById("qrLogoInput");
 if (!bookId || !qrId) return;
 
 /* ======================
-   LOAD LOCAL DB
+   LOCAL DB
 ====================== */
 
 let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
@@ -80,7 +80,39 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 FIREBASE LISTENER (FIXED - NO OVERWRITE)
+   🔥 SAFE MERGE FUNCTION (FIX CORE ISSUE)
+====================== */
+
+function mergeBooks(local, remote) {
+
+    const map = new Map();
+
+    local.forEach(b => map.set(b.id, b));
+
+    remote.forEach(r => {
+        const existing = map.get(r.id);
+
+        if (!existing) {
+            map.set(r.id, {
+                ...r,
+                qrs: r.qrs || []
+            });
+        } else {
+            map.set(r.id, {
+                ...existing,
+                ...r,
+                qrs: Array.isArray(r.qrs) && r.qrs.length > 0
+                    ? r.qrs
+                    : existing.qrs || []
+            });
+        }
+    });
+
+    return Array.from(map.values());
+}
+
+/* ======================
+   🔥 FIREBASE LISTENER (FIXED NO OVERWRITE)
 ====================== */
 
 const globalRef = db && doc ? doc(db, "books", "global") : null;
@@ -94,22 +126,23 @@ if (globalRef && onSnapshot) {
         const data = snap.data();
         if (!data.books) return;
 
-        // 🔥 FIX: merge instead of overwrite
         const remoteBooks = data.books;
 
         if (Array.isArray(remoteBooks)) {
 
-            books = remoteBooks;
+            // 🔥 FIX: merge instead of overwrite
+            books = mergeBooks(books, remoteBooks);
 
             localStorage.setItem("atqn_books", JSON.stringify(books));
 
-            // update current book safely
             const bIndex = books.findIndex(b => b.id === bookId);
+
             if (bIndex !== -1) {
 
                 const qIndex = books[bIndex].qrs?.findIndex(q => q.id === qrId);
 
                 if (qIndex !== -1) {
+
                     qr = books[bIndex].qrs[qIndex];
 
                     qrContentInput.value = qr.content || "";
@@ -195,7 +228,7 @@ qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 generateQR(qr.content || "");
 
 /* ======================
-   REALTIME SAVE (FIXED - SAFE SYNC)
+   REALTIME SAVE (FIXED SAFE WRITE)
 ====================== */
 
 let syncTimer = null;
@@ -230,13 +263,13 @@ function realtimeSave() {
 
         localStorage.setItem("atqn_books", JSON.stringify(localBooks));
 
-        // 🔥 FIX: write full sync safely (no overwrite loss)
+        // 🔥 FIX: write safe full sync (no overwrite)
         if (db && doc && setDoc) {
 
             const ref = doc(db, "books", "global");
 
             setDoc(ref, {
-                books: localBooks,
+                books: mergeBooks(books, localBooks),
                 updatedAt: Date.now()
             });
         }
@@ -266,7 +299,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (FIXED FINAL)
+   SAVE BUTTON (FINAL FIXED)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -306,7 +339,7 @@ saveBtn?.addEventListener("click", function () {
         const ref = doc(db, "books", "global");
 
         setDoc(ref, {
-            books: localBooks,
+            books: mergeBooks(books, localBooks),
             updatedAt: Date.now()
         });
     }
