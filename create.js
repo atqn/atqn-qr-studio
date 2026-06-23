@@ -103,17 +103,28 @@ if (bookRef && onSnapshot) {
 
         const remoteData = snap.data();
 
-        books[bookIndex] = remoteData;
+        // 🟢 حماية من الكتابة فوق بيانات محلية بشكل خاطئ
+        if (!remoteData) return;
+
+        // ✔ دمج آمن بدل الاستبدال الكامل
+        books[bookIndex] = {
+            ...books[bookIndex],
+            ...remoteData,
+            qrs: remoteData.qrs || books[bookIndex].qrs || []
+        };
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        if (remoteData.qrs && remoteData.qrs[qrIndex]) {
+        // ✔ تحديث QR الحالي فقط إذا موجود
+        if (
+            Array.isArray(books[bookIndex].qrs) &&
+            books[bookIndex].qrs[qrIndex]
+        ) {
+            const remoteQR = books[bookIndex].qrs[qrIndex];
 
-            const remoteQR = remoteData.qrs[qrIndex];
-
-            qr.title = remoteQR.title;
-            qr.description = remoteQR.description;
-            qr.content = remoteQR.content;
+            qr.title = remoteQR.title || "";
+            qr.description = remoteQR.description || "";
+            qr.content = remoteQR.content || "";
 
             qrContentInput.value = remoteQR.content || "";
         }
@@ -239,8 +250,8 @@ function realtimeSave() {
 
         try {
             if (db && doc && setDoc) {
-                const ref = doc(db, "books", String(bookId));
-                setDoc(ref, books[bIndex]);
+                const ref = doc(db, "books/global")
+                setDoc(doc(db, "books/global"), books);
             }
         } catch (e) {
             console.warn("Realtime sync failed:", e);
