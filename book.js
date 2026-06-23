@@ -22,22 +22,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
     /* =========================
-       FIREBASE (SOURCE OF TRUTH)
+       FIREBASE SETUP (SAFE)
     ========================= */
 
-    function getRef() {
-        if (!window.db || !window.firebaseFirestore) return null;
-        return window.firebaseFirestore.doc(window.db, "books", "global");
-    }
+    const db = window.db;
+    const fs = window.firebaseFirestore || {};
+    const { doc, setDoc, onSnapshot } = fs;
+
+    const ref = db && doc ? doc(db, "books", "global") : null;
 
     let books = [];
 
-    function loadFromFirebase() {
-        const ref = getRef();
-        if (!ref) return;
+    /* =========================
+       SYNC FIREBASE (REAL SOURCE)
+    ========================= */
 
-        window.firebaseFirestore.onSnapshot(ref, (snap) => {
+    function listenFirebase() {
+        if (!ref || !onSnapshot) return;
 
+        onSnapshot(ref, (snap) => {
             if (!snap.exists()) return;
 
             const data = snap.data();
@@ -45,19 +48,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
             books = data.books;
 
+            saveLocalCache();
             renderQrList();
             updateHeader();
         });
     }
 
     function saveToFirebase() {
-        const ref = getRef();
-        if (!ref) return;
+        if (!ref || !setDoc) return;
 
-        window.firebaseFirestore.setDoc(ref, {
+        setDoc(ref, {
             books,
             updatedAt: Date.now()
         });
+    }
+
+    /* =========================
+       LOCAL CACHE (NOT SOURCE)
+    ========================= */
+
+    function saveLocalCache() {
+        localStorage.setItem("atqn_books", JSON.stringify(books));
+    }
+
+    function loadLocalCache() {
+        const saved = localStorage.getItem("atqn_books");
+        if (saved) {
+            try {
+                books = JSON.parse(saved);
+            } catch {
+                books = [];
+            }
+        }
     }
 
     function getBook() {
@@ -84,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderQrList() {
 
         const book = getBook();
-        if (!book || !qrList) return;
+        if (!book) return;
 
         const qrs = book.qrs || [];
         qrList.innerHTML = "";
@@ -157,13 +179,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* =========================
-       EDIT (FIXED SAFE MATCH)
+       EDIT
     ========================= */
 
     function editQr(qrId) {
 
         const book = getBook();
-        if (!book?.qrs) return;
+        if (!book) return;
 
         const qr = book.qrs.find(q => Number(q.id) === Number(qrId));
         if (!qr) return;
@@ -210,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* =========================
-       ADD NEW
+       ADD QR
     ========================= */
 
     addQrBtn.addEventListener("click", () => {
@@ -230,7 +252,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* =========================
-       SAVE (FIXED FINAL)
+       SAVE QR (FIXED FINAL)
     ========================= */
 
     saveQrBtn.addEventListener("click", () => {
@@ -279,14 +301,15 @@ document.addEventListener("DOMContentLoaded", function () {
         addQrModal.classList.remove("show");
         editQrId = null;
 
-        updateHeader();
         renderQrList();
+        updateHeader();
     });
 
     /* =========================
        INIT
     ========================= */
 
-    loadFromFirebase();
+    loadLocalCache();
+    listenFirebase();
 
 });
