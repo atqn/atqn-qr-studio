@@ -1,3 +1,32 @@
+function listenFirebase(callback) {
+
+    if (!window.db || !window.firebaseFirestore) return;
+
+    const fs = window.firebaseFirestore;
+
+    if (!fs.doc || !fs.onSnapshot) return;
+
+    const ref = fs.doc(window.db, "books/main");
+
+    fs.onSnapshot(ref, (snap) => {
+
+        try {
+            if (!snap || !snap.exists()) return;
+
+            const data = snap.data();
+
+            if (data?.books) {
+                callback(data.books);
+            }
+
+        } catch (e) {
+            console.warn("listenFirebase error:", e);
+        }
+    });
+}
+
+
+
 let deleteBookId = null;
 
 const defaultBooks = [
