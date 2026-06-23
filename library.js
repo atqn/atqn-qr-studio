@@ -1,3 +1,10 @@
+import {
+  getLocalBooks,
+  saveLocalBooks,
+  syncToFirebase,
+  listenFirebase
+} from "./sync.js";
+
 let deleteBookId = null;
 
 const defaultBooks = [
@@ -14,7 +21,7 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE ONLY (FIXED STABILITY)
+   LOCAL STORAGE (SAFE WRAPPER)
 ====================== */
 
 function getBooks() {
@@ -92,12 +99,25 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT
+   INIT + FIREBASE LISTENER
 ====================== */
 
 document.addEventListener("DOMContentLoaded", function () {
 
     renderBooks();
+
+    /* 🔥 REALTIME SYNC FROM FIREBASE */
+    if (window.db && listenFirebase) {
+        listenFirebase(window.db, (remoteBooks) => {
+
+            if (!remoteBooks) return;
+
+            saveLocalBooks(remoteBooks);
+            renderBooks();
+
+            console.log("🔄 Synced from Firebase");
+        });
+    }
 
     const modal = document.getElementById("deleteModal");
 
@@ -116,8 +136,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         saveBooks(books);
 
-        modal?.classList.remove("show");
+        /* 🔥 PUSH TO FIREBASE */
+        syncToFirebase(window.db, books);
 
+        modal?.classList.remove("show");
         deleteBookId = null;
 
         renderBooks();
@@ -133,11 +155,6 @@ document.querySelector(".add-book-btn")?.addEventListener("click", function () {
     document.getElementById("newBookTitle").value = "";
     document.getElementById("addModal").classList.add("show");
 });
-
-function addBook() {
-    document.getElementById("newBookTitle").value = "";
-    document.getElementById("addModal").classList.add("show");
-}
 
 /* ======================
    EDIT BOOK
@@ -172,8 +189,11 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     books[index].title = newTitle;
 
     saveBooks(books);
-    renderBooks();
 
+    /* 🔥 PUSH */
+    syncToFirebase(window.db, books);
+
+    renderBooks();
     document.getElementById("editModal")?.classList.remove("show");
 });
 
@@ -193,8 +213,11 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
     });
 
     saveBooks(books);
-    renderBooks();
 
+    /* 🔥 PUSH */
+    syncToFirebase(window.db, books);
+
+    renderBooks();
     document.getElementById("addModal")?.classList.remove("show");
 });
 
