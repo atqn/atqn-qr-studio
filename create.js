@@ -61,6 +61,7 @@ let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 let bookIndex = books.findIndex(b => b.id === bookId);
 if (bookIndex === -1) return;
 
+/* 🔥 FIX: ensure qrs always exists */
 books[bookIndex].qrs = books[bookIndex].qrs || [];
 
 let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
@@ -89,7 +90,7 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 REALTIME SYNC (FIXED PATH)
+   🔥 REALTIME SYNC (FIXED SAFELY)
 ====================== */
 
 const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
@@ -98,7 +99,7 @@ if (bookRef && onSnapshot) {
 
     onSnapshot(bookRef, (snap) => {
 
-        if (!snap.exists()) return;
+        if (!snap || !snap.exists()) return;
 
         const remoteData = snap.data();
 
@@ -110,15 +111,20 @@ if (bookRef && onSnapshot) {
 
         let bIndex = books.findIndex(b => b.id === bookId);
 
-        if (bIndex !== -1 && books[bIndex].qrs?.[qrIndex]) {
+        if (bIndex !== -1) {
 
-            const remoteQR = books[bIndex].qrs[qrIndex];
+            books[bIndex].qrs = books[bIndex].qrs || [];
 
-            qr.title = remoteQR.title;
-            qr.description = remoteQR.description;
-            qr.content = remoteQR.content;
+            if (books[bIndex].qrs[qrIndex]) {
 
-            qrContentInput.value = remoteQR.content || "";
+                const remoteQR = books[bIndex].qrs[qrIndex];
+
+                qr.title = remoteQR.title || "";
+                qr.description = remoteQR.description || "";
+                qr.content = remoteQR.content || "";
+
+                qrContentInput.value = qr.content || "";
+            }
         }
     });
 }
@@ -205,7 +211,7 @@ generateBtn?.addEventListener("click", () => {
 });
 
 /* ======================
-   🔥 REALTIME WRITE (FIXED ONLY)
+   🔥 REALTIME WRITE (FIXED SAFE)
 ====================== */
 
 let syncTimer = null;
@@ -244,8 +250,14 @@ function realtimeSave() {
 
         try {
             if (db && firestore.doc && firestore.setDoc) {
+
                 const ref = doc(db, "books/main");
-                setDoc(ref, { books: books }, { merge: true });
+
+                setDoc(ref, {
+                    books: books,
+                    updatedAt: Date.now()
+                }, { merge: true });
+
             }
         } catch (e) {
             console.warn("Realtime sync failed:", e);
@@ -295,6 +307,9 @@ saveBtn?.addEventListener("click", function () {
     let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
     let bIndex = books.findIndex(b => b.id === bookId);
+
+    books[bIndex].qrs = books[bIndex].qrs || [];
+
     let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
 
     let logo = "assets/atqn-logo.png";
@@ -321,7 +336,10 @@ saveBtn?.addEventListener("click", function () {
 
     try {
         const ref = doc(db, "books/main");
-        setDoc(ref, { books: books }, { merge: true });
+        setDoc(ref, {
+            books: books,
+            updatedAt: Date.now()
+        }, { merge: true });
     } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
