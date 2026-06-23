@@ -17,35 +17,20 @@ const defaultBooks = [
    LOCAL STORAGE (UNCHANGED BUT SAFER)
 ====================== */
 
-async function getBooks() {
-
+function getBooks() {
     try {
-        if (window.db && window.firebaseFirestore) {
+        const saved = localStorage.getItem("atqn_books");
 
-            const ref = window.firebaseFirestore.doc(window.db, "books/main");
-            const snap = await window.firebaseFirestore.getDoc(ref);
-
-            if (snap.exists()) {
-                const data = snap.data();
-
-                if (data?.books) {
-                    localStorage.setItem("atqn_books", JSON.stringify(data.books));
-                    return data.books;
-                }
-            }
+        if (!saved) {
+            localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
+            return defaultBooks;
         }
+
+        return JSON.parse(saved) || defaultBooks;
+
     } catch (e) {
-        console.warn("Firebase load failed:", e);
-    }
-
-    const saved = localStorage.getItem("atqn_books");
-
-    if (!saved) return [];
-
-    try {
-        return JSON.parse(saved);
-    } catch (e) {
-        return [];
+        console.warn("Parse error:", e);
+        return defaultBooks;
     }
 }
 
