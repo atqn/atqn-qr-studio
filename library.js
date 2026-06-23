@@ -1,10 +1,3 @@
-import {
-  getLocalBooks,
-  saveLocalBooks,
-  syncToFirebase,
-  listenFirebase
-} from "./sync.js";
-
 let deleteBookId = null;
 
 const defaultBooks = [
@@ -21,7 +14,7 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE (SAFE WRAPPER)
+   LOCAL STORAGE (UNCHANGED)
 ====================== */
 
 function getBooks() {
@@ -42,6 +35,45 @@ function getBooks() {
 
 function saveBooks(books) {
     localStorage.setItem("atqn_books", JSON.stringify(books));
+}
+
+/* ======================
+   🔥 FIREBASE SYNC LAYER (NEW SAFE ADDITION)
+====================== */
+
+function syncToFirebase(books) {
+    try {
+        if (!window.db || !window.firebaseFirestore) return;
+
+        const ref = window.firebaseFirestore.doc(window.db, "books/global");
+
+        window.firebaseFirestore.setDoc(ref, {
+            books: books,
+            updatedAt: Date.now()
+        });
+    } catch (e) {
+        console.warn("Firebase sync error:", e);
+    }
+}
+
+function listenFirebase(callback) {
+    try {
+        if (!window.db || !window.firebaseFirestore) return;
+
+        const ref = window.firebaseFirestore.doc(window.db, "books/global");
+
+        window.firebaseFirestore.onSnapshot(ref, (snap) => {
+            if (!snap.exists()) return;
+
+            const data = snap.data();
+
+            if (data?.books) {
+                callback(data.books);
+            }
+        });
+    } catch (e) {
+        console.warn("Firebase listener error:", e);
+    }
 }
 
 /* ======================
@@ -99,25 +131,18 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT + FIREBASE LISTENER
+   INIT + REALTIME SYNC
 ====================== */
 
 document.addEventListener("DOMContentLoaded", function () {
 
     renderBooks();
 
-    /* 🔥 REALTIME SYNC FROM FIREBASE */
-    if (window.db && listenFirebase) {
-        listenFirebase(window.db, (remoteBooks) => {
-
-            if (!remoteBooks) return;
-
-            saveLocalBooks(remoteBooks);
-            renderBooks();
-
-            console.log("🔄 Synced from Firebase");
-        });
-    }
+    /* 🔥 REALTIME LISTENER */
+    listenFirebase((remoteBooks) => {
+        saveBooks(remoteBooks);
+        renderBooks();
+    });
 
     const modal = document.getElementById("deleteModal");
 
@@ -137,9 +162,10 @@ document.addEventListener("DOMContentLoaded", function () {
         saveBooks(books);
 
         /* 🔥 PUSH TO FIREBASE */
-        syncToFirebase(window.db, books);
+        syncToFirebase(books);
 
         modal?.classList.remove("show");
+
         deleteBookId = null;
 
         renderBooks();
@@ -155,6 +181,11 @@ document.querySelector(".add-book-btn")?.addEventListener("click", function () {
     document.getElementById("newBookTitle").value = "";
     document.getElementById("addModal").classList.add("show");
 });
+
+function addBook() {
+    document.getElementById("newBookTitle").value = "";
+    document.getElementById("addModal").classList.add("show");
+}
 
 /* ======================
    EDIT BOOK
@@ -191,9 +222,10 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     saveBooks(books);
 
     /* 🔥 PUSH */
-    syncToFirebase(window.db, books);
+    syncToFirebase(books);
 
     renderBooks();
+
     document.getElementById("editModal")?.classList.remove("show");
 });
 
@@ -215,9 +247,10 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
     saveBooks(books);
 
     /* 🔥 PUSH */
-    syncToFirebase(window.db, books);
+    syncToFirebase(books);
 
     renderBooks();
+
     document.getElementById("addModal")?.classList.remove("show");
 });
 
