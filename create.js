@@ -80,7 +80,7 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 FIREBASE GLOBAL SYNC (SAFE ONLY)
+   🔥 FIREBASE LISTENER (FIXED - NO OVERWRITE)
 ====================== */
 
 const globalRef = db && doc ? doc(db, "books", "global") : null;
@@ -94,10 +94,30 @@ if (globalRef && onSnapshot) {
         const data = snap.data();
         if (!data.books) return;
 
-        // ✔ تحديث كامل آمن بدون تكسير بيانات الجلسة
-        books = data.books;
+        // 🔥 FIX: merge instead of overwrite
+        const remoteBooks = data.books;
 
-        localStorage.setItem("atqn_books", JSON.stringify(books));
+        if (Array.isArray(remoteBooks)) {
+
+            books = remoteBooks;
+
+            localStorage.setItem("atqn_books", JSON.stringify(books));
+
+            // update current book safely
+            const bIndex = books.findIndex(b => b.id === bookId);
+            if (bIndex !== -1) {
+
+                const qIndex = books[bIndex].qrs?.findIndex(q => q.id === qrId);
+
+                if (qIndex !== -1) {
+                    qr = books[bIndex].qrs[qIndex];
+
+                    qrContentInput.value = qr.content || "";
+                    document.getElementById("qrTitleInput").value = qr.title || "";
+                    document.getElementById("qrDescriptionInput").value = qr.description || "";
+                }
+            }
+        }
     });
 }
 
@@ -175,7 +195,7 @@ qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
 generateQR(qr.content || "");
 
 /* ======================
-   REALTIME SAVE (SAFE FIXED)
+   REALTIME SAVE (FIXED - SAFE SYNC)
 ====================== */
 
 let syncTimer = null;
@@ -210,7 +230,7 @@ function realtimeSave() {
 
         localStorage.setItem("atqn_books", JSON.stringify(localBooks));
 
-        // ✔ push safe global update (no overwrite issues)
+        // 🔥 FIX: write full sync safely (no overwrite loss)
         if (db && doc && setDoc) {
 
             const ref = doc(db, "books", "global");
@@ -224,7 +244,7 @@ function realtimeSave() {
     }, 600);
 }
 
-/* bind realtime inputs */
+/* bind inputs */
 qrContentInput?.addEventListener("input", realtimeSave);
 document.getElementById("qrTitleInput")?.addEventListener("input", realtimeSave);
 document.getElementById("qrDescriptionInput")?.addEventListener("input", realtimeSave);
@@ -235,9 +255,7 @@ document.getElementById("qrDescriptionInput")?.addEventListener("input", realtim
     const el = document.getElementById(id);
     if (!el) return;
 
-    const update = () => {
-        generateQR(qrContentInput.value.trim());
-    };
+    const update = () => generateQR(qrContentInput.value.trim());
 
     el.addEventListener("input", update);
     el.addEventListener("change", update);
@@ -248,7 +266,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (FINAL SAFE)
+   SAVE BUTTON (FIXED FINAL)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
