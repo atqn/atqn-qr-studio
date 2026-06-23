@@ -89,10 +89,10 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 FIREBASE REALTIME READ (FIXED PATH)
+   🔥 REALTIME SYNC (FIXED PATH)
 ====================== */
 
-const bookRef = db && doc ? doc(db, "books/main") : null;
+const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
 
 if (bookRef && onSnapshot) {
 
@@ -205,7 +205,7 @@ generateBtn?.addEventListener("click", () => {
 });
 
 /* ======================
-   🔥 REALTIME WRITE (FIXED + MERGE SAFE)
+   🔥 REALTIME WRITE (FIXED ONLY)
 ====================== */
 
 let syncTimer = null;
@@ -243,9 +243,9 @@ function realtimeSave() {
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
         try {
-            if (db && doc && setDoc) {
+            if (db && firestore.doc && firestore.setDoc) {
                 const ref = doc(db, "books/main");
-                setDoc(ref, { books }, { merge: true });
+                setDoc(ref, { books: books }, { merge: true });
             }
         } catch (e) {
             console.warn("Realtime sync failed:", e);
@@ -278,7 +278,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (FIXED PATH TOO)
+   SAVE BUTTON (UNCHANGED LOGIC)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -295,10 +295,7 @@ saveBtn?.addEventListener("click", function () {
     let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
     let bIndex = books.findIndex(b => b.id === bookId);
-    if (bIndex === -1) return;
-
     let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
-    if (qIndex === -1) return;
 
     let logo = "assets/atqn-logo.png";
 
@@ -324,7 +321,7 @@ saveBtn?.addEventListener("click", function () {
 
     try {
         const ref = doc(db, "books/main");
-        setDoc(ref, { books }, { merge: true });
+        setDoc(ref, { books: books }, { merge: true });
     } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
@@ -332,6 +329,49 @@ saveBtn?.addEventListener("click", function () {
     setTimeout(() => {
         window.location.href = "book.html?id=" + bookId;
     }, 800);
+});
+
+/* ======================
+   DEFAULT SETTINGS
+====================== */
+
+saveDefaultBtn?.addEventListener("click", function () {
+
+    let settings = {
+        color: document.getElementById("qrColorInput").value,
+        size: document.getElementById("qrSizeInput").value,
+        style: document.getElementById("qrStyleInput").value
+    };
+
+    localStorage.setItem("qr_default_settings", JSON.stringify(settings));
+
+    showToast("تم حفظ الإعدادات الافتراضية");
+});
+
+/* ======================
+   DOWNLOAD PNG / SVG
+====================== */
+
+downloadBtn?.addEventListener("click", function () {
+    if (!qrCode) return;
+
+    const name = (
+        document.getElementById("bookNameInput").value + "_" +
+        document.getElementById("qrTitleInput").value
+    ).replace(/\s+/g, "_");
+
+    qrCode.download({ name, extension: "png" });
+});
+
+svgBtn?.addEventListener("click", function () {
+    if (!qrCode) return;
+
+    const name = (
+        document.getElementById("bookNameInput").value + "_" +
+        document.getElementById("qrTitleInput").value
+    ).replace(/\s+/g, "_");
+
+    qrCode.download({ name, extension: "svg" });
 });
 
 });
