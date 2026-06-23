@@ -48,7 +48,7 @@ function syncToFirebase(books) {
 
         const { doc, setDoc } = window.firebaseFirestore;
 
-        const ref = doc(window.db, "books/main")
+        const ref = doc(window.db, "books/main");
 
         setDoc(ref, {
             books: books,
@@ -66,7 +66,7 @@ function listenFirebase(callback) {
 
         const { doc, onSnapshot } = window.firebaseFirestore;
 
-        const ref = doc(window.db, "books/main")
+        const ref = doc(window.db, "books/main");
 
         onSnapshot(ref, (snap) => {
             if (!snap.exists()) return;
