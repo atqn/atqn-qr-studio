@@ -18,10 +18,8 @@ function showToast(message, type = "success") {
     if (!toast) return;
 
     toast.textContent = message;
-
     toast.className = "toast";
     void toast.offsetWidth;
-
     toast.classList.add("show", type);
 
     clearTimeout(toast._timer);
@@ -30,6 +28,13 @@ function showToast(message, type = "success") {
         toast.classList.remove("show");
     }, 2500);
 }
+
+/* ======================
+   STATE (FIX CORE BUG)
+====================== */
+
+let books = [];
+let syncTimer = null;
 
 /* ======================
    PARAMS
@@ -53,10 +58,10 @@ const logoInput = document.getElementById("qrLogoInput");
 if (!bookId || !qrId) return;
 
 /* ======================
-   LOAD DB
+   LOAD LOCAL
 ====================== */
 
-let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
 let bookIndex = books.findIndex(b => b.id === bookId);
 if (bookIndex === -1) return;
@@ -89,7 +94,7 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   FIREBASE SYNC (READ ONLY)
+   FIREBASE LISTENER (FIXED SAFE SYNC)
 ====================== */
 
 const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
@@ -100,11 +105,12 @@ if (bookRef && onSnapshot) {
 
         if (!snap || !snap.exists()) return;
 
-        const remoteData = snap.data();
+        const data = snap.data();
 
-        if (!remoteData?.books) return;
+        if (!data?.books || !Array.isArray(data.books)) return;
 
-        books = remoteData.books;
+        // 🔥 IMPORTANT: keep single source of truth
+        books = data.books;
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
@@ -112,7 +118,7 @@ if (bookRef && onSnapshot) {
 
         if (bIndex !== -1 && books[bIndex].qrs?.[qrIndex]) {
 
-            const remoteQR = books[bIndex].qrs[qrIndex];
+            let remoteQR = books[bIndex].qrs[qrIndex];
 
             qr.title = remoteQR.title || "";
             qr.description = remoteQR.description || "";
@@ -124,7 +130,7 @@ if (bookRef && onSnapshot) {
 }
 
 /* ======================
-   QR ENGINE
+   QR ENGINE (UNCHANGED)
 ====================== */
 
 let qrCode = null;
@@ -186,10 +192,23 @@ function generateQR(text) {
 }
 
 /* ======================
-   REALTIME SAVE (FIXED CORE ONLY)
+   INIT VIEW
 ====================== */
 
-let syncTimer = null;
+qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
+generateQR(qr.content || "");
+
+/* ======================
+   EVENTS
+====================== */
+
+generateBtn?.addEventListener("click", () => {
+    generateQR(qrContentInput.value.trim());
+});
+
+/* ======================
+   🔥 REALTIME SAVE (FIXED CORE BUG)
+====================== */
 
 function realtimeSave() {
 
@@ -221,18 +240,15 @@ function realtimeSave() {
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        // 🔥 FIX ONLY HERE (IMPORTANT)
         if (db && firestore.doc && firestore.setDoc) {
             const ref = doc(db, "books/main");
-
-            // ❗ بدون merge (هذا سبب الفشل)
             setDoc(ref, {
                 books: books,
                 updatedAt: Date.now()
             });
         }
 
-    }, 700);
+    }, 600);
 }
 
 /* bind inputs */
@@ -240,8 +256,17 @@ qrContentInput?.addEventListener("input", realtimeSave);
 document.getElementById("qrTitleInput")?.addEventListener("input", realtimeSave);
 document.getElementById("qrDescriptionInput")?.addEventListener("input", realtimeSave);
 
+/* color/size/style */
+["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("input", () => generateQR(qrContentInput.value.trim()));
+    el.addEventListener("change", () => generateQR(qrContentInput.value.trim()));
+});
+
 /* ======================
-   SAVE BUTTON (UNCHANGED LOGIC)
+   SAVE BUTTON (FIXED SAFE)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -256,10 +281,12 @@ saveBtn?.addEventListener("click", function () {
     }
 
     let bIndex = books.findIndex(b => b.id === bookId);
+    if (bIndex === -1) return;
 
     books[bIndex].qrs = books[bIndex].qrs || [];
 
     let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+    if (qIndex === -1) return;
 
     let logo = "assets/atqn-logo.png";
 
@@ -285,8 +312,6 @@ saveBtn?.addEventListener("click", function () {
 
     if (db && firestore.doc && firestore.setDoc) {
         const ref = doc(db, "books/main");
-
-        // 🔥 FIX ONLY HERE
         setDoc(ref, {
             books: books,
             updatedAt: Date.now()
@@ -300,10 +325,8 @@ saveBtn?.addEventListener("click", function () {
     }, 800);
 });
 
-
-
 /* ======================
-   DEFAULT SETTINGS
+   DEFAULT SETTINGS (UNCHANGED)
 ====================== */
 
 saveDefaultBtn?.addEventListener("click", function () {
@@ -320,7 +343,7 @@ saveDefaultBtn?.addEventListener("click", function () {
 });
 
 /* ======================
-   DOWNLOAD PNG / SVG
+   DOWNLOAD PNG / SVG (UNCHANGED)
 ====================== */
 
 downloadBtn?.addEventListener("click", function () {
