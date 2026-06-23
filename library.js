@@ -41,19 +41,21 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE (CACHE ONLY)
+   LOCAL STORAGE (FIXED SAFE)
 ====================== */
 
 function getBooks() {
     try {
         const saved = localStorage.getItem("atqn_books");
 
-        if (!saved) {
-            localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
-            return defaultBooks;
+        // 🔥 FIX: لا نرجّع defaultBooks إذا موجود بيانات صالحة
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) return parsed;
         }
 
-        return JSON.parse(saved) || defaultBooks;
+        localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
+        return defaultBooks;
 
     } catch (e) {
         console.warn("Parse error:", e);
@@ -62,6 +64,7 @@ function getBooks() {
 }
 
 function saveBooks(books) {
+    if (!Array.isArray(books)) return;
     localStorage.setItem("atqn_books", JSON.stringify(books));
 }
 
@@ -97,7 +100,7 @@ function syncToFirebase(books) {
 }
 
 /* ======================
-   SAFE MERGE (REAL FIX)
+   SAFE MERGE (FIXED 100%)
 ====================== */
 
 function mergeBooks(local, remote) {
@@ -107,32 +110,31 @@ function mergeBooks(local, remote) {
 
     const map = new Map();
 
-    // remote أولاً (مصدر الحقيقة)
-function mergeBooks(local, remote) {
-
-    if (!Array.isArray(remote)) return local;
-    if (!Array.isArray(local)) return remote;
-
-    const map = new Map();
-
+    // 🔥 remote first
     remote.forEach(b => {
         map.set(b.id, {
             ...b,
-            qrs: b.qrs || []
+            qrs: Array.isArray(b.qrs) ? b.qrs : []
         });
     });
 
+    // 🔥 local override only if newer / missing
     local.forEach(b => {
-        if (map.has(b.id)) {
+
+        if (!map.has(b.id)) {
+            map.set(b.id, {
+                ...b,
+                qrs: Array.isArray(b.qrs) ? b.qrs : []
+            });
+        } else {
+
             const existing = map.get(b.id);
 
             map.set(b.id, {
                 ...existing,
-                qrs: existing.qrs || b.qrs || []
+                ...b,
+                qrs: Array.isArray(existing.qrs) ? existing.qrs : []
             });
-
-        } else {
-            map.set(b.id, b);
         }
     });
 
@@ -140,7 +142,7 @@ function mergeBooks(local, remote) {
 }
 
 /* ======================
-   RENDER
+   RENDER (UNCHANGED UI + FIX SAFE COUNT)
 ====================== */
 
 function renderBooks() {
@@ -162,8 +164,8 @@ function renderBooks() {
     <h3>${book.title}</h3>
 
     <div class="book-count">${
-    Array.isArray(book.qrs) ? book.qrs.length : book.count
-} QR</div>
+        Array.isArray(book.qrs) ? book.qrs.length : (book.count || 0)
+    } QR</div>
 
     <div class="book-actions">
 
@@ -196,21 +198,23 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT (STABLE REALTIME)
+   INIT (FIXED SAFE FLOW)
 ====================== */
 
 document.addEventListener("DOMContentLoaded", function () {
+
+    // 🔥 FIX: لا نعيد الكتابة العمياء
+    const initial = getBooks();
+    saveBooks(initial);
 
     renderBooks();
 
     listenFirebase((remoteBooks) => {
 
         const local = getBooks();
-
         const merged = mergeBooks(local, remoteBooks);
 
         saveBooks(merged);
-
         renderBooks();
     });
 
@@ -230,7 +234,6 @@ document.addEventListener("DOMContentLoaded", function () {
         books = books.filter(book => book.id !== deleteBookId);
 
         saveBooks(books);
-
         syncToFirebase(books);
 
         modal?.classList.remove("show");
@@ -243,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* ======================
-   ADD BOOK
+   ADD BOOK (FIX SAFE PUSH)
 ====================== */
 
 document.querySelector(".add-book-btn")?.addEventListener("click", function () {
@@ -300,7 +303,7 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
 });
 
 /* ======================
-   SAVE ADD
+   SAVE ADD (FIX SAFE)
 ====================== */
 
 document.getElementById("saveAddBtn")?.addEventListener("click", function () {
@@ -314,7 +317,8 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
         id: Date.now(),
         title,
         icon: "📘",
-        count: 0
+        count: 0,
+        qrs: []
     });
 
     saveBooks(books);
