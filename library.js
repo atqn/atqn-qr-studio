@@ -25,8 +25,6 @@ function listenFirebase(callback) {
     });
 }
 
-
-
 let deleteBookId = null;
 
 const defaultBooks = [
@@ -43,7 +41,7 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE
+   LOCAL STORAGE (CACHE ONLY)
 ====================== */
 
 function getBooks() {
@@ -68,23 +66,17 @@ function saveBooks(books) {
 }
 
 /* ======================
-   🔥 FIREBASE SAFE SYNC
+   🔥 FIREBASE SYNC (SOURCE OF TRUTH)
 ====================== */
 
 function syncToFirebase(books) {
     try {
 
-        if (!window.db) {
-            console.warn("DB not ready");
-            return;
-        }
+        if (!window.db || !window.firebaseFirestore) return;
 
         const fs = window.firebaseFirestore;
 
-        if (!fs || !fs.doc || !fs.setDoc) {
-            console.warn("Firestore not ready:", fs);
-            return;
-        }
+        if (!fs.doc || !fs.setDoc) return;
 
         const ref = fs.doc(window.db, "books/main");
 
@@ -93,19 +85,19 @@ function syncToFirebase(books) {
             updatedAt: Date.now()
         })
         .then(() => {
-            console.log("✅ Firebase write success");
+            console.log("✅ saved to firebase");
         })
         .catch((err) => {
-            console.error("❌ Firebase write failed:", err);
+            console.warn("Firebase write failed:", err);
         });
 
     } catch (e) {
-        console.error("🔥 syncToFirebase crash:", e);
+        console.error("sync crash:", e);
     }
 }
 
 /* ======================
-   SAFE MERGE (NEW FIX)
+   SAFE MERGE (REAL FIX)
 ====================== */
 
 function mergeBooks(local, remote) {
@@ -113,11 +105,17 @@ function mergeBooks(local, remote) {
     if (!Array.isArray(remote)) return local;
     if (!Array.isArray(local)) return remote;
 
-    // نحافظ على الإضافات الجديدة المحلية إذا كانت أحدث
     const map = new Map();
 
+    // remote أولاً (مصدر الحقيقة)
     remote.forEach(b => map.set(b.id, b));
-    local.forEach(b => map.set(b.id, b));
+
+    // local فقط لإضافة الجديد غير الموجود في remote
+    local.forEach(b => {
+        if (!map.has(b.id)) {
+            map.set(b.id, b);
+        }
+    });
 
     return Array.from(map.values());
 }
@@ -177,7 +175,7 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT
+   INIT (STABLE REALTIME)
 ====================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -191,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const merged = mergeBooks(local, remoteBooks);
 
         saveBooks(merged);
+
         renderBooks();
     });
 
@@ -210,9 +209,11 @@ document.addEventListener("DOMContentLoaded", function () {
         books = books.filter(book => book.id !== deleteBookId);
 
         saveBooks(books);
+
         syncToFirebase(books);
 
         modal?.classList.remove("show");
+
         deleteBookId = null;
 
         renderBooks();
