@@ -1,18 +1,32 @@
+
+<header class="topbar">
+
+
+
 <script>
-console.log("🔥 TEST: page is running");
+function logout(){
+    localStorage.removeItem("logged");
+    window.location.href = "login.html";
+}
 </script>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script>
-console.log("🔥 Firebase script loaded");
-</script>
+    
+    <div class="brand">
+        <img src="assets/atqn-logo.png">
+        <h1>ATQN QR Studio</h1>
+    </div>
 
+<nav>
+    <a href="index.html">الرئيسة</a>
+    <a href="create.html">إنشاء QR</a>
+    <a href="library.html">مكتبة الكتب</a>
+    <a href="#" onclick="logout()">خروج</a>
+</nav>
 
-
+</header>
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,33 +34,12 @@ console.log("🔥 Firebase script loaded");
 <title>ATQN QR Studio</title>
 
 <link rel="stylesheet" href="style.css">
+
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<script>
-alert("PAGE IS RUNNING");
-</script>
-    
-<!-- ================= TOPBAR ================= -->
-<header class="topbar">
-
-    <div class="brand">
-        <img src="assets/atqn-logo.png">
-        <h1>ATQN QR Studio</h1>
-    </div>
-
-    <nav>
-        <a href="index.html">الرئيسة</a>
-        <a href="create.html">إنشاء QR</a>
-        <a href="library.html">مكتبة الكتب</a>
-        <a href="#" onclick="logout()">خروج</a>
-    </nav>
-
-</header>
-
-<!-- ================= MAIN ================= -->
 <div class="container">
 
     <div class="hero">
@@ -91,11 +84,11 @@ alert("PAGE IS RUNNING");
 
 </div>
 
-<!-- ================= FIREBASE (STABLE COMPAT VERSION) ================= -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<script>
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
   authDomain: "atqn-qr1.firebaseapp.com",
@@ -105,25 +98,13 @@ const firebaseConfig = {
   appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
 };
 
-// INIT
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// DB
-const db = firebase.firestore();
 window.db = db;
-
-// SAFE WRAPPER (مثل السابق لكن مضمون)
-window.firebaseFirestore = {
-  doc: firebase.firestore,
-  setDoc: (ref, data) => ref.set(data),
-  getDoc: (ref) => ref.get(),
-  onSnapshot: (ref, cb) => ref.onSnapshot(cb)
-};
-
-console.log("🔥 Firebase COMPAT initialized successfully");
+window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
 </script>
 
-<!-- ================= STATS ================= -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -147,17 +128,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- ================= AUTH ================= -->
 <script>
 if(localStorage.getItem("logged") !== "true"){
-    window.location.href = "login.html";
-}
-</script>
-
-<!-- ================= LOGOUT ================= -->
-<script>
-function logout(){
-    localStorage.removeItem("logged");
     window.location.href = "login.html";
 }
 </script>
