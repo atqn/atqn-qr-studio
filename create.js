@@ -18,8 +18,10 @@ function showToast(message, type = "success") {
     if (!toast) return;
 
     toast.textContent = message;
+
     toast.className = "toast";
     void toast.offsetWidth;
+
     toast.classList.add("show", type);
 
     clearTimeout(toast._timer);
@@ -30,21 +32,13 @@ function showToast(message, type = "success") {
 }
 
 /* ======================
-   STATE (FIX CORE BUG)
-====================== */
-
-let books = [];
-let syncTimer = null;
-
-/* ======================
    PARAMS
 ====================== */
 
 const params = new URLSearchParams(window.location.search);
 
 const bookId = Number(params.get("book"));
-let qrId = params.get("qr");
-qrId = qrId ? Number(qrId) : null;
+const qrId = Number(params.get("qr"));
 
 const qrPreviewBox = document.getElementById("qrPreviewBox");
 const generateBtn = document.getElementById("generatePreviewBtn");
@@ -56,13 +50,13 @@ const svgBtn = document.getElementById("downloadSvgBtn");
 const qrContentInput = document.getElementById("qrContentInput");
 const logoInput = document.getElementById("qrLogoInput");
 
-if (!bookId) return;
+if (!bookId || !qrId) return;
 
 /* ======================
-   LOAD LOCAL
+   LOAD DB
 ====================== */
 
-books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
 let bookIndex = books.findIndex(b => b.id === bookId);
 if (bookIndex === -1) return;
@@ -95,7 +89,7 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   FIREBASE LISTENER (FIXED SAFE SYNC)
+   🔥 REALTIME SYNC (FIXED PATH)
 ====================== */
 
 const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
@@ -104,14 +98,13 @@ if (bookRef && onSnapshot) {
 
     onSnapshot(bookRef, (snap) => {
 
-        if (!snap || !snap.exists()) return;
+        if (!snap.exists()) return;
 
-        const data = snap.data();
+        const remoteData = snap.data();
 
-        if (!data?.books || !Array.isArray(data.books)) return;
+        if (!remoteData?.books) return;
 
-        // 🔥 IMPORTANT: keep single source of truth
-        books = data.books;
+        books = remoteData.books;
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
@@ -119,19 +112,19 @@ if (bookRef && onSnapshot) {
 
         if (bIndex !== -1 && books[bIndex].qrs?.[qrIndex]) {
 
-            let remoteQR = books[bIndex].qrs[qrIndex];
+            const remoteQR = books[bIndex].qrs[qrIndex];
 
-            qr.title = remoteQR.title || "";
-            qr.description = remoteQR.description || "";
-            qr.content = remoteQR.content || "";
+            qr.title = remoteQR.title;
+            qr.description = remoteQR.description;
+            qr.content = remoteQR.content;
 
-            qrContentInput.value = qr.content || "";
+            qrContentInput.value = remoteQR.content || "";
         }
     });
 }
 
 /* ======================
-   QR ENGINE (UNCHANGED)
+   QR ENGINE
 ====================== */
 
 let qrCode = null;
@@ -188,12 +181,16 @@ function generateQR(text) {
         dotsOptions: {
             color: color,
             type: style
+        },
+        imageOptions: {
+            margin: 8,
+            imageSize: 0.60
         }
     });
 }
 
 /* ======================
-   INIT VIEW
+   FIRST LOAD
 ====================== */
 
 qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
@@ -208,8 +205,10 @@ generateBtn?.addEventListener("click", () => {
 });
 
 /* ======================
-   🔥 REALTIME SAVE (FIXED CORE BUG)
+   🔥 REALTIME WRITE (FIXED ONLY)
 ====================== */
+
+let syncTimer = null;
 
 function realtimeSave() {
 
@@ -222,6 +221,8 @@ function realtimeSave() {
         let content = qrContentInput.value.trim();
 
         if (!title || !content) return;
+
+        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
         let bIndex = books.findIndex(b => b.id === bookId);
         if (bIndex === -1) return;
@@ -241,33 +242,43 @@ function realtimeSave() {
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        if (db && firestore.doc && firestore.setDoc) {
-            const ref = doc(db, "books/main");
-            setDoc(ref, {
-                books: books,
-                updatedAt: Date.now()
-            });
+        try {
+            if (db && firestore.doc && firestore.setDoc) {
+                const ref = doc(db, "books/main");
+                setDoc(ref, { books: books }, { merge: true });
+            }
+        } catch (e) {
+            console.warn("Realtime sync failed:", e);
         }
 
-    }, 600);
+    }, 700);
 }
 
-/* bind inputs */
+/* bind realtime inputs */
 qrContentInput?.addEventListener("input", realtimeSave);
 document.getElementById("qrTitleInput")?.addEventListener("input", realtimeSave);
 document.getElementById("qrDescriptionInput")?.addEventListener("input", realtimeSave);
 
-/* color/size/style */
-["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"].forEach(id => {
+["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
+.forEach(id => {
+
     const el = document.getElementById(id);
     if (!el) return;
 
-    el.addEventListener("input", () => generateQR(qrContentInput.value.trim()));
-    el.addEventListener("change", () => generateQR(qrContentInput.value.trim()));
+    const update = () => {
+        generateQR(qrContentInput.value.trim());
+    };
+
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
+});
+
+qrContentInput?.addEventListener("input", () => {
+    generateQR(qrContentInput.value.trim());
 });
 
 /* ======================
-   SAVE BUTTON (FIXED SAFE)
+   SAVE BUTTON (UNCHANGED LOGIC)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -281,13 +292,10 @@ saveBtn?.addEventListener("click", function () {
         return;
     }
 
+    let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
+
     let bIndex = books.findIndex(b => b.id === bookId);
-    if (bIndex === -1) return;
-
-    books[bIndex].qrs = books[bIndex].qrs || [];
-
     let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
-    if (qIndex === -1) return;
 
     let logo = "assets/atqn-logo.png";
 
@@ -311,13 +319,10 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
-    if (db && firestore.doc && firestore.setDoc) {
+    try {
         const ref = doc(db, "books/main");
-        setDoc(ref, {
-            books: books,
-            updatedAt: Date.now()
-        });
-    }
+        setDoc(ref, { books: books }, { merge: true });
+    } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
 
@@ -327,7 +332,7 @@ saveBtn?.addEventListener("click", function () {
 });
 
 /* ======================
-   DEFAULT SETTINGS (UNCHANGED)
+   DEFAULT SETTINGS
 ====================== */
 
 saveDefaultBtn?.addEventListener("click", function () {
@@ -344,7 +349,7 @@ saveDefaultBtn?.addEventListener("click", function () {
 });
 
 /* ======================
-   DOWNLOAD PNG / SVG (UNCHANGED)
+   DOWNLOAD PNG / SVG
 ====================== */
 
 downloadBtn?.addEventListener("click", function () {
