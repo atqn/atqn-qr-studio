@@ -1,30 +1,3 @@
-function listenFirebase(callback) {
-
-    if (!window.db || !window.firebaseFirestore) return;
-
-    const fs = window.firebaseFirestore;
-
-    if (!fs.doc || !fs.onSnapshot) return;
-
-    const ref = fs.doc(window.db, "books/main");
-
-    fs.onSnapshot(ref, (snap) => {
-
-        try {
-            if (!snap || !snap.exists()) return;
-
-            const data = snap.data();
-
-            if (data?.books) {
-                callback(data.books);
-            }
-
-        } catch (e) {
-            console.warn("listenFirebase error:", e);
-        }
-    });
-}
-
 let deleteBookId = null;
 
 const defaultBooks = [
@@ -41,21 +14,19 @@ const defaultBooks = [
 ];
 
 /* ======================
-   LOCAL STORAGE (FIXED SAFE)
+   LOCAL STORAGE (UNCHANGED BUT SAFER)
 ====================== */
 
 function getBooks() {
     try {
         const saved = localStorage.getItem("atqn_books");
 
-        // 🔥 FIX: لا نرجّع defaultBooks إذا موجود بيانات صالحة
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) return parsed;
+        if (!saved) {
+            localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
+            return defaultBooks;
         }
 
-        localStorage.setItem("atqn_books", JSON.stringify(defaultBooks));
-        return defaultBooks;
+        return JSON.parse(saved) || defaultBooks;
 
     } catch (e) {
         console.warn("Parse error:", e);
@@ -64,85 +35,56 @@ function getBooks() {
 }
 
 function saveBooks(books) {
-    if (!Array.isArray(books)) return;
     localStorage.setItem("atqn_books", JSON.stringify(books));
 }
 
 /* ======================
-   🔥 FIREBASE SYNC (SOURCE OF TRUTH)
+   🔥 FIREBASE SAFE SYNC (FIXED)
 ====================== */
 
 function syncToFirebase(books) {
     try {
-
         if (!window.db || !window.firebaseFirestore) return;
 
-        const fs = window.firebaseFirestore;
+        const { doc, setDoc } = window.firebaseFirestore;
 
-        if (!fs.doc || !fs.setDoc) return;
+        const ref = doc(window.db, "books/global");
 
-        const ref = fs.doc(window.db, "books/main");
-
-        fs.setDoc(ref, {
+        setDoc(ref, {
             books: books,
             updatedAt: Date.now()
-        })
-        .then(() => {
-            console.log("✅ saved to firebase");
-        })
-        .catch((err) => {
-            console.warn("Firebase write failed:", err);
         });
 
     } catch (e) {
-        console.error("sync crash:", e);
+        console.warn("Firebase sync error:", e);
+    }
+}
+
+function listenFirebase(callback) {
+    try {
+        if (!window.db || !window.firebaseFirestore) return;
+
+        const { doc, onSnapshot } = window.firebaseFirestore;
+
+        const ref = doc(window.db, "books/global");
+
+        onSnapshot(ref, (snap) => {
+            if (!snap.exists()) return;
+
+            const data = snap.data();
+
+            if (data?.books) {
+                callback(data.books);
+            }
+        });
+
+    } catch (e) {
+        console.warn("Firebase listener error:", e);
     }
 }
 
 /* ======================
-   SAFE MERGE (FIXED 100%)
-====================== */
-
-function mergeBooks(local, remote) {
-
-    if (!Array.isArray(remote)) return local;
-    if (!Array.isArray(local)) return remote;
-
-    const map = new Map();
-
-    // 🔥 remote first
-    remote.forEach(b => {
-        map.set(b.id, {
-            ...b,
-            qrs: Array.isArray(b.qrs) ? b.qrs : []
-        });
-    });
-
-    // 🔥 local override only if newer / missing
-    local.forEach(b => {
-
-        if (!map.has(b.id)) {
-            map.set(b.id, {
-                ...b,
-                qrs: Array.isArray(b.qrs) ? b.qrs : []
-            });
-        } else {
-
-            const existing = map.get(b.id);
-
-            map.set(b.id, {
-                ...existing,
-                ...b,
-                qrs: Array.isArray(existing.qrs) ? existing.qrs : []
-            });
-        }
-    });
-
-    return Array.from(map.values());
-}
-
-/* ======================
-   RENDER (UNCHANGED UI + FIX SAFE COUNT)
+   RENDER
 ====================== */
 
 function renderBooks() {
@@ -163,9 +105,7 @@ function renderBooks() {
 
     <h3>${book.title}</h3>
 
-    <div class="book-count">${
-        Array.isArray(book.qrs) ? book.qrs.length : (book.count || 0)
-    } QR</div>
+    <div class="book-count">${book.count} QR</div>
 
     <div class="book-actions">
 
@@ -198,24 +138,21 @@ function deleteBook(id) {
 }
 
 /* ======================
-   INIT (FIXED SAFE FLOW)
+   INIT + REALTIME SYNC
 ====================== */
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    // 🔥 FIX: لا نعيد الكتابة العمياء
-    const initial = getBooks();
-    saveBooks(initial);
-
     renderBooks();
 
+    /* 🔥 REALTIME SYNC FROM FIREBASE */
     listenFirebase((remoteBooks) => {
 
-        const local = getBooks();
-        const merged = mergeBooks(local, remoteBooks);
+        if (!Array.isArray(remoteBooks)) return;
 
-        saveBooks(merged);
+        saveBooks(remoteBooks);
         renderBooks();
+
     });
 
     const modal = document.getElementById("deleteModal");
@@ -234,6 +171,8 @@ document.addEventListener("DOMContentLoaded", function () {
         books = books.filter(book => book.id !== deleteBookId);
 
         saveBooks(books);
+
+        /* 🔥 PUSH TO FIREBASE */
         syncToFirebase(books);
 
         modal?.classList.remove("show");
@@ -246,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* ======================
-   ADD BOOK (FIX SAFE PUSH)
+   ADD BOOK
 ====================== */
 
 document.querySelector(".add-book-btn")?.addEventListener("click", function () {
@@ -295,6 +234,8 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
     books[index].title = newTitle;
 
     saveBooks(books);
+
+    /* 🔥 PUSH */
     syncToFirebase(books);
 
     renderBooks();
@@ -303,7 +244,7 @@ document.getElementById("saveEditBtn")?.addEventListener("click", function () {
 });
 
 /* ======================
-   SAVE ADD (FIX SAFE)
+   SAVE ADD
 ====================== */
 
 document.getElementById("saveAddBtn")?.addEventListener("click", function () {
@@ -317,11 +258,12 @@ document.getElementById("saveAddBtn")?.addEventListener("click", function () {
         id: Date.now(),
         title,
         icon: "📘",
-        count: 0,
-        qrs: []
+        count: 0
     });
 
     saveBooks(books);
+
+    /* 🔥 PUSH */
     syncToFirebase(books);
 
     renderBooks();
