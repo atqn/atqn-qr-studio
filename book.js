@@ -21,94 +21,36 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmDeleteQrBtn = document.getElementById("confirmDeleteQrBtn");
     const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
-    /* =========================
-       FIREBASE FIX (CRITICAL STABILITY)
-    ========================= */
-
-    const db = window.db;
-    const fs = window.firebaseFirestore || {};
-    const { doc, setDoc, onSnapshot } = fs;
-
-    const firebaseRef = db && doc ? doc(db, "books", "global") : null;
-
-    let booksFromFirebase = null;
-
-    /* =========================
-       REALTIME SYNC (SAFE)
-    ========================= */
-
-    if (firebaseRef && onSnapshot) {
-
-        onSnapshot(firebaseRef, (snap) => {
-
-            if (!snap.exists()) return;
-
-            const data = snap.data();
-            if (!Array.isArray(data.books)) return;
-
-            booksFromFirebase = data.books;
-
-            // تحديث localStorage كنسخة احتياطية فقط
-            localStorage.setItem("atqn_books", JSON.stringify(booksFromFirebase));
-
-            renderQrList();
-            updateHeader();
-        });
-    }
-
-    /* =========================
-       STORAGE (FIXED PRIORITY)
-    ========================= */
-
+    // =========================
+    // STORAGE
+    // =========================
     function getBooks() {
-
-        const local = JSON.parse(localStorage.getItem("atqn_books") || "[]");
-
-        // 🔥 Firebase هو الأساس إذا موجود
-        if (booksFromFirebase) {
-            return booksFromFirebase;
-        }
-
-        return local;
+        return JSON.parse(localStorage.getItem("atqn_books") || "[]");
     }
 
     function saveBooks(books) {
-
         localStorage.setItem("atqn_books", JSON.stringify(books));
-
-        // 🔥 IMPORTANT FIX: push to firebase always
-        if (firebaseRef && setDoc) {
-            setDoc(firebaseRef, {
-                books,
-                updatedAt: Date.now()
-            });
-        }
     }
 
     function getBook() {
         return getBooks().find(b => b.id === bookId);
     }
 
-    /* =========================
-       HEADER (FIX COUNT SOURCE)
-    ========================= */
-
+    // =========================
+    // HEADER
+    // =========================
     function updateHeader() {
-
         const book = getBook();
         if (!book) return;
 
-        const qrs = book.qrs || [];
-
         document.getElementById("bookTitle").textContent = book.title || "";
         document.getElementById("bookCount").textContent =
-            "عدد الأكواد: " + qrs.length;
+            "عدد الأكواد: " + (book.qrs?.length || 0);
     }
 
-    /* =========================
-       RENDER
-    ========================= */
-
+    // =========================
+    // RENDER LIST (FIXED BADGE + CONTENT)
+    // =========================
     function renderQrList() {
 
         const book = getBook();
@@ -140,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${qr.description || "بدون وصف"}
                     </div>
 
+                    <!-- ✔ FIX: إعادة "رابط مرفق" -->
                     <div class="qr-link-badge">
                         🌐 رابط مرفق
                     </div>
@@ -165,10 +108,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /* =========================
-       CLICK EVENTS
-    ========================= */
-
+    // =========================
+    // CLICK EVENTS
+    // =========================
     qrList.addEventListener("click", function (e) {
 
         const editId = e.target.dataset.edit;
@@ -184,21 +126,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    /* =========================
-       EDIT (FIXED)
-    ========================= */
-
+    // =========================
+    // EDIT
+    // =========================
     function editQr(qrId) {
 
         const book = getBook();
         if (!book?.qrs) return;
 
-        const qr = book.qrs.find(q => Number(q.id) === Number(qrId));
+        const qr = book.qrs.find(q => q.id === qrId);
         if (!qr) return;
 
         editQrId = qrId;
 
         addQrModal.querySelector("h3").textContent = "تعديل QR";
+        saveQrBtn.textContent = "حفظ";
 
         qrTitleInput.value = qr.title || "";
         qrDescriptionInput.value = qr.description || "";
@@ -207,32 +149,28 @@ document.addEventListener("DOMContentLoaded", function () {
         addQrModal.classList.add("show");
     }
 
-    /* =========================
-       DELETE (FIXED SYNC)
-    ========================= */
-
+    // =========================
+    // DELETE
+    // =========================
     function deleteQr(qrId) {
         deleteQrId = qrId;
         deleteQrModal.classList.add("show");
     }
 
-    cancelDeleteQrBtn.addEventListener("click", () => {
+    cancelDeleteQrBtn.addEventListener("click", function () {
         deleteQrModal.classList.remove("show");
         deleteQrId = null;
     });
 
-    confirmDeleteQrBtn.addEventListener("click", () => {
+    confirmDeleteQrBtn.addEventListener("click", function () {
 
         let books = getBooks();
-
         const bookIndex = books.findIndex(b => b.id === bookId);
 
         if (bookIndex === -1) return;
 
         books[bookIndex].qrs =
-            (books[bookIndex].qrs || []).filter(q => Number(q.id) !== Number(deleteQrId));
-
-        books[bookIndex].count = books[bookIndex].qrs.length;
+            (books[bookIndex].qrs || []).filter(q => q.id !== deleteQrId);
 
         saveBooks(books);
 
@@ -243,13 +181,15 @@ document.addEventListener("DOMContentLoaded", function () {
         renderQrList();
     });
 
-    /* =========================
-       ADD NEW
-    ========================= */
-
-    addQrBtn.addEventListener("click", () => {
+    // =========================
+    // ADD NEW
+    // =========================
+    addQrBtn.addEventListener("click", function () {
 
         editQrId = null;
+
+        addQrModal.querySelector("h3").textContent = "إضافة QR جديد";
+        saveQrBtn.textContent = "حفظ";
 
         qrTitleInput.value = "";
         qrDescriptionInput.value = "";
@@ -258,16 +198,15 @@ document.addEventListener("DOMContentLoaded", function () {
         addQrModal.classList.add("show");
     });
 
-    cancelQrBtn.addEventListener("click", () => {
+    cancelQrBtn.addEventListener("click", function () {
         addQrModal.classList.remove("show");
         editQrId = null;
     });
 
-    /* =========================
-       SAVE (FINAL FIXED)
-    ========================= */
-
-    saveQrBtn.addEventListener("click", () => {
+    // =========================
+    // SAVE (FIXED FINAL STABLE)
+    // =========================
+    saveQrBtn.addEventListener("click", function () {
 
         const title = qrTitleInput.value.trim();
         const description = qrDescriptionInput.value.trim();
@@ -279,8 +218,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         let books = getBooks();
-
         const bookIndex = books.findIndex(b => b.id === bookId);
+
         if (bookIndex === -1) return;
 
         if (!books[bookIndex].qrs) books[bookIndex].qrs = [];
@@ -288,12 +227,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (editQrId) {
 
             const qrIndex =
-                books[bookIndex].qrs.findIndex(q => Number(q.id) === Number(editQrId));
+                books[bookIndex].qrs.findIndex(q => q.id === editQrId);
 
             if (qrIndex !== -1) {
-
                 books[bookIndex].qrs[qrIndex] = {
-                    ...books[bookIndex].qrs[qrIndex],
+                    id: editQrId,
                     title,
                     description,
                     content: link
@@ -321,10 +259,9 @@ document.addEventListener("DOMContentLoaded", function () {
         renderQrList();
     });
 
-    /* =========================
-       INIT
-    ========================= */
-
+    // =========================
+    // INIT
+    // =========================
     updateHeader();
     renderQrList();
 
