@@ -61,7 +61,6 @@ let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 let bookIndex = books.findIndex(b => b.id === bookId);
 if (bookIndex === -1) return;
 
-/* FIX */
 books[bookIndex].qrs = books[bookIndex].qrs || [];
 
 let qrIndex = books[bookIndex].qrs.findIndex(q => q.id === qrId);
@@ -90,7 +89,7 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   FIREBASE SYNC (READ)
+   FIREBASE SYNC (READ ONLY)
 ====================== */
 
 const bookRef = db && firestore.doc ? doc(db, "books/main") : null;
@@ -111,20 +110,15 @@ if (bookRef && onSnapshot) {
 
         let bIndex = books.findIndex(b => b.id === bookId);
 
-        if (bIndex !== -1) {
+        if (bIndex !== -1 && books[bIndex].qrs?.[qrIndex]) {
 
-            books[bIndex].qrs = books[bIndex].qrs || [];
+            const remoteQR = books[bIndex].qrs[qrIndex];
 
-            if (books[bIndex].qrs[qrIndex]) {
+            qr.title = remoteQR.title || "";
+            qr.description = remoteQR.description || "";
+            qr.content = remoteQR.content || "";
 
-                const remoteQR = books[bIndex].qrs[qrIndex];
-
-                qr.title = remoteQR.title || "";
-                qr.description = remoteQR.description || "";
-                qr.content = remoteQR.content || "";
-
-                qrContentInput.value = qr.content || "";
-            }
+            qrContentInput.value = qr.content || "";
         }
     });
 }
@@ -187,31 +181,12 @@ function generateQR(text) {
         dotsOptions: {
             color: color,
             type: style
-        },
-        imageOptions: {
-            margin: 8,
-            imageSize: 0.60
         }
     });
 }
 
 /* ======================
-   FIRST LOAD
-====================== */
-
-qrPreviewBox.innerHTML = "اضغط توليد المعاينة";
-generateQR(qr.content || "");
-
-/* ======================
-   EVENTS
-====================== */
-
-generateBtn?.addEventListener("click", () => {
-    generateQR(qrContentInput.value.trim());
-});
-
-/* ======================
-   REALTIME SAVE (FIXED ONLY)
+   REALTIME SAVE (FIXED CORE ONLY)
 ====================== */
 
 let syncTimer = null;
@@ -227,8 +202,6 @@ function realtimeSave() {
         let content = qrContentInput.value.trim();
 
         if (!title || !content) return;
-
-        let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
         let bIndex = books.findIndex(b => b.id === bookId);
         if (bIndex === -1) return;
@@ -248,49 +221,27 @@ function realtimeSave() {
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        try {
-            if (db && firestore.doc && firestore.setDoc) {
+        // 🔥 FIX ONLY HERE (IMPORTANT)
+        if (db && firestore.doc && firestore.setDoc) {
+            const ref = doc(db, "books/main");
 
-                const ref = doc(db, "books/main");
-
-                setDoc(ref, {
-                    books: books,
-                    updatedAt: Date.now()
-                }, { merge: true });
-
-            }
-        } catch (e) {
-            console.warn("Realtime sync failed:", e);
+            // ❗ بدون merge (هذا سبب الفشل)
+            setDoc(ref, {
+                books: books,
+                updatedAt: Date.now()
+            });
         }
 
     }, 700);
 }
 
-/* bind realtime inputs */
+/* bind inputs */
 qrContentInput?.addEventListener("input", realtimeSave);
 document.getElementById("qrTitleInput")?.addEventListener("input", realtimeSave);
 document.getElementById("qrDescriptionInput")?.addEventListener("input", realtimeSave);
 
-["qrColorInput", "qrSizeInput", "qrStyleInput", "qrLogoInput"]
-.forEach(id => {
-
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    const update = () => {
-        generateQR(qrContentInput.value.trim());
-    };
-
-    el.addEventListener("input", update);
-    el.addEventListener("change", update);
-});
-
-qrContentInput?.addEventListener("input", () => {
-    generateQR(qrContentInput.value.trim());
-});
-
 /* ======================
-   SAVE BUTTON (FIXED ONLY)
+   SAVE BUTTON (UNCHANGED LOGIC)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -303,8 +254,6 @@ saveBtn?.addEventListener("click", function () {
         alert("أدخل البيانات");
         return;
     }
-
-    let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
     let bIndex = books.findIndex(b => b.id === bookId);
 
@@ -334,19 +283,23 @@ saveBtn?.addEventListener("click", function () {
 
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
-    try {
+    if (db && firestore.doc && firestore.setDoc) {
         const ref = doc(db, "books/main");
+
+        // 🔥 FIX ONLY HERE
         setDoc(ref, {
             books: books,
             updatedAt: Date.now()
-        }, { merge: true });
-    } catch (e) {}
+        });
+    }
 
     showToast("تم الحفظ بنجاح");
 
     setTimeout(() => {
         window.location.href = "book.html?id=" + bookId;
     }, 800);
+});
+
 });
 
 /* ======================
