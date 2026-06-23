@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // STORAGE
     // =========================
+
     function getBooks() {
         return JSON.parse(localStorage.getItem("atqn_books") || "[]");
     }
@@ -39,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // HEADER
     // =========================
+
     function updateHeader() {
         const book = getBook();
         if (!book) return;
@@ -49,8 +51,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================
-    // RENDER LIST (FIXED BADGE + CONTENT)
+    // RENDER
     // =========================
+
     function renderQrList() {
 
         const book = getBook();
@@ -82,7 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${qr.description || "بدون وصف"}
                     </div>
 
-                    <!-- ✔ FIX: إعادة "رابط مرفق" -->
                     <div class="qr-link-badge">
                         🌐 رابط مرفق
                     </div>
@@ -111,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // CLICK EVENTS
     // =========================
+
     qrList.addEventListener("click", function (e) {
 
         const editId = e.target.dataset.edit;
@@ -127,14 +130,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =========================
-    // EDIT
+    // EDIT (FIXED SAFE MERGE)
     // =========================
+
     function editQr(qrId) {
 
         const book = getBook();
         if (!book?.qrs) return;
 
-        const qr = book.qrs.find(q => q.id === qrId);
+        const qr = book.qrs.find(q => Number(q.id) === Number(qrId));
         if (!qr) return;
 
         editQrId = qrId;
@@ -152,17 +156,18 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // DELETE
     // =========================
+
     function deleteQr(qrId) {
         deleteQrId = qrId;
         deleteQrModal.classList.add("show");
     }
 
-    cancelDeleteQrBtn.addEventListener("click", function () {
+    cancelDeleteQrBtn.addEventListener("click", () => {
         deleteQrModal.classList.remove("show");
         deleteQrId = null;
     });
 
-    confirmDeleteQrBtn.addEventListener("click", function () {
+    confirmDeleteQrBtn.addEventListener("click", () => {
 
         let books = getBooks();
         const bookIndex = books.findIndex(b => b.id === bookId);
@@ -170,7 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (bookIndex === -1) return;
 
         books[bookIndex].qrs =
-            (books[bookIndex].qrs || []).filter(q => q.id !== deleteQrId);
+            (books[bookIndex].qrs || []).filter(q => Number(q.id) !== Number(deleteQrId));
+
+        books[bookIndex].count = books[bookIndex].qrs.length;
 
         saveBooks(books);
 
@@ -184,7 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // ADD NEW
     // =========================
-    addQrBtn.addEventListener("click", function () {
+
+    addQrBtn.addEventListener("click", () => {
 
         editQrId = null;
 
@@ -198,15 +206,16 @@ document.addEventListener("DOMContentLoaded", function () {
         addQrModal.classList.add("show");
     });
 
-    cancelQrBtn.addEventListener("click", function () {
+    cancelQrBtn.addEventListener("click", () => {
         addQrModal.classList.remove("show");
         editQrId = null;
     });
 
     // =========================
-    // SAVE (FIXED FINAL STABLE)
+    // SAVE (FIXED SAFE UPDATE - IMPORTANT)
     // =========================
-    saveQrBtn.addEventListener("click", function () {
+
+    saveQrBtn.addEventListener("click", () => {
 
         const title = qrTitleInput.value.trim();
         const description = qrDescriptionInput.value.trim();
@@ -227,11 +236,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (editQrId) {
 
             const qrIndex =
-                books[bookIndex].qrs.findIndex(q => q.id === editQrId);
+                books[bookIndex].qrs.findIndex(q => Number(q.id) === Number(editQrId));
 
             if (qrIndex !== -1) {
+
                 books[bookIndex].qrs[qrIndex] = {
-                    id: editQrId,
+                    ...books[bookIndex].qrs[qrIndex], // 🔥 IMPORTANT FIX
                     title,
                     description,
                     content: link
@@ -262,6 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================
     // INIT
     // =========================
+
     updateHeader();
     renderQrList();
 
