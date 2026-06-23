@@ -54,13 +54,14 @@ function saveLocal() {
 }
 
 /* ======================
-   🔥 FIXED MERGE (IMPORTANT)
+   🔥 FIXED MERGE (FINAL SAFE VERSION)
 ====================== */
 
 function mergeBooks(local, remote) {
 
     const map = new Map();
 
+    // local first (IMPORTANT)
     local.forEach(b => map.set(b.id, b));
 
     remote.forEach(r => {
@@ -70,18 +71,30 @@ function mergeBooks(local, remote) {
         if (!existing) {
             map.set(r.id, {
                 ...r,
-                qrs: r.qrs || []
+                qrs: Array.isArray(r.qrs) ? r.qrs : []
             });
         } else {
+
+            // 🔥 FIX: NEVER allow remote to override local qrs
+            const localQrs = Array.isArray(existing.qrs) ? existing.qrs : [];
+            const remoteQrs = Array.isArray(r.qrs) ? r.qrs : [];
+
+            // merge qrs safely (no overwrite)
+            const mergedQrs = [...localQrs];
+
+            remoteQrs.forEach(qr => {
+
+                const exists = mergedQrs.find(x => x.id === qr.id);
+
+                if (!exists) {
+                    mergedQrs.push(qr);
+                }
+            });
 
             map.set(r.id, {
                 ...existing,
                 ...r,
-
-                // 🔥 CRITICAL FIX: NEVER allow qrs to be overwritten with empty/undefined
-                qrs: Array.isArray(r.qrs) && r.qrs.length > 0
-                    ? r.qrs
-                    : existing.qrs || []
+                qrs: mergedQrs
             });
         }
     });
@@ -104,7 +117,7 @@ function syncFirebase() {
 }
 
 /* ======================
-   🔥 FIXED LISTENER (ROOT FIX)
+   🔥 FIXED LISTENER (NO LOSS EVER)
 ====================== */
 
 function listenFirebase() {
@@ -121,7 +134,7 @@ function listenFirebase() {
 
         const remoteBooks = data.books;
 
-        // 🔥 FIX: merge safe + prevent QR loss
+        // 🔥 FIX: safe merge (no overwrite)
         books = mergeBooks(books, remoteBooks);
 
         saveLocal();
