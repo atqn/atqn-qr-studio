@@ -54,11 +54,10 @@ function saveLocal() {
 }
 
 /* ======================
-   🔥 FIX: FORCE COUNT SYNC (IMPORTANT FIX)
+   🔥 CRITICAL FIX: ALWAYS NORMALIZE DATA
 ====================== */
 
 function normalizeBooks(data) {
-
     if (!Array.isArray(data)) return [];
 
     return data.map(b => ({
@@ -83,7 +82,7 @@ function syncFirebase() {
 }
 
 /* ======================
-   🔥 FIXED LISTENER (FINAL STABLE)
+   🔥 FIXED LISTENER (SOURCE OF TRUTH FIX)
 ====================== */
 
 function listenFirebase() {
@@ -98,7 +97,7 @@ function listenFirebase() {
 
         if (!data || !Array.isArray(data.books)) return;
 
-        // 🔥 FIX: normalize + prevent count issues
+        // 🔥 IMPORTANT FIX: normalize incoming data
         books = normalizeBooks(data.books);
 
         saveLocal();
@@ -173,6 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         books = books.filter(b => b.id !== deleteBookId);
 
+        // 🔥 FIX: recalc counts before save
+        books = normalizeBooks(books);
+
         saveLocal();
         syncFirebase();
 
@@ -209,9 +211,10 @@ document.getElementById("saveAddBtn")?.addEventListener("click", () => {
         qrs: []
     });
 
+    books = normalizeBooks(books);
+
     saveLocal();
     syncFirebase();
-
     renderBooks();
 
     document.getElementById("addModal").classList.remove("show");
@@ -243,9 +246,10 @@ document.getElementById("saveEditBtn")?.addEventListener("click", () => {
 
     books[index].title = newTitle;
 
+    books = normalizeBooks(books);
+
     saveLocal();
     syncFirebase();
-
     renderBooks();
 
     document.getElementById("editModal").classList.remove("show");
