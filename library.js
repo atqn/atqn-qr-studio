@@ -44,50 +44,34 @@ function saveBooks(books) {
 
 function syncToFirebase(books) {
     try {
-        if (!window.db || !window.firebaseFirestore) return;
+
+        if (!window.db) {
+            console.warn("DB not ready");
+            return;
+        }
 
         const fs = window.firebaseFirestore;
-        if (!fs.doc || !fs.setDoc) return;
+
+        if (!fs || !fs.doc || !fs.setDoc) {
+            console.warn("Firestore not ready:", fs);
+            return;
+        }
 
         const ref = fs.doc(window.db, "books/main");
 
         fs.setDoc(ref, {
             books: books,
             updatedAt: Date.now()
-        }).catch(err => {
-            console.warn("Firebase write failed:", err);
+        })
+        .then(() => {
+            console.log("✅ Firebase write success");
+        })
+        .catch((err) => {
+            console.error("❌ Firebase write failed:", err);
         });
 
     } catch (e) {
-        console.warn("Firebase sync error:", e);
-    }
-}
-
-function listenFirebase(callback) {
-    try {
-        if (!window.db || !window.firebaseFirestore) return;
-
-        const fs = window.firebaseFirestore;
-        if (!fs.doc || !fs.onSnapshot) return;
-
-        const ref = fs.doc(window.db, "books/main");
-
-        fs.onSnapshot(ref, (snap) => {
-            try {
-                if (!snap || !snap.exists()) return;
-
-                const data = snap.data();
-
-                if (data && Array.isArray(data.books)) {
-                    callback(data.books);
-                }
-            } catch (e) {
-                console.warn("Snapshot error:", e);
-            }
-        });
-
-    } catch (e) {
-        console.warn("Firebase listener error:", e);
+        console.error("🔥 syncToFirebase crash:", e);
     }
 }
 
