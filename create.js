@@ -300,7 +300,7 @@ saveBtn?.addEventListener("click", function () {
     }, 800);
 });
 
-});
+
 
 /* ======================
    DEFAULT SETTINGS
