@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
 
 const db = window.db;
@@ -90,10 +89,10 @@ if (qr.qrSettings) {
 }
 
 /* ======================
-   🔥 REALTIME SYNC (READ)
+   🔥 FIREBASE REALTIME READ (FIXED PATH)
 ====================== */
 
-const bookRef = db && doc ? doc(db, "books", String(bookId)) : null;
+const bookRef = db && doc ? doc(db, "books/main") : null;
 
 if (bookRef && onSnapshot) {
 
@@ -103,13 +102,17 @@ if (bookRef && onSnapshot) {
 
         const remoteData = snap.data();
 
-        books[bookIndex] = remoteData;
+        if (!remoteData?.books) return;
+
+        books = remoteData.books;
 
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        if (remoteData.qrs && remoteData.qrs[qrIndex]) {
+        let bIndex = books.findIndex(b => b.id === bookId);
 
-            const remoteQR = remoteData.qrs[qrIndex];
+        if (bIndex !== -1 && books[bIndex].qrs?.[qrIndex]) {
+
+            const remoteQR = books[bIndex].qrs[qrIndex];
 
             qr.title = remoteQR.title;
             qr.description = remoteQR.description;
@@ -202,7 +205,7 @@ generateBtn?.addEventListener("click", () => {
 });
 
 /* ======================
-   🔥 REALTIME WRITE (NEW)
+   🔥 REALTIME WRITE (FIXED + MERGE SAFE)
 ====================== */
 
 let syncTimer = null;
@@ -224,6 +227,8 @@ function realtimeSave() {
         let bIndex = books.findIndex(b => b.id === bookId);
         if (bIndex === -1) return;
 
+        books[bIndex].qrs = books[bIndex].qrs || [];
+
         let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
         if (qIndex === -1) return;
 
@@ -239,8 +244,8 @@ function realtimeSave() {
 
         try {
             if (db && doc && setDoc) {
-                const ref = doc(db, "books", String(bookId));
-                setDoc(ref, books[bIndex]);
+                const ref = doc(db, "books/main");
+                setDoc(ref, { books }, { merge: true });
             }
         } catch (e) {
             console.warn("Realtime sync failed:", e);
@@ -273,7 +278,7 @@ qrContentInput?.addEventListener("input", () => {
 });
 
 /* ======================
-   SAVE BUTTON (kept as fallback)
+   SAVE BUTTON (FIXED PATH TOO)
 ====================== */
 
 saveBtn?.addEventListener("click", function () {
@@ -290,7 +295,10 @@ saveBtn?.addEventListener("click", function () {
     let books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
     let bIndex = books.findIndex(b => b.id === bookId);
+    if (bIndex === -1) return;
+
     let qIndex = books[bIndex].qrs.findIndex(q => q.id === qrId);
+    if (qIndex === -1) return;
 
     let logo = "assets/atqn-logo.png";
 
@@ -315,8 +323,8 @@ saveBtn?.addEventListener("click", function () {
     localStorage.setItem("atqn_books", JSON.stringify(books));
 
     try {
-        const ref = doc(db, "books", String(bookId));
-        setDoc(ref, books[bIndex]);
+        const ref = doc(db, "books/main");
+        setDoc(ref, { books }, { merge: true });
     } catch (e) {}
 
     showToast("تم الحفظ بنجاح");
@@ -324,49 +332,6 @@ saveBtn?.addEventListener("click", function () {
     setTimeout(() => {
         window.location.href = "book.html?id=" + bookId;
     }, 800);
-});
-
-/* ======================
-   DEFAULT SETTINGS
-====================== */
-
-saveDefaultBtn?.addEventListener("click", function () {
-
-    let settings = {
-        color: document.getElementById("qrColorInput").value,
-        size: document.getElementById("qrSizeInput").value,
-        style: document.getElementById("qrStyleInput").value
-    };
-
-    localStorage.setItem("qr_default_settings", JSON.stringify(settings));
-
-    showToast("تم حفظ الإعدادات الافتراضية");
-});
-
-/* ======================
-   DOWNLOAD PNG / SVG
-====================== */
-
-downloadBtn?.addEventListener("click", function () {
-    if (!qrCode) return;
-
-    const name = (
-        document.getElementById("bookNameInput").value + "_" +
-        document.getElementById("qrTitleInput").value
-    ).replace(/\s+/g, "_");
-
-    qrCode.download({ name, extension: "png" });
-});
-
-svgBtn?.addEventListener("click", function () {
-    if (!qrCode) return;
-
-    const name = (
-        document.getElementById("bookNameInput").value + "_" +
-        document.getElementById("qrTitleInput").value
-    ).replace(/\s+/g, "_");
-
-    qrCode.download({ name, extension: "svg" });
 });
 
 });
