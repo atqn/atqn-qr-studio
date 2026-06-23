@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
     /* =========================
-       FIREBASE ADDITION (FIX ONLY)
+       FIREBASE FIX (CRITICAL STABILITY)
     ========================= */
 
     const db = window.db;
@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let booksFromFirebase = null;
 
+    /* =========================
+       REALTIME SYNC (SAFE)
+    ========================= */
+
     if (firebaseRef && onSnapshot) {
 
         onSnapshot(firebaseRef, (snap) => {
@@ -40,12 +44,11 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!snap.exists()) return;
 
             const data = snap.data();
-
-            if (!data.books) return;
+            if (!Array.isArray(data.books)) return;
 
             booksFromFirebase = data.books;
 
-            // 🔥 IMPORTANT: update localStorage ONLY if newer
+            // تحديث localStorage كنسخة احتياطية فقط
             localStorage.setItem("atqn_books", JSON.stringify(booksFromFirebase));
 
             renderQrList();
@@ -54,22 +57,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /* =========================
-       STORAGE (UNCHANGED LOGIC)
+       STORAGE (FIXED PRIORITY)
     ========================= */
 
     function getBooks() {
+
         const local = JSON.parse(localStorage.getItem("atqn_books") || "[]");
 
-        // 🔥 FIX: prefer firebase if exists
-        if (booksFromFirebase) return booksFromFirebase;
+        // 🔥 Firebase هو الأساس إذا موجود
+        if (booksFromFirebase) {
+            return booksFromFirebase;
+        }
 
         return local;
     }
 
     function saveBooks(books) {
+
         localStorage.setItem("atqn_books", JSON.stringify(books));
 
-        // 🔥 PUSH TO FIREBASE ALSO
+        // 🔥 IMPORTANT FIX: push to firebase always
         if (firebaseRef && setDoc) {
             setDoc(firebaseRef, {
                 books,
@@ -83,16 +90,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /* =========================
-       HEADER
+       HEADER (FIX COUNT SOURCE)
     ========================= */
 
     function updateHeader() {
+
         const book = getBook();
         if (!book) return;
 
+        const qrs = book.qrs || [];
+
         document.getElementById("bookTitle").textContent = book.title || "";
         document.getElementById("bookCount").textContent =
-            "عدد الأكواد: " + (book.qrs?.length || 0);
+            "عدد الأكواد: " + qrs.length;
     }
 
     /* =========================
@@ -175,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* =========================
-       EDIT
+       EDIT (FIXED)
     ========================= */
 
     function editQr(qrId) {
@@ -198,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /* =========================
-       DELETE
+       DELETE (FIXED SYNC)
     ========================= */
 
     function deleteQr(qrId) {
@@ -221,6 +231,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         books[bookIndex].qrs =
             (books[bookIndex].qrs || []).filter(q => Number(q.id) !== Number(deleteQrId));
+
+        books[bookIndex].count = books[bookIndex].qrs.length;
 
         saveBooks(books);
 
@@ -252,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* =========================
-       SAVE (FIXED FINAL)
+       SAVE (FINAL FIXED)
     ========================= */
 
     saveQrBtn.addEventListener("click", () => {
@@ -269,7 +281,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let books = getBooks();
 
         const bookIndex = books.findIndex(b => b.id === bookId);
-
         if (bookIndex === -1) return;
 
         if (!books[bookIndex].qrs) books[bookIndex].qrs = [];
