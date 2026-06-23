@@ -54,52 +54,18 @@ function saveLocal() {
 }
 
 /* ======================
-   🔥 FIXED MERGE (FINAL SAFE VERSION)
+   🔥 FIX: FORCE COUNT SYNC (IMPORTANT FIX)
 ====================== */
 
-function mergeBooks(local, remote) {
+function normalizeBooks(data) {
 
-    const map = new Map();
+    if (!Array.isArray(data)) return [];
 
-    // local first (IMPORTANT)
-    local.forEach(b => map.set(b.id, b));
-
-    remote.forEach(r => {
-
-        const existing = map.get(r.id);
-
-        if (!existing) {
-            map.set(r.id, {
-                ...r,
-                qrs: Array.isArray(r.qrs) ? r.qrs : []
-            });
-        } else {
-
-            // 🔥 FIX: NEVER allow remote to override local qrs
-            const localQrs = Array.isArray(existing.qrs) ? existing.qrs : [];
-            const remoteQrs = Array.isArray(r.qrs) ? r.qrs : [];
-
-            // merge qrs safely (no overwrite)
-            const mergedQrs = [...localQrs];
-
-            remoteQrs.forEach(qr => {
-
-                const exists = mergedQrs.find(x => x.id === qr.id);
-
-                if (!exists) {
-                    mergedQrs.push(qr);
-                }
-            });
-
-            map.set(r.id, {
-                ...existing,
-                ...r,
-                qrs: mergedQrs
-            });
-        }
-    });
-
-    return Array.from(map.values());
+    return data.map(b => ({
+        ...b,
+        qrs: Array.isArray(b.qrs) ? b.qrs : [],
+        count: Array.isArray(b.qrs) ? b.qrs.length : 0
+    }));
 }
 
 /* ======================
@@ -117,7 +83,7 @@ function syncFirebase() {
 }
 
 /* ======================
-   🔥 FIXED LISTENER (NO LOSS EVER)
+   🔥 FIXED LISTENER (FINAL STABLE)
 ====================== */
 
 function listenFirebase() {
@@ -132,10 +98,8 @@ function listenFirebase() {
 
         if (!data || !Array.isArray(data.books)) return;
 
-        const remoteBooks = data.books;
-
-        // 🔥 FIX: safe merge (no overwrite)
-        books = mergeBooks(books, remoteBooks);
+        // 🔥 FIX: normalize + prevent count issues
+        books = normalizeBooks(data.books);
 
         saveLocal();
         renderBooks();
@@ -160,7 +124,7 @@ function renderBooks() {
 
     <h3>${book.title}</h3>
 
-    <div class="book-count">${book.count} QR</div>
+    <div class="book-count">${book.count || 0} QR</div>
 
     <div class="book-actions">
 
@@ -211,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         saveLocal();
         syncFirebase();
+
         renderBooks();
 
         document.getElementById("deleteModal")?.classList.remove("show");
@@ -246,6 +211,7 @@ document.getElementById("saveAddBtn")?.addEventListener("click", () => {
 
     saveLocal();
     syncFirebase();
+
     renderBooks();
 
     document.getElementById("addModal").classList.remove("show");
@@ -279,6 +245,7 @@ document.getElementById("saveEditBtn")?.addEventListener("click", () => {
 
     saveLocal();
     syncFirebase();
+
     renderBooks();
 
     document.getElementById("editModal").classList.remove("show");
