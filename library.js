@@ -54,27 +54,34 @@ function saveLocal() {
 }
 
 /* ======================
-   MERGE FIX (🔥 أهم إصلاح)
+   🔥 FIXED MERGE (IMPORTANT)
 ====================== */
 
 function mergeBooks(local, remote) {
 
     const map = new Map();
 
-    // local first
     local.forEach(b => map.set(b.id, b));
 
-    // merge remote safely
     remote.forEach(r => {
+
         const existing = map.get(r.id);
 
         if (!existing) {
-            map.set(r.id, r);
+            map.set(r.id, {
+                ...r,
+                qrs: r.qrs || []
+            });
         } else {
+
             map.set(r.id, {
                 ...existing,
                 ...r,
-                qrs: r.qrs || existing.qrs || []
+
+                // 🔥 CRITICAL FIX: NEVER allow qrs to be overwritten with empty/undefined
+                qrs: Array.isArray(r.qrs) && r.qrs.length > 0
+                    ? r.qrs
+                    : existing.qrs || []
             });
         }
     });
@@ -97,7 +104,7 @@ function syncFirebase() {
 }
 
 /* ======================
-   LISTENER (FIXED)
+   🔥 FIXED LISTENER (ROOT FIX)
 ====================== */
 
 function listenFirebase() {
@@ -109,11 +116,12 @@ function listenFirebase() {
         if (!snap.exists()) return;
 
         const data = snap.data();
+
         if (!data || !Array.isArray(data.books)) return;
 
         const remoteBooks = data.books;
 
-        // 🔥 FIX: safe merge instead of overwrite
+        // 🔥 FIX: merge safe + prevent QR loss
         books = mergeBooks(books, remoteBooks);
 
         saveLocal();
