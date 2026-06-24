@@ -3,146 +3,45 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>الكتاب - ATQN QR Studio</title>
+<title>الكتاب</title>
 
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- HEADER -->
 <header class="topbar">
-
-    <div class="brand">
-        <img src="assets/atqn-logo.png" alt="ATQN">
-        <h1>ATQN QR Studio</h1>
-    </div>
-
-    <nav>
-        <a href="index.html">الرئيسة</a>
-        <a href="create.html">إنشاء QR</a>
-        <a href="library.html">مكتبة الكتب</a>
-    </nav>
-
+    <h1 id="bookTitle">📘 الكتاب</h1>
+    <p id="bookCount">0 QR</p>
 </header>
 
-<!-- MAIN -->
 <div class="container">
 
-    <div class="library-header">
-
-        <h2 id="bookTitle">اسم الكتاب</h2>
-        <p id="bookCount">عدد الأكواد: 0</p>
-
-    </div>
-
-    <div class="library-toolbar">
-
-        <button id="addQrBtn" class="add-book-btn">
-            ➕ إضافة QR جديد
-        </button>
-
-        <a href="library.html" class="add-book-btn" style="text-decoration:none;display:inline-block;">
-            ← الرجوع للمكتبة
-        </a>
-
-    </div>
+    <button id="addQrBtn">➕ إضافة QR</button>
 
     <div id="qrList" class="books-grid"></div>
 
 </div>
 
-<!-- ADD QR MODAL -->
-<div id="addQrModal" class="modal-overlay">
-
+<!-- MODAL -->
+<div id="qrModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
 
-        <div class="modal-icon">➕</div>
+        <h3>إضافة QR</h3>
 
-        <h3>إضافة QR جديد</h3>
-
-        <input id="qrTitleInput" type="text" class="modal-input" placeholder="عنوان QR">
-        <input id="qrDescriptionInput" type="text" class="modal-input" placeholder="وصف مختصر">
-        <input id="qrLinkInput" type="text" class="modal-input" placeholder="الرابط أو المحتوى">
+        <input id="qrTitle" placeholder="عنوان">
+        <input id="qrDesc" placeholder="وصف">
+        <input id="qrContent" placeholder="المحتوى / الرابط">
 
         <div class="modal-actions">
-
-            <button id="saveQrBtn" class="modal-btn danger-btn">حفظ</button>
-            <button id="cancelQrBtn" class="modal-btn cancel-btn">إلغاء</button>
-
+            <button id="saveQrBtn">حفظ</button>
+            <button id="cancelQrBtn">إلغاء</button>
         </div>
 
     </div>
-
 </div>
 
-<!-- DELETE QR MODAL -->
-<div id="deleteQrModal" class="modal-overlay">
-
-    <div class="modal-box">
-
-        <div class="modal-icon">⚠️</div>
-
-        <h3>تأكيد الحذف</h3>
-        <p>هل تريد حذف هذا الـ QR؟</p>
-
-        <div class="modal-actions">
-
-            <button id="confirmDeleteQrBtn" class="modal-btn danger-btn">حذف</button>
-            <button id="cancelDeleteQrBtn" class="modal-btn cancel-btn">إلغاء</button>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- QR LIBRARY LIB -->
-<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
-
-<!-- FIREBASE (FIXED ONCE ONLY) -->
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
-  authDomain: "atqn-qr1.firebaseapp.com",
-  projectId: "atqn-qr1",
-  storageBucket: "atqn-qr1.firebasestorage.app",
-  messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* ✅ SAFE GLOBAL EXPORT (CRITICAL FIX) */
-window.db = db;
-
-window.firebaseFirestore = {
-  doc: (...args) => doc(...args),
-  setDoc: (...args) => setDoc(...args),
-  getDoc: (...args) => getDoc(...args),
-  onSnapshot: (...args) => onSnapshot(...args)
-};
-
-console.log("🔥 Firebase Ready (book.html)");
-
-</script>
-
-<!-- MAIN JS -->
-<script src="book.js"></script>
+<script type="module" src="book.js"></script>
 
 </body>
 </html>
