@@ -8,7 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ======================
-   FIREBASE CONFIG
+   FIREBASE CONFIG (مرة واحدة فقط)
 ====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
@@ -19,8 +19,9 @@ const firebaseConfig = {
   appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
 };
 
-const firebaseConfig = window.firebaseConfig;
-
+/* ======================
+   INIT FIREBASE
+====================== */
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -38,7 +39,7 @@ const booksGrid = document.getElementById("booksGrid");
 const addBtn = document.querySelector(".add-book-btn");
 
 /* ======================
-   INIT CHECK (IMPORTANT FIX)
+   CREATE DOC IF NOT EXISTS
 ====================== */
 async function init() {
   const snap = await getDoc(booksRef);
