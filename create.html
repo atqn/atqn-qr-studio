@@ -19,7 +19,7 @@
         <a href="index.html">الرئيسة</a>
         <a href="library.html">مكتبة الكتب</a>
         <a href="create.html">إنشاء QR</a>
-        <a href="login.html">خروج</a>
+        <a href="#" onclick="logout()">خروج</a>
     </nav>
 </header>
 
@@ -38,7 +38,11 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
+<!-- 🔥 مهم جدًا: تفعيل logout -->
+<script type="module">
+import { logout } from "./auth.js";
+window.logout = logout;
+</script>
+
 </body>
 </html>
-
-
