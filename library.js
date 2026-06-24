@@ -1,3 +1,7 @@
+if (!window.firebaseFirestore) {
+    console.error("Firebase not loaded yet");
+}
+
 let deleteBookId = null;
 let books = [];
 
