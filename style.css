@@ -982,7 +982,7 @@ body{
 
 .preview-actions button{
     width: 100%;
-    padding: 9px 10px;
+    padding: 9px 12px;
     font-size: 13px;
     border-radius: 8px;
     transition: 0.2s;
@@ -1089,7 +1089,7 @@ body{
     .primary-btn,
     .save-btn,
     .export-btn {
-        height: 48px;
+        height: 44px;
         font-size: 15px;
     }
 }
