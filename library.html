@@ -140,7 +140,24 @@ console.log("🔥 Firebase Ready");
 </script>
 
 <!-- MAIN JS -->
-<script src="library.js"></script>
+<script>
+(function waitFirebase() {
+
+    function check() {
+
+        if (window.db && window.firebaseFirestore?.doc) {
+            const script = document.createElement("script");
+            script.src = "library.js";
+            document.body.appendChild(script);
+        } else {
+            setTimeout(check, 50);
+        }
+    }
+
+    check();
+
+})();
+</script>
 
 </body>
 </html>
