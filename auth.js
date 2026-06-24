@@ -10,51 +10,38 @@ import {
    LOGIN
 ====================== */
 export async function login(email, password) {
-
-    return await signInWithEmailAndPassword(auth, email, password);
+  return await signInWithEmailAndPassword(auth, email, password);
 }
 
 /* ======================
-   LOGOUT (FORCED FIX)
+   LOGOUT (FIXED)
 ====================== */
-export async function logout() {
-
-    try {
-
-        await signOut(auth);
-
-        sessionStorage.clear();
-        localStorage.removeItem("firebase:authUser");
-
-        window.location.href = "login.html";
-
-    } catch (e) {
-
-        console.error("LOGOUT FAILED:", e);
-    }
+async function logout() {
+  await signOut(auth);
+  window.location.href = "login.html";
 }
 
 /* ======================
    RESET PASSWORD
 ====================== */
 export async function resetPassword(email) {
-
-    return await sendPasswordResetEmail(auth, email);
+  return await sendPasswordResetEmail(auth, email);
 }
 
 /* ======================
-   AUTO AUTH CHECK
+   AUTH GUARD
 ====================== */
-onAuthStateChanged(auth, (user) => {
-
-    const page = location.pathname.split("/").pop();
-
-    if (!user && page !== "login.html") {
-        window.location.href = "login.html";
+export function authGuard(callback) {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
     }
-});
+    callback(user);
+  });
+}
 
 /* ======================
-   GLOBAL EXPORT (IMPORTANT)
+   أهم سطر (الحل الحقيقي)
 ====================== */
 window.logout = logout;
