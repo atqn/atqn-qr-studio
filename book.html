@@ -6,7 +6,6 @@
 <title>الكتاب</title>
 <link rel="stylesheet" href="style.css">
 
-<!-- QR Engine -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 
@@ -28,37 +27,42 @@
 
 <div class="container">
 
-    <h1 id="bookTitle">الكتاب</h1>
-    <p id="bookCount">0 QR</p>
+    <h1 id="bookTitle"></h1>
+    <p id="bookCount"></p>
 
-    <div class="qr-panel">
+    <!-- BOOK ACTIONS -->
+    <button id="deleteBookBtn" style="background:red;color:white;">
+        🗑 حذف الكتاب
+    </button>
 
-        <input id="qrTitle" placeholder="عنوان QR">
-        <input id="qrDesc" placeholder="وصف QR">
-        <input id="qrLink" placeholder="الرابط">
+    <hr>
 
-        <input type="color" id="qrColor" value="#000000">
+    <!-- QR PANEL -->
+    <input id="qrTitle" placeholder="عنوان QR">
+    <input id="qrDesc" placeholder="وصف QR">
+    <input id="qrLink" placeholder="الرابط">
 
-        <select id="qrSize">
-            <option value="300">300 DPI</option>
-            <option value="600">600 DPI</option>
-            <option value="1200">1200 DPI</option>
-            <option value="2400">2400 DPI</option>
-        </select>
+    <input type="color" id="qrColor" value="#000000">
 
-        <input type="file" id="qrLogo">
+    <select id="qrSize">
+        <option value="300">300</option>
+        <option value="600">600</option>
+        <option value="1200">1200</option>
+        <option value="2400">2400</option>
+    </select>
 
-        <button id="generateQR">توليد QR</button>
-        <button id="addQrBtn">➕ حفظ داخل الكتاب</button>
+    <!-- LOGO OPTIONS -->
+    <select id="logoType">
+        <option value="default">شعار ATQN</option>
+        <option value="upload">رفع من الجهاز</option>
+    </select>
 
-    </div>
+    <input type="file" id="logoUpload" style="display:none;">
+
+    <button id="generateQR">توليد QR</button>
+    <button id="saveQR">حفظ</button>
 
     <canvas id="qrCanvas"></canvas>
-
-    <div class="qr-actions">
-        <button id="downloadPNG">تحميل PNG</button>
-        <button id="downloadSVG">تحميل SVG</button>
-    </div>
 
     <div id="qrList"></div>
 
