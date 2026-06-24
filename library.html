@@ -3,161 +3,42 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>مكتبة الكتب - ATQN QR Studio</title>
+<title>مكتبة الكتب</title>
 
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- DELETE MODAL -->
-<div id="deleteModal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-icon">⚠️</div>
-        <h3>تأكيد الحذف</h3>
-        <p>هل تريد حذف هذا الكتاب؟</p>
-
-        <div class="modal-actions">
-            <button id="cancelDeleteBtn" class="modal-btn cancel-btn">إلغاء</button>
-            <button id="confirmDeleteBtn" class="modal-btn danger-btn">حذف</button>
-        </div>
-    </div>
-</div>
-
-<!-- HEADER -->
 <header class="topbar">
-
-    <div class="brand">
-        <img src="assets/atqn-logo.png" alt="ATQN">
-        <h1>ATQN QR Studio</h1>
-    </div>
-
-    <nav>
-        <a href="index.html">الرئيسة</a>
-        <a href="create.html">إنشاء QR</a>
-        <a href="library.html">مكتبة الكتب</a>
-        <a href="#" onclick="logout()">خروج</a>
-    </nav>
-
+    <h1>📚 مكتبة الكتب</h1>
 </header>
 
-<!-- MAIN -->
 <div class="container">
 
-    <div class="library-header">
-        <h2>إدارة الكتب</h2>
-    </div>
+    <button id="addBookBtn">➕ إضافة كتاب</button>
 
-    <div class="library-toolbar">
-        <button class="add-book-btn">➕ إضافة كتاب جديد</button>
-    </div>
-
-    <div class="books-scroll">
-        <div id="booksGrid" class="books-grid"></div>
-    </div>
+    <div id="booksGrid" class="books-grid"></div>
 
 </div>
 
-<!-- EDIT MODAL -->
-<div id="editModal" class="modal-overlay">
-
+<!-- MODAL -->
+<div id="modal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
 
-        <div class="modal-icon">✏️</div>
+        <h3>إضافة كتاب</h3>
 
-        <h3>تعديل الكتاب</h3>
-
-        <input id="editBookTitle" type="text" class="modal-input">
+        <input id="bookTitleInput" placeholder="اسم الكتاب">
 
         <div class="modal-actions">
-            <button id="saveEditBtn" class="modal-btn danger-btn">حفظ</button>
-            <button id="cancelEditBtn" class="modal-btn cancel-btn">إلغاء</button>
+            <button id="saveBtn">حفظ</button>
+            <button id="cancelBtn">إلغاء</button>
         </div>
 
     </div>
-
 </div>
 
-<!-- ADD MODAL -->
-<div id="addModal" class="modal-overlay">
-
-    <div class="modal-box">
-
-        <div class="modal-icon">➕</div>
-
-        <h3>إضافة كتاب جديد</h3>
-
-        <input id="newBookTitle" type="text" class="modal-input" placeholder="اسم الكتاب">
-
-        <div class="modal-actions">
-            <button id="saveAddBtn" class="modal-btn danger-btn">إضافة</button>
-            <button id="cancelAddBtn" class="modal-btn cancel-btn">إلغاء</button>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- FIREBASE (FIXED ONCE ONLY) -->
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
-  authDomain: "atqn-qr1.firebaseapp.com",
-  projectId: "atqn-qr1",
-  storageBucket: "atqn-qr1.firebasestorage.app",
-  messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* ✅ SAFE GLOBAL EXPORT (FIX DOC ERROR) */
-window.db = db;
-
-window.firebaseFirestore = {
-  doc: (...args) => doc(...args),
-  setDoc: (...args) => setDoc(...args),
-  getDoc: (...args) => getDoc(...args),
-  onSnapshot: (...args) => onSnapshot(...args)
-};
-
-console.log("🔥 Firebase Ready");
-
-</script>
-
-<!-- MAIN JS -->
-<script>
-(function waitFirebase() {
-
-    function check() {
-
-        if (window.db && window.firebaseFirestore?.doc) {
-            const script = document.createElement("script");
-            script.src = "library.js";
-            document.body.appendChild(script);
-        } else {
-            setTimeout(check, 50);
-        }
-    }
-
-    check();
-
-})();
-</script>
+<script type="module" src="library.js"></script>
 
 </body>
 </html>
