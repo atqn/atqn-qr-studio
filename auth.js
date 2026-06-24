@@ -7,24 +7,24 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 /* ======================
-   LOGIN
+   LOGIN FUNCTION
 ====================== */
 export async function login(email, password) {
 
-  return await signInWithEmailAndPassword(auth, email, password);
+    return await signInWithEmailAndPassword(auth, email, password);
 }
 
 /* ======================
-   LOGOUT (FIXED)
+   LOGOUT FUNCTION (FIXED)
 ====================== */
 export async function logout() {
 
-  try {
-    await signOut(auth);
-    window.location.href = "login.html";
-  } catch (e) {
-    console.error("Logout error:", e);
-  }
+    try {
+        await signOut(auth);
+        window.location.replace("login.html");
+    } catch (error) {
+        console.error("Logout error:", error);
+    }
 }
 
 /* ======================
@@ -32,26 +32,26 @@ export async function logout() {
 ====================== */
 export async function resetPassword(email) {
 
-  return await sendPasswordResetEmail(auth, email);
+    return await sendPasswordResetEmail(auth, email);
 }
 
 /* ======================
-   GUARD
+   AUTH GUARD
 ====================== */
 export function authGuard(callback) {
 
-  onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
 
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
+        if (!user) {
+            window.location.replace("login.html");
+            return;
+        }
 
-    callback(user);
-  });
+        callback(user);
+    });
 }
 
 /* ======================
-   GLOBAL LOGOUT (for HTML onclick)
+   GLOBAL ACCESS (IMPORTANT FOR HTML onclick)
 ====================== */
 window.logout = logout;
