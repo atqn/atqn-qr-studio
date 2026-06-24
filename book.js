@@ -36,10 +36,13 @@ let lastQR = "";
 let logoImg = null;
 
 /* ======================
-   ELEMENTS (SAFE)
+   ELEMENTS
 ====================== */
 const canvas = document.getElementById("qrCanvas");
 const ctx = canvas.getContext("2d");
+
+const titleEl = document.getElementById("bookTitle");
+const countEl = document.getElementById("bookCount");
 
 const qrTitle = document.getElementById("qrTitle");
 const qrDesc = document.getElementById("qrDesc");
@@ -64,16 +67,17 @@ document.getElementById("logoUpload")?.addEventListener("change", (e) => {
 });
 
 /* ======================
-   FIRESTORE
+   FIRESTORE REALTIME
 ====================== */
 onSnapshot(booksRef, (snap) => {
+
   books = snap.data()?.books || [];
   currentBook = books.find(b => b.id === bookId);
 
   if (!currentBook) return;
 
-  document.getElementById("bookTitle").innerText = currentBook.title;
-  document.getElementById("bookCount").innerText = currentBook.qrs?.length || 0;
+  titleEl.innerText = currentBook.title;
+  countEl.innerText = (currentBook.qrs?.length || 0) + " QR";
 
   render();
 });
@@ -82,9 +86,11 @@ onSnapshot(booksRef, (snap) => {
    RENDER LIST
 ====================== */
 function render() {
+
   qrList.innerHTML = "";
 
   (currentBook?.qrs || []).forEach(qr => {
+
     qrList.innerHTML += `
       <div class="book-card">
         <h3>${qr.title}</h3>
@@ -97,15 +103,14 @@ function render() {
 }
 
 /* ======================
-   GENERATE QR (FIXED)
+   GENERATE QR + AUTO SAVE
 ====================== */
-document.getElementById("generateQR").onclick = async () => {
+document.getElementById("generateQR").addEventListener("click", async () => {
 
-  if (!qrLink.value) return;
+  const link = qrLink.value;
+  if (!link) return;
 
-  lastQR = qrLink.value.startsWith("http")
-    ? qrLink.value
-    : "https://" + qrLink.value;
+  lastQR = link.startsWith("http") ? link : "https://" + link;
 
   const size = Number(qrSize.value);
 
@@ -116,91 +121,64 @@ document.getElementById("generateQR").onclick = async () => {
     width: size,
     color: {
       dark: qrColor.value,
-      light: "#fff"
+      light: "#ffffff"
     },
     errorCorrectionLevel: "H"
   });
 
   if (logoImg) {
-    const s = size * 0.22;
-    ctx.drawImage(logoImg, (size - s) / 2, (size - s) / 2, s, s);
+    const logoSize = size * 0.22;
+
+    ctx.drawImage(
+      logoImg,
+      (size - logoSize) / 2,
+      (size - logoSize) / 2,
+      logoSize,
+      logoSize
+    );
   }
-};
 
-/* ======================
-   SAVE QR
-====================== */
-document.getElementById("addQrBtn").onclick = async () => {
+  /* ======================
+     AUTO SAVE (REAL-TIME)
+  ====================== */
 
-  if (!qrTitle.value || !lastQR) return;
+  const index = books.findIndex(b => b.id === bookId);
 
-  const i = books.findIndex(b => b.id === bookId);
+  if (index === -1) return;
 
-  books[i].qrs ??= [];
+  books[index].qrs ??= [];
 
-  books[i].qrs.push({
+  books[index].qrs.push({
     id: Date.now(),
-    title: qrTitle.value,
-    description: qrDesc.value,
+    title: qrTitle.value || "QR",
+    description: qrDesc.value || "",
     content: lastQR
   });
 
+  books[index].count = books[index].qrs.length;
+
   await setDoc(booksRef, { books });
-};
+});
 
 /* ======================
    DELETE QR
 ====================== */
-window.deleteQR = async (id) => {
+window.deleteQR = async function (id) {
 
-  const i = books.findIndex(b => b.id === bookId);
+  const index = books.findIndex(b => b.id === bookId);
 
-  books[i].qrs = books[i].qrs.filter(q => q.id !== id);
+  if (index === -1) return;
+
+  books[index].qrs = books[index].qrs.filter(q => q.id !== id);
+
+  books[index].count = books[index].qrs.length;
 
   await setDoc(booksRef, { books });
 };
 
 /* ======================
-   OPEN
+   OPEN QR
 ====================== */
-window.openQR = (url) => {
-  if (url) window.open(url, "_blank");
-};
-
-/* ======================
-   PNG
-====================== */
-document.getElementById("downloadPNG").onclick = () => {
-
-  const name = `${document.getElementById("bookTitle").innerText}_${qrTitle.value}`;
-
-  const a = document.createElement("a");
-  a.download = name + ".png";
-  a.href = canvas.toDataURL("image/png");
-  a.click();
-};
-
-/* ======================
-   SVG
-====================== */
-document.getElementById("downloadSVG").onclick = async () => {
-
-  const svg = await QRCode.toString(lastQR, {
-    type: "svg",
-    width: Number(qrSize.value),
-    color: {
-      dark: qrColor.value,
-      light: "#fff"
-    },
-    errorCorrectionLevel: "H"
-  });
-
-  const name = `${document.getElementById("bookTitle").innerText}_${qrTitle.value}`;
-
-  const blob = new Blob([svg], { type: "image/svg+xml" });
-
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name + ".svg";
-  a.click();
+window.openQR = function (url) {
+  window.open(url, "_blank");
 };
