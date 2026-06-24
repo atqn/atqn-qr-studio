@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmDeleteQrBtn = document.getElementById("confirmDeleteQrBtn");
     const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
+    
     // =========================
     // STORAGE
     // =========================
