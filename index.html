@@ -1,137 +1,33 @@
-
-<header class="topbar">
-
-<script>
-function logout(){
-    localStorage.removeItem("logged");
-    window.location.href = "login.html";
-}
-</script>
-
-
-    
-    <div class="brand">
-        <img src="assets/atqn-logo.png">
-        <h1>ATQN QR Studio</h1>
-    </div>
-
-<nav>
-    <a href="index.html">الرئيسة</a>
-    <a href="create.html">إنشاء QR</a>
-    <a href="library.html">مكتبة الكتب</a>
-    <a href="#" onclick="logout()">خروج</a>
-</nav>
-
-</header>
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ATQN QR Studio</title>
-
 <link rel="stylesheet" href="style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
+<header class="topbar">
+    <h1>📚 ATQN QR Studio</h1>
+</header>
+
 <div class="container">
 
-    <div class="hero">
+    <div class="home-grid">
 
-        <div class="logo-box">
-            <h1>ATQN QR Studio</h1>
-        </div>
-
-        <p class="subtitle">
-            إدارة وإنشاء أكواد QR للكتب التعليمية
-        </p>
-
-    </div>
-
-    <div class="stats">
-
-        <div class="card">
-            <div class="number">0</div>
-            <div class="label">عدد الكتب</div>
-        </div>
-
-        <div class="card">
-            <div class="number">0</div>
-            <div class="label">عدد الباركودات</div>
-        </div>
-
-    </div>
-
-    <div class="actions">
-
-        <a href="create.html" class="action-card">
-            <span>➕</span>
-            <h2>إنشاء QR جديد</h2>
+        <a href="library.html" class="card">
+            📚 المكتبة
         </a>
 
-        <a href="library.html" class="action-card">
-            <span>📚</span>
-            <h2>مكتبة الكتب</h2>
+        <a href="create.html" class="card">
+            ➕ إنشاء QR
         </a>
 
     </div>
 
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
-  authDomain: "atqn-qr1.firebaseapp.com",
-  projectId: "atqn-qr1",
-  storageBucket: "atqn-qr1.firebasestorage.app",
-  messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.db = db;
-window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const books = JSON.parse(localStorage.getItem("atqn_books") || "[]");
-
-    const booksCount = books.length;
-
-    let qrCount = 0;
-
-    books.forEach(book => {
-        qrCount += (book.count || 0);
-    });
-
-    const numbers = document.querySelectorAll(".number");
-
-    if (numbers.length >= 2) {
-        numbers[0].textContent = booksCount;
-        numbers[1].textContent = qrCount;
-    }
-
-});
-</script>
-
-<script>
-if(localStorage.getItem("logged") !== "true"){
-    window.location.href = "login.html";
-}
-</script>
-    
 </body>
 </html>
