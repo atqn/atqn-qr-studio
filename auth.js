@@ -7,11 +7,9 @@ const auth = getAuth();
 ====================== */
 window.logout = async function () {
 
-    try {
-        await signOut(auth);
-        window.location.href = "login.html";
-    } catch (e) {
-        console.error("Logout Error:", e);
-        alert("حدث خطأ أثناء تسجيل الخروج");
-    }
+    await signOut(auth);
+
+    sessionStorage.removeItem("auth");
+
+    window.location.replace("login.html");
 };
