@@ -15,12 +15,16 @@ export async function login(email, password) {
 }
 
 /* ======================
-   LOGOUT
+   LOGOUT (FIXED)
 ====================== */
 export async function logout() {
 
-  await signOut(auth);
-  window.location.href = "login.html";
+  try {
+    await signOut(auth);
+    window.location.href = "login.html";
+  } catch (e) {
+    console.error("Logout error:", e);
+  }
 }
 
 /* ======================
@@ -32,7 +36,7 @@ export async function resetPassword(email) {
 }
 
 /* ======================
-   GUARD (PROTECTION)
+   GUARD
 ====================== */
 export function authGuard(callback) {
 
@@ -46,3 +50,8 @@ export function authGuard(callback) {
     callback(user);
   });
 }
+
+/* ======================
+   GLOBAL LOGOUT (for HTML onclick)
+====================== */
+window.logout = logout;
