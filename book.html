@@ -9,20 +9,36 @@
 
 <body>
 
-<script type="module">
-import { loadHeader } from "./header.js";
-import { authGuard } from "./auth.js";
+<header class="topbar">
+    <div class="brand">
+        <img src="assets/atqn-logo.png" alt="ATQN">
+        <h1>ATQN QR Studio</h1>
+    </div>
 
-loadHeader();
-
-authGuard(() => {
-  console.log("book page ready");
-});
-</script>
+    <nav>
+        <a href="index.html">الرئيسة</a>
+        <a href="library.html">مكتبة الكتب</a>
+        <a href="create.html">إنشاء QR</a>
+        <a href="login.html">خروج</a>
+    </nav>
+</header>
 
 <div class="container">
-    <h1>📘 الكتاب</h1>
+    <h1 id="bookTitle">الكتاب</h1>
+    <p id="bookCount">0 QR</p>
+    <div id="qrList"></div>
 </div>
+
+<script type="module">
+import { auth } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = "login.html";
+    }
+});
+</script>
 
 </body>
 </html>
