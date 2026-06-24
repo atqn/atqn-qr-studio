@@ -5,39 +5,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    
 <title>مكتبة الكتب - ATQN QR Studio</title>
 
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-
 </head>
+
+<body>
 
 <div id="deleteModal" class="modal-overlay">
 
     <div class="modal-box">
 
-        <div class="modal-icon">
-            ⚠️
-        </div>
+        <div class="modal-icon">⚠️</div>
 
         <h3>تأكيد الحذف</h3>
 
-        <p>
-            هل تريد حذف هذا الكتاب؟
-        </p>
+        <p>هل تريد حذف هذا الكتاب؟</p>
 
         <div class="modal-actions">
 
-            <button
-                id="cancelDeleteBtn"
-                class="modal-btn cancel-btn">
+            <button id="cancelDeleteBtn" class="modal-btn cancel-btn">
                 إلغاء
             </button>
 
-            <button
-                id="confirmDeleteBtn"
-                class="modal-btn danger-btn">
+            <button id="confirmDeleteBtn" class="modal-btn danger-btn">
                 حذف
             </button>
 
@@ -46,9 +38,6 @@
     </div>
 
 </div>
-
-    
-<body>
 
 <header class="topbar">
 
@@ -60,77 +49,55 @@
 
     </div>
 
-<nav>
-    <a href="index.html">الرئيسة</a>
-    <a href="create.html">إنشاء QR</a>
-    <a href="library.html">مكتبة الكتب</a>
-    <a href="#" onclick="logout()">خروج</a>
-</nav>
+    <nav>
+        <a href="index.html">الرئيسة</a>
+        <a href="create.html">إنشاء QR</a>
+        <a href="library.html">مكتبة الكتب</a>
+        <a href="#" onclick="logout()">خروج</a>
+    </nav>
 
 </header>
 
 <div class="container">
 
     <div class="library-header">
-
         <h2>إدارة الكتب</h2>
+    </div>
 
+    <div class="library-toolbar">
+
+        <button class="add-book-btn">
+            ➕ إضافة كتاب جديد
+        </button>
 
     </div>
 
-<div class="library-toolbar">
+    <div class="books-scroll">
 
-    <button class="add-book-btn">
-        ➕ إضافة كتاب جديد
-    </button>
+        <div id="booksGrid" class="books-grid"></div>
 
-</div>
-
-<div class="books-scroll">
-
-    <div id="booksGrid" class="books-grid">
-    </div>
-
-</div>
-
-</div>
     </div>
 
 </div>
 
-
-<div
-    id="editModal"
-    class="modal-overlay">
+<!-- EDIT MODAL -->
+<div id="editModal" class="modal-overlay">
 
     <div class="modal-box">
 
-        <div class="modal-icon">
-            ✏️
-        </div>
+        <div class="modal-icon">✏️</div>
 
-        <h3>
-            تعديل الكتاب
-        </h3>
+        <h3>تعديل الكتاب</h3>
 
-        <input
-            id="editBookTitle"
-            type="text"
-            class="modal-input">
+        <input id="editBookTitle" type="text" class="modal-input">
 
         <div class="modal-actions">
 
-            <button
-                id="saveEditBtn"
-                class="modal-btn danger-btn">
-
+            <button id="saveEditBtn" class="modal-btn danger-btn">
                 حفظ
             </button>
 
-            <button
-                id="cancelEditBtn"
-                class="modal-btn cancel-btn">
-
+            <button id="cancelEditBtn" class="modal-btn cancel-btn">
                 إلغاء
             </button>
 
@@ -140,39 +107,24 @@
 
 </div>
 
-<div
-    id="addModal"
-    class="modal-overlay">
+<!-- ADD MODAL -->
+<div id="addModal" class="modal-overlay">
 
     <div class="modal-box">
 
-        <div class="modal-icon">
-            ➕
-        </div>
+        <div class="modal-icon">➕</div>
 
-        <h3>
-            إضافة كتاب جديد
-        </h3>
+        <h3>إضافة كتاب جديد</h3>
 
-        <input
-            id="newBookTitle"
-            type="text"
-            class="modal-input"
-            placeholder="اسم الكتاب">
+        <input id="newBookTitle" type="text" class="modal-input" placeholder="اسم الكتاب">
 
         <div class="modal-actions">
 
-            <button
-                id="saveAddBtn"
-                class="modal-btn danger-btn">
-
+            <button id="saveAddBtn" class="modal-btn danger-btn">
                 إضافة
             </button>
 
-            <button
-                id="cancelAddBtn"
-                class="modal-btn cancel-btn">
-
+            <button id="cancelAddBtn" class="modal-btn cancel-btn">
                 إلغاء
             </button>
 
@@ -182,10 +134,17 @@
 
 </div>
 
+<!-- FIREBASE FIX (IMPORTANT) -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
@@ -199,11 +158,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ======================
+   SAFE GLOBAL EXPORT
+====================== */
 window.db = db;
-window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
+
+window.firebaseFirestore = {
+  doc: (...args) => doc(...args),
+  setDoc: (...args) => setDoc(...args),
+  getDoc: (...args) => getDoc(...args),
+  onSnapshot: (...args) => onSnapshot(...args)
+};
+
+console.log("🔥 Firebase Ready");
+
 </script>
-    
+
 <script src="library.js"></script>
-   
+
 </body>
 </html>
