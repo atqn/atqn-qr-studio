@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentBook = null;
 
     const qrList = document.getElementById("qrList");
-    const addQrBtn = document.getElementById("addQrBtn");
 
     let editQrId = null;
     let deleteQrId = null;
@@ -119,12 +118,29 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* ======================
-       ADD QR MODAL
+       🔥 FIXED ADD QR BUTTON
+       (IMPORTANT: prevents timing issues)
     ====================== */
-    addQrBtn.addEventListener("click", () => {
-        document.getElementById("addQrModal").classList.add("show");
-    });
+    function bindAddButton() {
 
+        const btn = document.getElementById("addQrBtn");
+        const modal = document.getElementById("addQrModal");
+
+        if (!btn || !modal) {
+            setTimeout(bindAddButton, 100);
+            return;
+        }
+
+        btn.onclick = function () {
+            modal.classList.add("show");
+        };
+    }
+
+    bindAddButton();
+
+    /* ======================
+       CLOSE MODAL
+    ====================== */
     document.getElementById("cancelQrBtn")?.addEventListener("click", () => {
         document.getElementById("addQrModal").classList.remove("show");
     });
@@ -145,28 +161,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!books[index].qrs) books[index].qrs = [];
 
-        if (editQrId) {
-
-            const qIndex = books[index].qrs.findIndex(q => q.id === editQrId);
-
-            if (qIndex !== -1) {
-                books[index].qrs[qIndex] = {
-                    id: editQrId,
-                    title,
-                    description,
-                    content: link
-                };
-            }
-
-        } else {
-
-            books[index].qrs.push({
-                id: Date.now(),
-                title,
-                description,
-                content: link
-            });
-        }
+        books[index].qrs.push({
+            id: Date.now(),
+            title,
+            description,
+            content: link
+        });
 
         books[index].count = books[index].qrs.length;
 
