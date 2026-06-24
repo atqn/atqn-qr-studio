@@ -24,3 +24,4 @@ export function loadHeader() {
     import("./auth.js").then(m => m.logout());
   };
 }
+
