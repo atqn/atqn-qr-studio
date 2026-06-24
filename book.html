@@ -3,10 +3,12 @@
 
 <head>
 <meta charset="UTF-8">
-<title>ATQN QR Studio</title>
+<title>الكتاب - ATQN</title>
+
 <link rel="stylesheet" href="style.css">
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<!-- QR STYLING ENGINE -->
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 </head>
 
 <body>
@@ -18,7 +20,7 @@
     </div>
 
     <nav>
-        <a href="index.html">الرئيسية</a>
+        <a href="index.html">الرئيسة</a>
         <a href="library.html">المكتبة</a>
         <a href="create.html">إنشاء QR</a>
         <a href="#" onclick="logout()">خروج</a>
@@ -27,33 +29,58 @@
 
 <div class="container">
 
-    <h2 id="bookTitle"></h2>
-    <p id="bookCount"></p>
+    <div class="library-header">
+        <h2 id="bookTitle">الكتاب</h2>
+        <p id="bookCount">0 QR</p>
+    </div>
 
+    <!-- QR Editor Panel -->
     <div class="qr-panel">
 
         <input id="qrTitle" placeholder="عنوان QR">
-        <input id="qrDesc" placeholder="وصف">
+        <input id="qrDesc" placeholder="وصف QR">
         <input id="qrLink" placeholder="الرابط">
 
         <input type="color" id="qrColor" value="#000000">
 
         <select id="qrSize">
-            <option value="300">300</option>
-            <option value="600">600</option>
-            <option value="1200">1200</option>
-            <option value="2400">2400</option>
+            <option value="300">300 DPI</option>
+            <option value="600">600 DPI</option>
+            <option value="1200">1200 DPI</option>
+            <option value="2400">2400 DPI</option>
         </select>
 
-        <input type="file" id="logoUpload">
+        <select id="qrStyle">
+            <option value="square">Square</option>
+            <option value="dots">Dots</option>
+            <option value="rounded">Rounded</option>
+            <option value="extra-rounded">Extra Rounded</option>
+        </select>
 
-        <button id="generateQR">توليد QR</button>
-        <button id="saveQR">حفظ</button>
+        <select id="logoMode">
+            <option value="default">شعار ATQN</option>
+            <option value="upload">رفع شعار</option>
+        </select>
+
+        <input type="file" id="logoUpload" style="display:none;">
+
+        <button id="generateQR">⚡ توليد QR</button>
+        <button id="saveQR">💾 حفظ</button>
 
     </div>
 
-    <canvas id="qrCanvas"></canvas>
+    <!-- Preview -->
+    <div id="qrCanvas"></div>
 
+    <!-- Actions -->
+    <div class="qr-actions">
+        <button id="downloadPNG">تحميل PNG</button>
+        <button id="downloadSVG">تحميل SVG</button>
+    </div>
+
+    <hr>
+
+    <!-- LIST -->
     <div id="qrList"></div>
 
 </div>
