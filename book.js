@@ -1,3 +1,17 @@
+function waitFirebaseReady(callback) {
+
+    const check = () => {
+
+        if (window.firebaseFirestore?.doc && window.db) {
+            callback();
+        } else {
+            setTimeout(check, 100);
+        }
+    };
+
+    check();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const params = new URLSearchParams(window.location.search);
