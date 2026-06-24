@@ -1,1 +1,28 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
+<head>
+<meta charset="UTF-8">
+<title>الرئيسية</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script type="module">
+import { loadHeader } from "./header.js";
+import { authGuard } from "./auth.js";
+
+loadHeader();
+
+authGuard(() => {
+  console.log("logged in");
+});
+</script>
+
+<div class="container">
+    <h1>مرحبًا بك في ATQN QR</h1>
+</div>
+
+</body>
+</html>
