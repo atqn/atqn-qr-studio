@@ -14,12 +14,12 @@ export async function login(email, password) {
 }
 
 /* ======================
-   LOGOUT (REAL FIX)
+   LOGOUT (FIXED 100%)
 ====================== */
 async function logout() {
   try {
     await signOut(auth);
-    window.location.replace("login.html");
+    window.location.href = "login.html";
   } catch (e) {
     console.error(e);
   }
@@ -33,19 +33,17 @@ export async function resetPassword(email) {
 }
 
 /* ======================
-   AUTH GUARD
+   AUTO GUARD
 ====================== */
-export function authGuard(callback) {
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.replace("login.html");
-      return;
-    }
-    callback(user);
-  });
-}
+onAuthStateChanged(auth, (user) => {
+  const page = location.pathname.split("/").pop();
+
+  if (!user && page !== "login.html") {
+    window.location.href = "login.html";
+  }
+});
 
 /* ======================
-   🔥 أهم سطر في الحل
+   🔥 هذا هو الحل الحقيقي
 ====================== */
 window.logout = logout;
