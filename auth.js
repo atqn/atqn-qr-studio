@@ -46,3 +46,4 @@ export function authGuard(callback) {
     callback(user);
   });
 }
+
