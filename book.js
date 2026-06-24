@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ======================
-   FIREBASE CONFIG (نفس المكتبة السابقة)
+   FIREBASE CONFIG
 ====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
@@ -89,7 +89,7 @@ function render() {
 }
 
 /* ======================
-   ADD QR
+   ADD QR (FIXED URL ISSUE)
 ====================== */
 async function addQR() {
 
@@ -105,7 +105,7 @@ async function addQR() {
   books[index].qrs.push({
     id: Date.now(),
     title,
-    content: link
+    content: link.startsWith("http") ? link : "https://" + link
   });
 
   books[index].count = books[index].qrs.length;
@@ -128,9 +128,12 @@ window.deleteQR = async function (id) {
 };
 
 /* ======================
-   OPEN QR
+   OPEN QR (SAFE FIX)
 ====================== */
 window.openQR = function (url) {
+
+  if (!url) return;
+
   window.open(url, "_blank");
 };
 
