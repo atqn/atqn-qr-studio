@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
-    
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,30 +13,29 @@
 
 <body>
 
-    
+<!-- HEADER -->
 <header class="topbar">
 
     <div class="brand">
         <img src="assets/atqn-logo.png" alt="ATQN">
-        <div>
-            <h1>ATQN QR Studio</h1>
-        </div>
+        <h1>ATQN QR Studio</h1>
     </div>
 
-<nav>
-    <a href="index.html">الرئيسة</a>
-    <a href="create.html">إنشاء QR</a>
-    <a href="library.html">مكتبة الكتب</a>
-    <a href="#" onclick="logout()">خروج</a>
-</nav>
+    <nav>
+        <a href="index.html">الرئيسة</a>
+        <a href="create.html">إنشاء QR</a>
+        <a href="library.html">مكتبة الكتب</a>
+        <a href="#" onclick="logout()">خروج</a>
+    </nav>
 
 </header>
 
+<!-- MAIN -->
 <div class="container">
 
     <div class="create-layout">
 
-        <!-- العمود 1 -->
+        <!-- COLUMN 1 -->
         <div class="panel">
 
             <h3>بيانات الباركود</h3>
@@ -54,38 +52,12 @@
             <label>المحتوى / الرابط</label>
             <input id="qrContentInput" type="text">
 
-            <div class="info-card">
-                <div class="info-title">📚 تنظيم الباركودات</div>
-                <p>
-                    استخدم اسم الكتاب لتجميع جميع أكواد QR داخل مكتبة واحدة.
-                </p>
-            </div>
-
         </div>
 
-        <!-- العمود 2 -->
+        <!-- COLUMN 2 -->
         <div class="panel">
 
             <h3>الإعدادات</h3>
-
-            <div class="logo-options">
-
-                <label class="radio-item">
-                    <input type="radio" name="logoMode" checked>
-                    <span>استخدام شعار ATQN</span>
-                </label>
-
-                <label class="radio-item">
-                    <input type="radio" name="logoMode">
-                    <span>رفع شعار من الجهاز</span>
-                </label>
-
-            </div>
-
-            <label>رفع الشعار داخل QR</label>
-            <input type="file" id="qrLogoInput" accept="image/*">
-
-            <div class="settings-divider"></div>
 
             <label>اللون</label>
             <input id="qrColorInput" type="color" value="#38bdf8">
@@ -96,8 +68,6 @@
                 <option value="dots">Dots</option>
                 <option value="rounded">Rounded</option>
                 <option value="extra-rounded">Extra Rounded</option>
-                <option value="classy">Classy</option>
-                <option value="classy-rounded">Classy Rounded</option>
             </select>
 
             <label>الدقة</label>
@@ -105,34 +75,36 @@
                 <option value="300">300</option>
                 <option value="600" selected>600</option>
                 <option value="1200">1200</option>
-                <option value="2400">2400</option>
             </select>
+
+            <label>رفع شعار</label>
+            <input type="file" id="qrLogoInput">
 
         </div>
 
-        <!-- العمود 3 -->
+        <!-- COLUMN 3 -->
         <div class="panel preview-panel">
 
             <h3>المعاينة</h3>
 
             <div id="qrPreviewBox" class="preview-box"></div>
 
-            <div class="preview-actions vertical-actions">
+            <div class="preview-actions">
 
                 <button id="generatePreviewBtn" class="action-btn primary">
-                    ⚡ توليد المعاينة
+                    ⚡ توليد
                 </button>
 
                 <button id="saveQrChangesBtn" class="action-btn success">
-                    📚 حفظ في المكتبة
+                    💾 حفظ
                 </button>
 
                 <button id="downloadQrBtn" class="action-btn dark">
-                    ⬇️ تحميل PNG
+                    ⬇️ PNG
                 </button>
 
                 <button id="downloadSvgBtn" class="action-btn dark">
-                    ⬇️ تحميل SVG
+                    ⬇️ SVG
                 </button>
 
             </div>
@@ -143,25 +115,22 @@
 
 </div>
 
-<!-- QR Library -->
+<!-- QR LIB -->
 <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 
-<!-- Firebase -->
+<!-- FIREBASE (FIXED ONCE ONLY - NO DUPLICATION) -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
   doc,
-  getDoc,
   setDoc,
+  getDoc,
   updateDoc,
-  arrayUnion,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ======================
-   Firebase Config
-====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
   authDomain: "atqn-qr1.firebaseapp.com",
@@ -171,55 +140,26 @@ const firebaseConfig = {
   appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
 };
 
-/* ======================
-   Init Firebase
-====================== */
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ======================
-   Expose SAFE GLOBAL API
-====================== */
+/* ✅ SAFE GLOBAL EXPORT (IMPORTANT FIX) */
 window.db = db;
 
 window.firebaseFirestore = {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  onSnapshot
+  doc: (...args) => doc(...args),
+  setDoc: (...args) => setDoc(...args),
+  updateDoc: (...args) => updateDoc(...args),
+  getDoc: (...args) => getDoc(...args),
+  onSnapshot: (...args) => onSnapshot(...args)
 };
 
-console.log("🔥 Firebase initialized successfully");
+console.log("🔥 Firebase Ready (create.html)");
+
 </script>
 
-<!-- Toast -->
-<div id="toast"></div>
-
-<!-- JS -->
+<!-- MAIN JS -->
 <script src="create.js"></script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
-  authDomain: "atqn-qr1.firebaseapp.com",
-  projectId: "atqn-qr1",
-  storageBucket: "atqn-qr1.firebasestorage.app",
-  messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.db = db;
-window.firebaseFirestore = { doc, setDoc, getDoc, onSnapshot };
-</script>
-    
 </body>
 </html>
