@@ -3,7 +3,8 @@ import {
   getFirestore,
   doc,
   setDoc,
-  onSnapshot
+  onSnapshot,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ======================
@@ -18,12 +19,11 @@ const firebaseConfig = {
   appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
 };
 
+const firebaseConfig = window.firebaseConfig;
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ======================
-   FIRESTORE REF
-====================== */
 const booksRef = doc(db, "books", "global");
 
 /* ======================
@@ -38,23 +38,36 @@ const booksGrid = document.getElementById("booksGrid");
 const addBtn = document.querySelector(".add-book-btn");
 
 /* ======================
-   LOAD REALTIME DATA
+   INIT CHECK (IMPORTANT FIX)
+====================== */
+async function init() {
+  const snap = await getDoc(booksRef);
+
+  if (!snap.exists()) {
+    await setDoc(booksRef, { books: [] });
+  }
+}
+
+init();
+
+/* ======================
+   REALTIME LISTENER
 ====================== */
 onSnapshot(booksRef, (snap) => {
+
   const data = snap.data();
 
-  if (!data) {
+  if (!data || !data.books) {
     books = [];
-    render();
-    return;
+  } else {
+    books = data.books;
   }
 
-  books = data.books || [];
   render();
 });
 
 /* ======================
-   RENDER BOOKS
+   RENDER
 ====================== */
 function render() {
 
@@ -71,9 +84,7 @@ function render() {
 
         <h3>${book.title}</h3>
 
-        <div class="book-count">
-          ${book.count || 0} QR
-        </div>
+        <div class="book-count">${book.count || 0} QR</div>
 
         <button onclick="openBook(${book.id})" class="book-btn">
           فتح الكتاب
@@ -89,13 +100,13 @@ function render() {
 ====================== */
 async function addBook() {
 
-  const title = prompt("اسم الكتاب:");
+  const title = prompt("اسم الكتاب");
 
   if (!title) return;
 
   const newBook = {
     id: Date.now(),
-    title: title,
+    title,
     icon: "📘",
     count: 0,
     qrs: []
@@ -114,7 +125,7 @@ window.openBook = function (id) {
 };
 
 /* ======================
-   CLICK ADD BUTTON
+   CLICK EVENT
 ====================== */
 if (addBtn) {
   addBtn.addEventListener("click", addBook);
