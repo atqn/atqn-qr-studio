@@ -11,9 +11,9 @@
 
 <div class="login-box">
 
-    <h2>🔐 تسجيل الدخول</h2>
+    <h2>تسجيل الدخول</h2>
 
-    <input id="email" placeholder="البريد الإلكتروني">
+    <input id="email" placeholder="البريد">
     <input id="password" type="password" placeholder="كلمة المرور">
 
     <button id="loginBtn">دخول</button>
@@ -29,51 +29,25 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-/* ======================
-   منع الدخول إذا كان مسجل مسبقًا
-====================== */
 onAuthStateChanged(auth, (user) => {
     if (user) {
         window.location.href = "index.html";
     }
 });
 
-/* ======================
-   LOGIN
-====================== */
 document.getElementById("loginBtn").onclick = async () => {
-
     const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const pass = document.getElementById("password").value;
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "index.html";
-    } catch (e) {
-        alert("خطأ في تسجيل الدخول");
-    }
+    await signInWithEmailAndPassword(auth, email, pass);
+    window.location.href = "index.html";
 };
 
-/* ======================
-   RESET PASSWORD
-====================== */
 document.getElementById("resetBtn").onclick = async () => {
-
     const email = document.getElementById("email").value;
-
-    if (!email) {
-        alert("اكتب البريد أولاً");
-        return;
-    }
-
-    try {
-        await sendPasswordResetEmail(auth, email);
-        alert("تم إرسال رابط إعادة التعيين");
-    } catch (e) {
-        alert("حدث خطأ في الإرسال");
-    }
+    await sendPasswordResetEmail(auth, email);
+    alert("تم إرسال رابط الاستعادة");
 };
-
 </script>
 
 </body>
