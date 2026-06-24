@@ -1,13 +1,13 @@
 import { auth } from "./firebase.js";
 import {
-  signInWithEmailAndPassword,
   signOut,
+  signInWithEmailAndPassword,
   sendPasswordResetEmail,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 /* ======================
-   LOGIN FUNCTION
+   LOGIN
 ====================== */
 export async function login(email, password) {
 
@@ -15,15 +15,22 @@ export async function login(email, password) {
 }
 
 /* ======================
-   LOGOUT FUNCTION (FIXED)
+   LOGOUT (FORCED FIX)
 ====================== */
 export async function logout() {
 
     try {
+
         await signOut(auth);
-        window.location.replace("login.html");
-    } catch (error) {
-        console.error("Logout error:", error);
+
+        sessionStorage.clear();
+        localStorage.removeItem("firebase:authUser");
+
+        window.location.href = "login.html";
+
+    } catch (e) {
+
+        console.error("LOGOUT FAILED:", e);
     }
 }
 
@@ -36,22 +43,18 @@ export async function resetPassword(email) {
 }
 
 /* ======================
-   AUTH GUARD
+   AUTO AUTH CHECK
 ====================== */
-export function authGuard(callback) {
+onAuthStateChanged(auth, (user) => {
 
-    onAuthStateChanged(auth, (user) => {
+    const page = location.pathname.split("/").pop();
 
-        if (!user) {
-            window.location.replace("login.html");
-            return;
-        }
-
-        callback(user);
-    });
-}
+    if (!user && page !== "login.html") {
+        window.location.href = "login.html";
+    }
+});
 
 /* ======================
-   GLOBAL ACCESS (IMPORTANT FOR HTML onclick)
+   GLOBAL EXPORT (IMPORTANT)
 ====================== */
 window.logout = logout;
