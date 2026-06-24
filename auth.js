@@ -14,11 +14,15 @@ export async function login(email, password) {
 }
 
 /* ======================
-   LOGOUT (FIXED)
+   LOGOUT (REAL FIX)
 ====================== */
 async function logout() {
-  await signOut(auth);
-  window.location.href = "login.html";
+  try {
+    await signOut(auth);
+    window.location.replace("login.html");
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 /* ======================
@@ -34,7 +38,7 @@ export async function resetPassword(email) {
 export function authGuard(callback) {
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = "login.html";
+      window.location.replace("login.html");
       return;
     }
     callback(user);
@@ -42,6 +46,6 @@ export function authGuard(callback) {
 }
 
 /* ======================
-   أهم سطر (الحل الحقيقي)
+   🔥 أهم سطر في الحل
 ====================== */
 window.logout = logout;
