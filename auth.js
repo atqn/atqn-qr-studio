@@ -14,15 +14,11 @@ export async function login(email, password) {
 }
 
 /* ======================
-   LOGOUT (FIXED 100%)
+   LOGOUT (IMPORTANT FIX)
 ====================== */
-async function logout() {
-  try {
-    await signOut(auth);
-    window.location.href = "login.html";
-  } catch (e) {
-    console.error(e);
-  }
+export async function logout() {
+  await signOut(auth);
+  window.location.href = "login.html";
 }
 
 /* ======================
@@ -33,18 +29,14 @@ export async function resetPassword(email) {
 }
 
 /* ======================
-   AUTO GUARD
+   AUTH GUARD
 ====================== */
-onAuthStateChanged(auth, (user) => {
-  const page = location.pathname.split("/").pop();
-
-  if (!user && page !== "login.html") {
-    window.location.href = "login.html";
-  }
-});
-
-/* ======================
-   🔥 هذا هو الحل الحقيقي
-====================== */
-window.logout = logout;
-
+export function authGuard(callback) {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    callback(user);
+  });
+}
