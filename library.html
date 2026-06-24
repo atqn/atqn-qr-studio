@@ -1,1 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
+<head>
+<meta charset="UTF-8">
+<title>المكتبة</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script type="module">
+import { loadHeader } from "./header.js";
+import { authGuard } from "./auth.js";
+import { db, doc, onSnapshot } from "./firebase.js";
+
+loadHeader();
+
+authGuard(() => {
+
+  const ref = doc(db, "books", "global");
+
+  onSnapshot(ref, (snap) => {
+
+    const data = snap.data()?.books || [];
+
+    console.log("books:", data);
+
+  });
+
+});
+</script>
+
+<div class="container">
+    <h1>📚 المكتبة</h1>
+    <div id="booksGrid"></div>
+</div>
+
+</body>
+</html>
