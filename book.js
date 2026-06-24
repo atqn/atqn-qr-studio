@@ -1,3 +1,4 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
   doc,
@@ -5,10 +6,23 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { db } from "./firebase.js";
+/* ======================
+   FIREBASE CONFIG (نفس المكتبة السابقة)
+====================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
+  authDomain: "atqn-qr1.firebaseapp.com",
+  projectId: "atqn-qr1",
+  storageBucket: "atqn-qr1.firebasestorage.app",
+  messagingSenderId: "867770918097",
+  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 /* ======================
-   GET BOOK ID
+   BOOK ID
 ====================== */
 const params = new URLSearchParams(window.location.search);
 const bookId = Number(params.get("id"));
@@ -34,44 +48,44 @@ const countEl = document.getElementById("bookCount");
 ====================== */
 onSnapshot(booksRef, (snap) => {
 
-    const data = snap.data();
+  const data = snap.data();
 
-    books = data?.books || [];
+  books = data?.books || [];
 
-    currentBook = books.find(b => b.id === bookId);
+  currentBook = books.find(b => b.id === bookId);
 
-    if (!currentBook) return;
+  if (!currentBook) return;
 
-    render();
+  render();
 });
 
 /* ======================
-   RENDER QRs
+   RENDER
 ====================== */
 function render() {
 
-    if (!currentBook) return;
+  if (!currentBook) return;
 
-    titleEl.textContent = currentBook.title;
-    countEl.textContent = currentBook.qrs.length + " QR";
+  titleEl.textContent = currentBook.title;
+  countEl.textContent = (currentBook.qrs?.length || 0) + " QR";
 
-    qrList.innerHTML = "";
+  qrList.innerHTML = "";
 
-    currentBook.qrs.forEach(qr => {
+  (currentBook.qrs || []).forEach(qr => {
 
-        qrList.innerHTML += `
-            <div class="book-card">
+    qrList.innerHTML += `
+      <div class="book-card">
 
-                <h3>${qr.title}</h3>
+        <h3>${qr.title}</h3>
 
-                <p>${qr.description || ""}</p>
+        <p>${qr.description || ""}</p>
 
-                <button onclick="openQR('${qr.content}')">فتح</button>
-                <button onclick="deleteQR(${qr.id})">حذف</button>
+        <button onclick="openQR('${qr.content}')">فتح</button>
+        <button onclick="deleteQR(${qr.id})">حذف</button>
 
-            </div>
-        `;
-    });
+      </div>
+    `;
+  });
 }
 
 /* ======================
@@ -79,24 +93,24 @@ function render() {
 ====================== */
 async function addQR() {
 
-    const title = prompt("عنوان QR");
-    const link = prompt("الرابط");
+  const title = prompt("عنوان QR");
+  const link = prompt("الرابط");
 
-    if (!title || !link) return;
+  if (!title || !link) return;
 
-    const index = books.findIndex(b => b.id === bookId);
+  const index = books.findIndex(b => b.id === bookId);
 
-    if (!books[index].qrs) books[index].qrs = [];
+  if (!books[index].qrs) books[index].qrs = [];
 
-    books[index].qrs.push({
-        id: Date.now(),
-        title,
-        content: link
-    });
+  books[index].qrs.push({
+    id: Date.now(),
+    title,
+    content: link
+  });
 
-    books[index].count = books[index].qrs.length;
+  books[index].count = books[index].qrs.length;
 
-    await setDoc(booksRef, { books });
+  await setDoc(booksRef, { books });
 }
 
 /* ======================
@@ -104,25 +118,25 @@ async function addQR() {
 ====================== */
 window.deleteQR = async function (id) {
 
-    const index = books.findIndex(b => b.id === bookId);
+  const index = books.findIndex(b => b.id === bookId);
 
-    books[index].qrs = books[index].qrs.filter(q => q.id !== id);
+  books[index].qrs = books[index].qrs.filter(q => q.id !== id);
 
-    books[index].count = books[index].qrs.length;
+  books[index].count = books[index].qrs.length;
 
-    await setDoc(booksRef, { books });
+  await setDoc(booksRef, { books });
 };
 
 /* ======================
    OPEN QR
 ====================== */
 window.openQR = function (url) {
-    window.open(url, "_blank");
+  window.open(url, "_blank");
 };
 
 /* ======================
    EVENT
 ====================== */
 if (addBtn) {
-    addBtn.addEventListener("click", addQR);
+  addBtn.addEventListener("click", addQR);
 }
