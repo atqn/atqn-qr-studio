@@ -12,13 +12,18 @@ function waitFirebaseReady(callback) {
     check();
 }
 
+/* ======================
+   MAIN APP
+====================== */
+waitFirebaseReady(function () {
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const params = new URLSearchParams(window.location.search);
     const bookId = Number(params.get("id"));
 
     const db = window.db;
-    const fs = window.firebaseFirestore || {};
+    const fs = window.firebaseFirestore;
     const { doc, setDoc, onSnapshot } = fs;
 
     const booksRef = doc(db, "books", "global");
@@ -33,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let deleteQrId = null;
 
     /* ======================
-       LOAD REALTIME
+       REALTIME LOAD
     ====================== */
     onSnapshot(booksRef, (snap) => {
 
@@ -53,6 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
        HEADER
     ====================== */
     function updateHeader() {
+
         if (!currentBook) return;
 
         document.getElementById("bookTitle").textContent = currentBook.title;
@@ -96,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /* ======================
-       CLICK
+       CLICK HANDLER
     ====================== */
     qrList.addEventListener("click", function (e) {
 
@@ -113,10 +119,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* ======================
-       ADD QR
+       ADD QR MODAL
     ====================== */
     addQrBtn.addEventListener("click", () => {
         document.getElementById("addQrModal").classList.add("show");
+    });
+
+    document.getElementById("cancelQrBtn")?.addEventListener("click", () => {
+        document.getElementById("addQrModal").classList.remove("show");
     });
 
     /* ======================
@@ -124,24 +134,29 @@ document.addEventListener("DOMContentLoaded", function () {
     ====================== */
     document.getElementById("saveQrBtn")?.addEventListener("click", async function () {
 
-        const title = qrTitleInput.value.trim();
-        const description = qrDescriptionInput.value.trim();
-        const link = qrLinkInput.value.trim();
+        const title = document.getElementById("qrTitleInput")?.value.trim();
+        const description = document.getElementById("qrDescriptionInput")?.value.trim();
+        const link = document.getElementById("qrLinkInput")?.value.trim();
 
         if (!title || !link) return;
 
         const index = books.findIndex(b => b.id === bookId);
+        if (index === -1) return;
+
+        if (!books[index].qrs) books[index].qrs = [];
 
         if (editQrId) {
 
             const qIndex = books[index].qrs.findIndex(q => q.id === editQrId);
 
-            books[index].qrs[qIndex] = {
-                id: editQrId,
-                title,
-                description,
-                content: link
-            };
+            if (qIndex !== -1) {
+                books[index].qrs[qIndex] = {
+                    id: editQrId,
+                    title,
+                    description,
+                    content: link
+                };
+            }
 
         } else {
 
@@ -167,6 +182,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const index = books.findIndex(b => b.id === bookId);
 
+        if (index === -1) return;
+
         books[index].qrs =
             books[index].qrs.filter(q => q.id !== id);
 
@@ -176,5 +193,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("deleteQrModal").classList.remove("show");
     }
+
+});
 
 });
