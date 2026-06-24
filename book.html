@@ -6,7 +6,7 @@
 <title>الكتاب</title>
 <link rel="stylesheet" href="style.css">
 
-<!-- QR Library -->
+<!-- QR Engine -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 
@@ -31,7 +31,6 @@
     <h1 id="bookTitle">الكتاب</h1>
     <p id="bookCount">0 QR</p>
 
-    <!-- QR Editor -->
     <div class="qr-panel">
 
         <input id="qrTitle" placeholder="عنوان QR">
@@ -46,6 +45,8 @@
             <option value="1200">1200 DPI</option>
             <option value="2400">2400 DPI</option>
         </select>
+
+        <input type="file" id="qrLogo">
 
         <button id="generateQR">توليد QR</button>
         <button id="addQrBtn">➕ حفظ داخل الكتاب</button>
@@ -63,7 +64,6 @@
 
 </div>
 
-<!-- Firebase Auth Guard -->
 <script type="module">
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
