@@ -18,8 +18,7 @@ const firebaseConfig = {
   projectId: "atqn-qr1",
   storageBucket: "atqn-qr1.firebasestorage.app",
   messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0",
-  measurementId: "G-X609Z298YZ"
+  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
 };
 
 const app = initializeApp(firebaseConfig);
