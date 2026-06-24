@@ -5,6 +5,9 @@
 <meta charset="UTF-8">
 <title>الكتاب</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- QR Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -24,30 +27,54 @@
 </header>
 
 <div class="container">
+
     <h1 id="bookTitle">الكتاب</h1>
     <p id="bookCount">0 QR</p>
 
-    <button id="addQrBtn">➕ إضافة QR</button>
+    <!-- QR Editor -->
+    <div class="qr-panel">
+
+        <input id="qrTitle" placeholder="عنوان QR">
+        <input id="qrDesc" placeholder="وصف QR">
+        <input id="qrLink" placeholder="الرابط">
+
+        <input type="color" id="qrColor" value="#000000">
+
+        <select id="qrSize">
+            <option value="300">300 DPI</option>
+            <option value="600">600 DPI</option>
+            <option value="1200">1200 DPI</option>
+            <option value="2400">2400 DPI</option>
+        </select>
+
+        <button id="generateQR">توليد QR</button>
+        <button id="addQrBtn">➕ حفظ داخل الكتاب</button>
+
+    </div>
+
+    <canvas id="qrCanvas"></canvas>
+
+    <div class="qr-actions">
+        <button id="downloadPNG">تحميل PNG</button>
+        <button id="downloadSVG">تحميل SVG</button>
+    </div>
 
     <div id="qrList"></div>
+
 </div>
 
-<!-- حماية الدخول -->
+<!-- Firebase Auth Guard -->
 <script type="module">
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        window.location.href = "login.html";
-    }
+    if (!user) window.location.href = "login.html";
 });
 </script>
 
-<!-- ربط الكتاب بالنظام -->
 <script type="module" src="./book.js"></script>
 
-<!-- تفعيل logout -->
 <script type="module">
 import { logout } from "./auth.js";
 window.logout = logout;
