@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ======================
-   FIREBASE CONFIG
+   FIREBASE
 ====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
@@ -34,17 +34,22 @@ const booksRef = doc(db, "books", "global");
 ====================== */
 let books = [];
 let currentBook = null;
+let lastQR = "";
 
 /* ======================
    ELEMENTS
 ====================== */
 const qrList = document.getElementById("qrList");
-const addBtn = document.getElementById("addQrBtn");
-const titleEl = document.getElementById("bookTitle");
-const countEl = document.getElementById("bookCount");
+const canvas = document.getElementById("qrCanvas");
+
+const titleInput = document.getElementById("qrTitle");
+const descInput = document.getElementById("qrDesc");
+const linkInput = document.getElementById("qrLink");
+const colorInput = document.getElementById("qrColor");
+const sizeInput = document.getElementById("qrSize");
 
 /* ======================
-   REALTIME
+   FIRESTORE LISTENER
 ====================== */
 onSnapshot(booksRef, (snap) => {
 
@@ -60,14 +65,9 @@ onSnapshot(booksRef, (snap) => {
 });
 
 /* ======================
-   RENDER
+   RENDER QR LIST
 ====================== */
 function render() {
-
-  if (!currentBook) return;
-
-  titleEl.textContent = currentBook.title;
-  countEl.textContent = (currentBook.qrs?.length || 0) + " QR";
 
   qrList.innerHTML = "";
 
@@ -77,7 +77,6 @@ function render() {
       <div class="book-card">
 
         <h3>${qr.title}</h3>
-
         <p>${qr.description || ""}</p>
 
         <button onclick="openQR('${qr.content}')">فتح</button>
@@ -89,12 +88,35 @@ function render() {
 }
 
 /* ======================
-   ADD QR (FIXED URL ISSUE)
+   GENERATE QR
 ====================== */
-async function addQR() {
+document.getElementById("generateQR").addEventListener("click", async () => {
 
-  const title = prompt("عنوان QR");
-  const link = prompt("الرابط");
+  const title = titleInput.value;
+  const desc = descInput.value;
+  const link = linkInput.value;
+
+  if (!title || !link) return;
+
+  lastQR = link.startsWith("http") ? link : "https://" + link;
+
+  await QRCode.toCanvas(canvas, lastQR, {
+    width: parseInt(sizeInput.value),
+    color: {
+      dark: colorInput.value,
+      light: "#ffffff"
+    }
+  });
+});
+
+/* ======================
+   SAVE QR
+====================== */
+document.getElementById("addQrBtn").addEventListener("click", async () => {
+
+  const title = titleInput.value;
+  const desc = descInput.value;
+  const link = lastQR;
 
   if (!title || !link) return;
 
@@ -105,13 +127,14 @@ async function addQR() {
   books[index].qrs.push({
     id: Date.now(),
     title,
-    content: link.startsWith("http") ? link : "https://" + link
+    description: desc,
+    content: link
   });
 
   books[index].count = books[index].qrs.length;
 
   await setDoc(booksRef, { books });
-}
+});
 
 /* ======================
    DELETE QR
@@ -128,18 +151,47 @@ window.deleteQR = async function (id) {
 };
 
 /* ======================
-   OPEN QR (SAFE FIX)
+   OPEN QR
 ====================== */
 window.openQR = function (url) {
-
-  if (!url) return;
-
   window.open(url, "_blank");
 };
 
 /* ======================
-   EVENT
+   DOWNLOAD PNG
 ====================== */
-if (addBtn) {
-  addBtn.addEventListener("click", addQR);
-}
+document.getElementById("downloadPNG").addEventListener("click", () => {
+
+  const link = document.createElement("a");
+
+  link.download = `QR_${currentBook.title}.png`;
+
+  link.href = canvas.toDataURL("image/png");
+
+  link.click();
+});
+
+/* ======================
+   DOWNLOAD SVG
+====================== */
+document.getElementById("downloadSVG").addEventListener("click", async () => {
+
+  const svg = await QRCode.toString(lastQR, {
+    type: "svg",
+    width: parseInt(sizeInput.value),
+    color: {
+      dark: colorInput.value,
+      light: "#ffffff"
+    }
+  });
+
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+
+  const a = document.createElement("a");
+
+  a.href = URL.createObjectURL(blob);
+
+  a.download = `QR_${currentBook.title}.svg`;
+
+  a.click();
+});
