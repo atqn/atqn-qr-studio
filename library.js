@@ -1,130 +1,110 @@
 let deleteBookId = null;
-
-const db = window.db;
-const fs = window.firebaseFirestore || {};
-const { doc, setDoc, onSnapshot } = fs;
-
-const booksRef = doc(db, "books", "global");
-
 let books = [];
 
 /* ======================
-   INIT FIREBASE DATA
+   DEFAULT BOOKS
 ====================== */
-function initBooks() {
+const defaultBooks = [
+    { id:1, title:"كتاب المدود", icon:"📘", count:24, qrs:[] },
+    { id:2, title:"كتاب الهمزات", icon:"📗", count:18, qrs:[] },
+    { id:3, title:"كتاب التنوين", icon:"📙", count:35, qrs:[] },
+    { id:4, title:"كتاب الشدة", icon:"📕", count:12, qrs:[] },
+    { id:5, title:"كتاب السكون", icon:"📔", count:16, qrs:[] },
+    { id:6, title:"كتاب التفخيم", icon:"📓", count:21, qrs:[] },
+    { id:7, title:"كتاب الترقيق", icon:"📚", count:19, qrs:[] },
+    { id:8, title:"كتاب المخارج", icon:"📒", count:27, qrs:[] },
+    { id:9, title:"كتاب الصفات", icon:"📖", count:14, qrs:[] },
+    { id:10, title:"كتاب الوقف والابتداء", icon:"📑", count:31, qrs:[] }
+];
 
+/* ======================
+   WAIT FOR FIREBASE (IMPORTANT FIX)
+====================== */
+function waitForFirebase(callback) {
+
+    const check = () => {
+
+        if (window.db && window.firebaseFirestore) {
+            callback();
+        } else {
+            setTimeout(check, 100);
+        }
+    };
+
+    check();
+}
+
+/* ======================
+   MAIN INIT
+====================== */
+waitForFirebase(function () {
+
+    const db = window.db;
+    const fs = window.firebaseFirestore;
+    const { doc, setDoc, onSnapshot } = fs;
+
+    const booksRef = doc(db, "books", "global");
+
+    /* ======================
+       LOAD DATA (REALTIME SAFE)
+    ====================== */
     onSnapshot(booksRef, async (snap) => {
 
         if (!snap.exists() || !snap.data()?.books) {
 
-            const defaultBooks = [
-                { id:1, title:"كتاب المدود", icon:"📘", count:24, qrs:[] },
-                { id:2, title:"كتاب الهمزات", icon:"📗", count:18, qrs:[] },
-                { id:3, title:"كتاب التنوين", icon:"📙", count:35, qrs:[] },
-                { id:4, title:"كتاب الشدة", icon:"📕", count:12, qrs:[] },
-                { id:5, title:"كتاب السكون", icon:"📔", count:16, qrs:[] },
-                { id:6, title:"كتاب التفخيم", icon:"📓", count:21, qrs:[] },
-                { id:7, title:"كتاب الترقيق", icon:"📚", count:19, qrs:[] },
-                { id:8, title:"كتاب المخارج", icon:"📒", count:27, qrs:[] },
-                { id:9, title:"كتاب الصفات", icon:"📖", count:14, qrs:[] },
-                { id:10, title:"كتاب الوقف والابتداء", icon:"📑", count:31, qrs:[] }
-            ];
-
             await setDoc(booksRef, { books: defaultBooks });
+
             books = defaultBooks;
 
         } else {
-            books = snap.data().books;
+            books = snap.data().books || [];
         }
 
         renderBooks();
     });
-}
 
-/* ======================
-   RENDER
-====================== */
-function renderBooks() {
+    /* ======================
+       INITIAL RENDER (fallback)
+    ====================== */
+    renderBooks();
 
-    const booksGrid = document.getElementById("booksGrid");
-    if (!booksGrid) return;
+    /* ======================
+       ADD BUTTON FIX (CRITICAL)
+    ====================== */
+    function bindAddButton() {
 
-    booksGrid.innerHTML = "";
+        const btn = document.querySelector(".add-book-btn");
 
-    books.forEach(book => {
+        if (!btn) {
+            setTimeout(bindAddButton, 200);
+            return;
+        }
 
-        booksGrid.innerHTML += `
-<div class="book-card">
+        btn.addEventListener("click", function () {
 
-    <div class="book-icon">${book.icon}</div>
+            const input = document.getElementById("newBookTitle");
+            if (input) input.value = "";
 
-    <h3>${book.title}</h3>
-
-    <div class="book-count">${book.count} QR</div>
-
-    <div class="book-actions">
-
-        <button class="action-btn edit-btn" onclick="editBook(${book.id})">
-            ✏️ تعديل
-        </button>
-
-        <button class="action-btn delete-btn" onclick="deleteBook(${book.id})">
-            🗑 حذف
-        </button>
-
-    </div>
-
-    <button class="book-btn" onclick="openBook(${book.id})">
-        📖 فتح الكتاب
-    </button>
-
-</div>
-`;
-    });
-}
-
-/* ======================
-   DELETE
-====================== */
-function deleteBook(id) {
-    deleteBookId = id;
-    document.getElementById("deleteModal")?.classList.add("show");
-}
-
-/* ======================
-   ADD BUTTON FIX
-====================== */
-function bindAddButton() {
-
-    const btn = document.querySelector(".add-book-btn");
-
-    if (!btn) {
-        setTimeout(bindAddButton, 200);
-        return;
+            const modal = document.getElementById("addModal");
+            if (modal) modal.classList.add("show");
+        });
     }
 
-    btn.addEventListener("click", () => {
-        document.getElementById("newBookTitle").value = "";
-        document.getElementById("addModal").classList.add("show");
-    });
-}
-
-/* ======================
-   INIT
-====================== */
-document.addEventListener("DOMContentLoaded", function () {
-
-    initBooks();
     bindAddButton();
 
+    /* ======================
+       DELETE MODAL
+    ====================== */
+    const cancelBtn = document.getElementById("cancelDeleteBtn");
+    const confirmBtn = document.getElementById("confirmDeleteBtn");
     const modal = document.getElementById("deleteModal");
 
-    document.getElementById("cancelDeleteBtn")?.addEventListener("click", function () {
+    cancelBtn?.addEventListener("click", () => {
         modal?.classList.remove("show");
         deleteBookId = null;
     });
 
-    document.getElementById("confirmDeleteBtn")?.addEventListener("click", async function () {
+    confirmBtn?.addEventListener("click", async () => {
 
         books = books.filter(b => b.id !== deleteBookId);
 
@@ -134,74 +114,124 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteBookId = null;
     });
 
-});
+    /* ======================
+       ADD BOOK
+    ====================== */
+    document.getElementById("saveAddBtn")?.addEventListener("click", async () => {
 
-/* ======================
-   ADD BOOK
-====================== */
-document.getElementById("saveAddBtn")?.addEventListener("click", async function () {
+        const title = document.getElementById("newBookTitle")?.value.trim();
+        if (!title) return;
 
-    const title = document.getElementById("newBookTitle")?.value.trim();
-    if (!title) return;
+        books.push({
+            id: Date.now(),
+            title,
+            icon: "📘",
+            count: 0,
+            qrs: []
+        });
 
-    books.push({
-        id: Date.now(),
-        title,
-        icon: "📘",
-        count: 0,
-        qrs: []
+        await setDoc(booksRef, { books });
+
+        document.getElementById("addModal")?.classList.remove("show");
     });
 
-    await setDoc(booksRef, { books });
+    /* ======================
+       EDIT BOOK
+    ====================== */
+    let currentEditId = null;
 
-    document.getElementById("addModal").classList.remove("show");
+    window.editBook = function (id) {
+
+        const book = books.find(b => b.id === id);
+        if (!book) return;
+
+        currentEditId = id;
+
+        document.getElementById("editBookTitle").value = book.title;
+        document.getElementById("editModal").classList.add("show");
+    };
+
+    document.getElementById("saveEditBtn")?.addEventListener("click", async () => {
+
+        const newTitle = document.getElementById("editBookTitle")?.value.trim();
+        if (!newTitle) return;
+
+        const index = books.findIndex(b => b.id === currentEditId);
+        if (index === -1) return;
+
+        books[index].title = newTitle;
+
+        await setDoc(booksRef, { books });
+
+        document.getElementById("editModal")?.classList.remove("show");
+    });
+
+    document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
+        document.getElementById("editModal")?.classList.remove("show");
+    });
+
 });
 
 /* ======================
-   EDIT BOOK
+   RENDER (OUTSIDE SAFE)
 ====================== */
-let currentEditId = null;
+function renderBooks() {
 
-function editBook(id) {
+    const grid = document.getElementById("booksGrid");
+    if (!grid) return;
 
-    const book = books.find(b => b.id === id);
-    if (!book) return;
+    grid.innerHTML = "";
 
-    currentEditId = id;
+    if (!books.length) {
+        grid.innerHTML = `
+            <div class="book-card">
+                <h3>لا توجد كتب</h3>
+                <div class="book-count">اضغط إضافة كتاب جديد</div>
+            </div>
+        `;
+        return;
+    }
 
-    document.getElementById("editBookTitle").value = book.title;
-    document.getElementById("editModal").classList.add("show");
+    books.forEach(book => {
+
+        grid.innerHTML += `
+        <div class="book-card">
+
+            <div class="book-icon">${book.icon || "📘"}</div>
+
+            <h3>${book.title}</h3>
+
+            <div class="book-count">${book.count || 0} QR</div>
+
+            <div class="book-actions">
+
+                <button class="action-btn edit-btn" onclick="editBook(${book.id})">
+                    ✏️ تعديل
+                </button>
+
+                <button class="action-btn delete-btn" onclick="deleteBook(${book.id})">
+                    🗑 حذف
+                </button>
+
+            </div>
+
+            <button class="book-btn" onclick="openBook(${book.id})">
+                📖 فتح الكتاب
+            </button>
+
+        </div>
+        `;
+    });
 }
 
-document.getElementById("saveEditBtn")?.addEventListener("click", async function () {
-
-    const newTitle = document.getElementById("editBookTitle")?.value.trim();
-    if (!newTitle) return;
-
-    const index = books.findIndex(b => b.id === currentEditId);
-    if (index === -1) return;
-
-    books[index].title = newTitle;
-
-    await setDoc(booksRef, { books });
-
-    document.getElementById("editModal").classList.remove("show");
-});
-
 /* ======================
-   CLOSE MODALS
+   GLOBAL FUNCTIONS
 ====================== */
-document.getElementById("cancelEditBtn")?.addEventListener("click", () => {
-    document.getElementById("editModal")?.classList.remove("show");
-});
+window.deleteBook = function (id) {
+    deleteBookId = id;
+    document.getElementById("deleteModal")?.classList.add("show");
+};
 
-document.getElementById("cancelAddBtn")?.addEventListener("click", () => {
-    document.getElementById("addModal")?.classList.remove("show");
-});
-
-/* ======================
-   OPEN BOOK
-====================== */
-function openBook(id) {
+window.openBook = function (id) {
     window.location.href = "book.html?id=" + id;
-}
+};
