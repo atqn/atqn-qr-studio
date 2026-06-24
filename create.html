@@ -13,7 +13,6 @@
 
 <body>
 
-<!-- HEADER -->
 <header class="topbar">
 
     <div class="brand">
@@ -30,12 +29,10 @@
 
 </header>
 
-<!-- MAIN -->
 <div class="container">
 
     <div class="create-layout">
 
-        <!-- COLUMN 1 -->
         <div class="panel">
 
             <h3>بيانات الباركود</h3>
@@ -54,7 +51,6 @@
 
         </div>
 
-        <!-- COLUMN 2 -->
         <div class="panel">
 
             <h3>الإعدادات</h3>
@@ -82,7 +78,6 @@
 
         </div>
 
-        <!-- COLUMN 3 -->
         <div class="panel preview-panel">
 
             <h3>المعاينة</h3>
@@ -91,21 +86,10 @@
 
             <div class="preview-actions">
 
-                <button id="generatePreviewBtn" class="action-btn primary">
-                    ⚡ توليد
-                </button>
-
-                <button id="saveQrChangesBtn" class="action-btn success">
-                    💾 حفظ
-                </button>
-
-                <button id="downloadQrBtn" class="action-btn dark">
-                    ⬇️ PNG
-                </button>
-
-                <button id="downloadSvgBtn" class="action-btn dark">
-                    ⬇️ SVG
-                </button>
+                <button id="generatePreviewBtn" class="action-btn primary">⚡ توليد</button>
+                <button id="saveQrChangesBtn" class="action-btn success">💾 حفظ</button>
+                <button id="downloadQrBtn" class="action-btn dark">⬇️ PNG</button>
+                <button id="downloadSvgBtn" class="action-btn dark">⬇️ SVG</button>
 
             </div>
 
@@ -115,10 +99,9 @@
 
 </div>
 
-<!-- QR LIB -->
 <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 
-<!-- FIREBASE (FIXED ONCE ONLY - NO DUPLICATION) -->
+<!-- FIREBASE FIX (ONE SOURCE ONLY) -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -143,22 +126,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ✅ SAFE GLOBAL EXPORT (IMPORTANT FIX) */
+/* ======================
+   SAFE EXPORT (CRITICAL FIX)
+====================== */
 window.db = db;
 
 window.firebaseFirestore = {
-  doc: (...args) => doc(...args),
-  setDoc: (...args) => setDoc(...args),
-  updateDoc: (...args) => updateDoc(...args),
-  getDoc: (...args) => getDoc(...args),
-  onSnapshot: (...args) => onSnapshot(...args)
+  doc: (...a) => doc(...a),
+  setDoc: (...a) => setDoc(...a),
+  updateDoc: (...a) => updateDoc(...a),
+  getDoc: (...a) => getDoc(...a),
+  onSnapshot: (...a) => onSnapshot(...a)
 };
 
 console.log("🔥 Firebase Ready (create.html)");
 
 </script>
 
-<!-- MAIN JS -->
 <script src="create.js"></script>
 
 </body>
