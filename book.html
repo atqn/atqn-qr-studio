@@ -1,88 +1,227 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<head>
-<meta charset="UTF-8">
-<title>الكتاب</title>
-<link rel="stylesheet" href="style.css">
+/* ======================
+   FIREBASE
+====================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
+  authDomain: "atqn-qr1.firebaseapp.com",
+  projectId: "atqn-qr1",
+  storageBucket: "atqn-qr1.firebasestorage.app",
+  messagingSenderId: "867770918097",
+  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
+};
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-</head>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<body>
+/* ======================
+   BOOK ID
+====================== */
+const params = new URLSearchParams(window.location.search);
+const bookId = Number(params.get("id"));
 
-<header class="topbar">
-    <div class="brand">
-        <img src="assets/atqn-logo.png" alt="ATQN">
-        <h1>ATQN QR Studio</h1>
-    </div>
+const booksRef = doc(db, "books", "global");
 
-    <nav>
-        <a href="index.html">الرئيسة</a>
-        <a href="library.html">مكتبة الكتب</a>
-        <a href="create.html">إنشاء QR</a>
-        <a href="#" onclick="logout()">خروج</a>
-    </nav>
-</header>
+/* ======================
+   STATE
+====================== */
+let books = [];
+let currentBook = null;
+let lastQR = "";
+let logoImg = null;
 
-<div class="container">
+/* ======================
+   ELEMENTS
+====================== */
+const qrCanvas = document.getElementById("qrCanvas");
+const ctx = qrCanvas.getContext("2d");
 
-    <h1 id="bookTitle"></h1>
-    <p id="bookCount"></p>
+const titleInput = document.getElementById("qrTitle");
+const descInput = document.getElementById("qrDesc");
+const linkInput = document.getElementById("qrLink");
+const colorInput = document.getElementById("qrColor");
+const sizeInput = document.getElementById("qrSize");
 
-    <!-- BOOK ACTIONS -->
-    <button id="deleteBookBtn" style="background:red;color:white;">
-        🗑 حذف الكتاب
-    </button>
+const logoUpload = document.getElementById("logoUpload");
 
-    <hr>
+/* ======================
+   LOGO UPLOAD (اختياري)
+====================== */
+logoUpload?.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  const reader = new FileReader();
 
-    <!-- QR PANEL -->
-    <input id="qrTitle" placeholder="عنوان QR">
-    <input id="qrDesc" placeholder="وصف QR">
-    <input id="qrLink" placeholder="الرابط">
+  reader.onload = () => {
+    logoImg = new Image();
+    logoImg.src = reader.result;
+  };
 
-    <input type="color" id="qrColor" value="#000000">
-
-    <select id="qrSize">
-        <option value="300">300</option>
-        <option value="600">600</option>
-        <option value="1200">1200</option>
-        <option value="2400">2400</option>
-    </select>
-
-    <!-- LOGO OPTIONS -->
-    <select id="logoType">
-        <option value="default">شعار ATQN</option>
-        <option value="upload">رفع من الجهاز</option>
-    </select>
-
-    <input type="file" id="logoUpload" style="display:none;">
-
-    <button id="generateQR">توليد QR</button>
-    <button id="saveQR">حفظ</button>
-
-    <canvas id="qrCanvas"></canvas>
-
-    <div id="qrList"></div>
-
-</div>
-
-<script type="module">
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-    if (!user) window.location.href = "login.html";
+  if (file) reader.readAsDataURL(file);
 });
-</script>
 
-<script type="module" src="./book.js"></script>
+/* ======================
+   FIRESTORE
+====================== */
+onSnapshot(booksRef, (snap) => {
+  books = snap.data()?.books || [];
+  currentBook = books.find(b => b.id === bookId);
 
-<script type="module">
-import { logout } from "./auth.js";
-window.logout = logout;
-</script>
+  if (currentBook) {
+    document.getElementById("bookTitle").innerText = currentBook.title;
+    document.getElementById("bookCount").innerText = currentBook.qrs?.length || 0;
+  }
 
-</body>
-</html>
+  render();
+});
+
+/* ======================
+   RENDER LIST
+====================== */
+function render() {
+  const list = document.getElementById("qrList");
+  list.innerHTML = "";
+
+  (currentBook?.qrs || []).forEach(qr => {
+    list.innerHTML += `
+      <div>
+        <h3>${qr.title}</h3>
+        <p>${qr.description || ""}</p>
+        <button onclick="openQR('${qr.content}')">فتح</button>
+        <button onclick="deleteQR(${qr.id})">حذف</button>
+      </div>
+    `;
+  });
+}
+
+/* ======================
+   توليد QR (FIXED 100%)
+====================== */
+document.getElementById("generateQR").addEventListener("click", async () => {
+
+  const link = linkInput.value;
+  if (!link) return;
+
+  lastQR = link.startsWith("http") ? link : "https://" + link;
+
+  const size = Number(sizeInput.value);
+
+  qrCanvas.width = size;
+  qrCanvas.height = size;
+
+  await QRCode.toCanvas(qrCanvas, lastQR, {
+    width: size,
+    color: {
+      dark: colorInput.value,
+      light: "#ffffff"
+    },
+    errorCorrectionLevel: "H"
+  });
+
+  /* ======================
+     LOGO CENTER
+  ====================== */
+  if (logoImg) {
+    const logoSize = size * 0.22;
+
+    ctx.drawImage(
+      logoImg,
+      (size - logoSize) / 2,
+      (size - logoSize) / 2,
+      logoSize,
+      logoSize
+    );
+  }
+});
+
+/* ======================
+   حفظ QR
+====================== */
+document.getElementById("saveQR").addEventListener("click", async () => {
+
+  const title = titleInput.value;
+  const desc = descInput.value;
+
+  if (!title || !lastQR) return;
+
+  const index = books.findIndex(b => b.id === bookId);
+
+  if (!books[index].qrs) books[index].qrs = [];
+
+  books[index].qrs.push({
+    id: Date.now(),
+    title,
+    description: desc,
+    content: lastQR
+  });
+
+  await setDoc(booksRef, { books });
+});
+
+/* ======================
+   حذف QR
+====================== */
+window.deleteQR = async function (id) {
+
+  const index = books.findIndex(b => b.id === bookId);
+
+  books[index].qrs = books[index].qrs.filter(q => q.id !== id);
+
+  await setDoc(booksRef, { books });
+};
+
+/* ======================
+   فتح QR
+====================== */
+window.openQR = function (url) {
+  window.open(url, "_blank");
+};
+
+/* ======================
+   PNG تحميل (اسم صحيح)
+====================== */
+document.getElementById("downloadPNG").addEventListener("click", () => {
+
+  const bookTitle = document.getElementById("bookTitle").innerText;
+  const qrTitle = titleInput.value || "QR";
+
+  const a = document.createElement("a");
+  a.download = `${bookTitle}_${qrTitle}.png`;
+  a.href = qrCanvas.toDataURL("image/png");
+  a.click();
+});
+
+/* ======================
+   SVG تحميل (FIXED)
+====================== */
+document.getElementById("downloadSVG").addEventListener("click", async () => {
+
+  const size = Number(sizeInput.value);
+  const link = lastQR;
+
+  const svg = await QRCode.toString(link, {
+    type: "svg",
+    width: size,
+    color: {
+      dark: colorInput.value,
+      light: "#ffffff"
+    },
+    errorCorrectionLevel: "H"
+  });
+
+  const bookTitle = document.getElementById("bookTitle").innerText;
+  const qrTitle = titleInput.value || "QR";
+
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${bookTitle}_${qrTitle}.svg`;
+  a.click();
+});
