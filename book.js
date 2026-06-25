@@ -46,6 +46,15 @@ const qrColor = document.getElementById("qrColor");
 const qrSize = document.getElementById("qrSize");
 const qrList = document.getElementById("qrList");
 
+const titleEl = document.getElementById("bookTitle");
+const countEl = document.getElementById("bookCount");
+
+/* ======================
+   BOOK ID SAFE PARSE
+====================== */
+const params = new URLSearchParams(location.search);
+const bookId = Number(params.get("id"));
+
 /* ======================
    LOGO UPLOAD
 ====================== */
@@ -62,30 +71,40 @@ document.getElementById("logoUpload")?.addEventListener("change", (e) => {
 });
 
 /* ======================
-   FIRESTORE REALTIME
+   FIRESTORE REALTIME SAFE
 ====================== */
 onSnapshot(booksRef, (snap) => {
+
   books = snap.data()?.books || [];
-  currentBook = books.find(b => b.id == new URLSearchParams(location.search).get("id"));
 
-  if (!currentBook) return;
+  currentBook = books.find(b => b.id === bookId) || null;
 
-  document.getElementById("bookTitle").innerText = currentBook.title;
-  document.getElementById("bookCount").innerText = (currentBook.qrs?.length || 0);
+  if (!currentBook) {
+    if (titleEl) titleEl.innerText = "الكتاب غير موجود";
+    if (countEl) countEl.innerText = "0";
+    return;
+  }
+
+  if (titleEl) titleEl.innerText = currentBook.title;
+  if (countEl) countEl.innerText = (currentBook.qrs?.length || 0);
 
   render();
 });
 
 /* ======================
-   RENDER LIST
+   RENDER LIST SAFE
 ====================== */
 function render() {
+
+  if (!qrList || !currentBook) return;
+
   qrList.innerHTML = "";
 
-  (currentBook?.qrs || []).forEach(qr => {
+  (currentBook.qrs || []).forEach(qr => {
+
     qrList.innerHTML += `
       <div class="book-card">
-        <h3>${qr.title}</h3>
+        <h3>${qr.title || ""}</h3>
         <p>${qr.description || ""}</p>
 
         <button onclick="openQR('${qr.content}')">فتح</button>
@@ -96,60 +115,65 @@ function render() {
 }
 
 /* ======================
-   GENERATE QR
+   GENERATE QR SAFE
 ====================== */
-document.getElementById("generateQR").addEventListener("click", async () => {
+document.getElementById("generateQR")?.addEventListener("click", async () => {
 
-  const link = qrLink.value;
-  if (!link) return;
+  const link = qrLink?.value;
+  if (!link || !canvas) return;
 
   lastQR = link.startsWith("http") ? link : "https://" + link;
 
-  const size = Number(qrSize.value);
+  const size = Number(qrSize?.value || 300);
 
   canvas.width = size;
   canvas.height = size;
 
-  await QRCode.toCanvas(canvas, lastQR, {
-    width: size,
-    color: {
-      dark: qrColor.value,
-      light: "#ffffff"
-    },
-    errorCorrectionLevel: "H"
-  });
+  try {
 
-  /* ======================
-     LOGO CENTER
-  ====================== */
-  if (logoImage) {
-    const logoSize = size * 0.22;
+    await QRCode.toCanvas(canvas, lastQR, {
+      width: size,
+      color: {
+        dark: qrColor?.value || "#000",
+        light: "#ffffff"
+      },
+      errorCorrectionLevel: "H"
+    });
 
-    ctx.drawImage(
-      logoImage,
-      (size - logoSize) / 2,
-      (size - logoSize) / 2,
-      logoSize,
-      logoSize
-    );
+    if (logoImage) {
+
+      const logoSize = size * 0.22;
+
+      ctx.drawImage(
+        logoImage,
+        (size - logoSize) / 2,
+        (size - logoSize) / 2,
+        logoSize,
+        logoSize
+      );
+    }
+
+  } catch (e) {
+    console.error("QR ERROR:", e);
   }
 });
 
 /* ======================
-   AUTO SAVE QR
+   AUTO SAVE (SAFE FIREBASE)
 ====================== */
-document.getElementById("saveQR").addEventListener("click", async () => {
+document.getElementById("saveQR")?.addEventListener("click", async () => {
 
-  if (!lastQR || !qrTitle.value) return;
+  if (!currentBook || !lastQR || !qrTitle?.value) return;
 
-  const index = books.findIndex(b => b.id == currentBook.id);
+  const index = books.findIndex(b => b.id === bookId);
+  if (index === -1) return;
 
   books[index].qrs ??= [];
 
   books[index].qrs.push({
     id: Date.now(),
     title: qrTitle.value,
-    description: qrDesc.value,
+    description: qrDesc?.value || "",
     content: lastQR
   });
 
@@ -159,13 +183,14 @@ document.getElementById("saveQR").addEventListener("click", async () => {
 });
 
 /* ======================
-   DELETE QR
+   DELETE QR SAFE
 ====================== */
 window.deleteQR = async function (id) {
 
-  const index = books.findIndex(b => b.id == currentBook.id);
+  const index = books.findIndex(b => b.id === bookId);
+  if (index === -1) return;
 
-  books[index].qrs = books[index].qrs.filter(q => q.id !== id);
+  books[index].qrs = (books[index].qrs || []).filter(q => q.id !== id);
 
   books[index].count = books[index].qrs.length;
 
@@ -173,19 +198,22 @@ window.deleteQR = async function (id) {
 };
 
 /* ======================
-   OPEN QR
+   OPEN QR SAFE
 ====================== */
 window.openQR = function (url) {
+  if (!url) return;
   window.open(url, "_blank");
 };
 
 /* ======================
-   DOWNLOAD PNG
+   PNG DOWNLOAD SAFE
 ====================== */
-document.getElementById("downloadPNG").addEventListener("click", () => {
+document.getElementById("downloadPNG")?.addEventListener("click", () => {
+
+  if (!canvas) return;
 
   const bookName = currentBook?.title || "book";
-  const qrName = qrTitle.value || "qr";
+  const qrName = qrTitle?.value || "qr";
 
   const a = document.createElement("a");
   a.download = `${bookName}_${qrName}.png`;
@@ -194,17 +222,19 @@ document.getElementById("downloadPNG").addEventListener("click", () => {
 });
 
 /* ======================
-   DOWNLOAD SVG
+   SVG DOWNLOAD SAFE
 ====================== */
-document.getElementById("downloadSVG").addEventListener("click", async () => {
+document.getElementById("downloadSVG")?.addEventListener("click", async () => {
 
-  const size = Number(qrSize.value);
+  if (!lastQR) return;
+
+  const size = Number(qrSize?.value || 300);
 
   const svg = await QRCode.toString(lastQR, {
     type: "svg",
     width: size,
     color: {
-      dark: qrColor.value,
+      dark: qrColor?.value || "#000",
       light: "#ffffff"
     },
     errorCorrectionLevel: "H"
@@ -214,6 +244,6 @@ document.getElementById("downloadSVG").addEventListener("click", async () => {
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `${currentBook.title}_${qrTitle.value}.svg`;
+  a.download = `${currentBook?.title || "book"}_${qrTitle?.value || "qr"}.svg`;
   a.click();
-});
+};
