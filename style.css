@@ -1,85 +1,110 @@
 body {
-    margin: 0;
-    font-family: Arial;
-    background: #f4f6f8;
-    direction: rtl;
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
 }
 
 .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #1e2a38;
-    color: white;
-    padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #111827;
 }
 
 .topbar img {
-    width: 40px;
-    margin-left: 10px;
+  width: 40px;
 }
 
 nav a {
-    color: white;
-    margin: 0 10px;
-    text-decoration: none;
+  color: white;
+  margin: 0 10px;
+  text-decoration: none;
 }
 
-.container {
-    padding: 20px;
+/* ======================
+   LAYOUT 3 COLUMNS
+====================== */
+.create-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  padding: 20px;
 }
 
-.qr-panel {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 400px;
+/* ======================
+   PANELS
+====================== */
+.panel {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 12px;
 }
 
-.qr-panel input,
-.qr-panel select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* ======================
+   QR PREVIEW
+====================== */
+.qr-preview-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 350px;
+  border: 2px dashed #334155;
+  margin-bottom: 15px;
 }
 
+canvas {
+  max-width: 100%;
+}
+
+/* ======================
+   INPUTS
+====================== */
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  background: #0f172a;
+  color: white;
+}
+
+/* ======================
+   BUTTONS
+====================== */
 button {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background: #007bff;
-    color: white;
-    cursor: pointer;
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #3b82f6;
+  color: white;
 }
 
 button:hover {
-    background: #0056b3;
+  background: #2563eb;
 }
 
-.book-card {
-    background: white;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-}
-
-.book-count {
-  background: #1f2937;
-  color: #38bdf8;
-  padding: 6px 12px;
+/* ======================
+   HINT BOX
+====================== */
+.hint {
+  margin-top: 15px;
+  padding: 10px;
+  background: #0f172a;
   border-radius: 8px;
-  font-weight: bold;
-  display: inline-block;
-  margin-top: 8px;
+  font-size: 13px;
+  opacity: 0.8;
 }
 
-.book-card {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 15px;
-  text-align: center;
+/* ======================
+   RESPONSIVE
+====================== */
+@media(max-width: 900px){
+  .create-layout{
+    grid-template-columns: 1fr;
+  }
 }
