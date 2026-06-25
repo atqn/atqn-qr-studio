@@ -1,4 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
 import {
   getFirestore,
   doc,
@@ -20,11 +23,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-/* ======================
-   BOOK ID
-====================== */
-const bookId = Number(new URLSearchParams(location.search).get("id"));
 const booksRef = doc(db, "books", "global");
 
 /* ======================
@@ -33,16 +31,13 @@ const booksRef = doc(db, "books", "global");
 let books = [];
 let currentBook = null;
 let lastQR = "";
-let logoImg = null;
+let logoImage = null;
 
 /* ======================
    ELEMENTS
 ====================== */
 const canvas = document.getElementById("qrCanvas");
 const ctx = canvas.getContext("2d");
-
-const titleEl = document.getElementById("bookTitle");
-const countEl = document.getElementById("bookCount");
 
 const qrTitle = document.getElementById("qrTitle");
 const qrDesc = document.getElementById("qrDesc");
@@ -52,7 +47,7 @@ const qrSize = document.getElementById("qrSize");
 const qrList = document.getElementById("qrList");
 
 /* ======================
-   LOGO (OPTIONAL)
+   LOGO UPLOAD
 ====================== */
 document.getElementById("logoUpload")?.addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -60,8 +55,8 @@ document.getElementById("logoUpload")?.addEventListener("change", (e) => {
 
   const reader = new FileReader();
   reader.onload = () => {
-    logoImg = new Image();
-    logoImg.src = reader.result;
+    logoImage = new Image();
+    logoImage.src = reader.result;
   };
   reader.readAsDataURL(file);
 });
@@ -70,14 +65,13 @@ document.getElementById("logoUpload")?.addEventListener("change", (e) => {
    FIRESTORE REALTIME
 ====================== */
 onSnapshot(booksRef, (snap) => {
-
   books = snap.data()?.books || [];
-  currentBook = books.find(b => b.id === bookId);
+  currentBook = books.find(b => b.id == new URLSearchParams(location.search).get("id"));
 
   if (!currentBook) return;
 
-  titleEl.innerText = currentBook.title;
-  countEl.innerText = (currentBook.qrs?.length || 0) + " QR";
+  document.getElementById("bookTitle").innerText = currentBook.title;
+  document.getElementById("bookCount").innerText = (currentBook.qrs?.length || 0);
 
   render();
 });
@@ -86,15 +80,14 @@ onSnapshot(booksRef, (snap) => {
    RENDER LIST
 ====================== */
 function render() {
-
   qrList.innerHTML = "";
 
   (currentBook?.qrs || []).forEach(qr => {
-
     qrList.innerHTML += `
       <div class="book-card">
         <h3>${qr.title}</h3>
         <p>${qr.description || ""}</p>
+
         <button onclick="openQR('${qr.content}')">فتح</button>
         <button onclick="deleteQR(${qr.id})">حذف</button>
       </div>
@@ -103,7 +96,7 @@ function render() {
 }
 
 /* ======================
-   GENERATE QR + AUTO SAVE
+   GENERATE QR
 ====================== */
 document.getElementById("generateQR").addEventListener("click", async () => {
 
@@ -126,32 +119,37 @@ document.getElementById("generateQR").addEventListener("click", async () => {
     errorCorrectionLevel: "H"
   });
 
-  if (logoImg) {
+  /* ======================
+     LOGO CENTER
+  ====================== */
+  if (logoImage) {
     const logoSize = size * 0.22;
 
     ctx.drawImage(
-      logoImg,
+      logoImage,
       (size - logoSize) / 2,
       (size - logoSize) / 2,
       logoSize,
       logoSize
     );
   }
+});
 
-  /* ======================
-     AUTO SAVE (REAL-TIME)
-  ====================== */
+/* ======================
+   AUTO SAVE QR
+====================== */
+document.getElementById("saveQR").addEventListener("click", async () => {
 
-  const index = books.findIndex(b => b.id === bookId);
+  if (!lastQR || !qrTitle.value) return;
 
-  if (index === -1) return;
+  const index = books.findIndex(b => b.id == currentBook.id);
 
   books[index].qrs ??= [];
 
   books[index].qrs.push({
     id: Date.now(),
-    title: qrTitle.value || "QR",
-    description: qrDesc.value || "",
+    title: qrTitle.value,
+    description: qrDesc.value,
     content: lastQR
   });
 
@@ -165,9 +163,7 @@ document.getElementById("generateQR").addEventListener("click", async () => {
 ====================== */
 window.deleteQR = async function (id) {
 
-  const index = books.findIndex(b => b.id === bookId);
-
-  if (index === -1) return;
+  const index = books.findIndex(b => b.id == currentBook.id);
 
   books[index].qrs = books[index].qrs.filter(q => q.id !== id);
 
@@ -182,3 +178,42 @@ window.deleteQR = async function (id) {
 window.openQR = function (url) {
   window.open(url, "_blank");
 };
+
+/* ======================
+   DOWNLOAD PNG
+====================== */
+document.getElementById("downloadPNG").addEventListener("click", () => {
+
+  const bookName = currentBook?.title || "book";
+  const qrName = qrTitle.value || "qr";
+
+  const a = document.createElement("a");
+  a.download = `${bookName}_${qrName}.png`;
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+});
+
+/* ======================
+   DOWNLOAD SVG
+====================== */
+document.getElementById("downloadSVG").addEventListener("click", async () => {
+
+  const size = Number(qrSize.value);
+
+  const svg = await QRCode.toString(lastQR, {
+    type: "svg",
+    width: size,
+    color: {
+      dark: qrColor.value,
+      light: "#ffffff"
+    },
+    errorCorrectionLevel: "H"
+  });
+
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentBook.title}_${qrTitle.value}.svg`;
+  a.click();
+});
