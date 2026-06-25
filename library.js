@@ -1,14 +1,17 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
 import {
   getFirestore,
   doc,
+  getDoc,
   setDoc,
-  onSnapshot,
-  getDoc
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ======================
-   FIREBASE CONFIG (مرة واحدة فقط)
+   FIREBASE
 ====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
@@ -19,27 +22,18 @@ const firebaseConfig = {
   appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
 };
 
-/* ======================
-   INIT FIREBASE
-====================== */
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const booksRef = doc(db, "books", "global");
 
 /* ======================
    STATE
 ====================== */
 let books = [];
+let deleteId = null;
 
 /* ======================
-   ELEMENTS
-====================== */
-const booksGrid = document.getElementById("booksGrid");
-const addBtn = document.querySelector(".add-book-btn");
-
-/* ======================
-   CREATE DOC IF NOT EXISTS
+   INIT FIRESTORE
 ====================== */
 async function init() {
   const snap = await getDoc(booksRef);
@@ -48,22 +42,14 @@ async function init() {
     await setDoc(booksRef, { books: [] });
   }
 }
-
 init();
 
 /* ======================
    REALTIME LISTENER
 ====================== */
 onSnapshot(booksRef, (snap) => {
-
   const data = snap.data();
-
-  if (!data || !data.books) {
-    books = [];
-  } else {
-    books = data.books;
-  }
-
+  books = data?.books || [];
   render();
 });
 
@@ -71,26 +57,26 @@ onSnapshot(booksRef, (snap) => {
    RENDER
 ====================== */
 function render() {
+  const grid = document.getElementById("booksGrid");
+  if (!grid) return;
 
-  if (!booksGrid) return;
+  grid.innerHTML = "";
 
-  booksGrid.innerHTML = "";
-
-  books.forEach((book) => {
-
-    booksGrid.innerHTML += `
+  books.forEach((b) => {
+    grid.innerHTML += `
       <div class="book-card">
+        <div class="book-icon">${b.icon || "📘"}</div>
+        <h3>${b.title}</h3>
+        <div class="book-count">${b.count || 0} QR</div>
 
-        <div class="book-icon">${book.icon || "📘"}</div>
+        <div class="book-actions">
+          <button class="action-btn edit-btn" onclick="editBook(${b.id})">تعديل</button>
+          <button class="action-btn delete-btn" onclick="openDelete(${b.id})">حذف</button>
+        </div>
 
-        <h3>${book.title}</h3>
-
-        <div class="book-count">${book.count || 0} QR</div>
-
-        <button onclick="openBook(${book.id})" class="book-btn">
+        <button class="book-btn" onclick="openBook(${b.id})">
           فتح الكتاب
         </button>
-
       </div>
     `;
   });
@@ -99,10 +85,8 @@ function render() {
 /* ======================
    ADD BOOK
 ====================== */
-async function addBook() {
-
+window.addBook = async function () {
   const title = prompt("اسم الكتاب");
-
   if (!title) return;
 
   const newBook = {
@@ -114,9 +98,27 @@ async function addBook() {
   };
 
   books.push(newBook);
-
   await setDoc(booksRef, { books });
-}
+};
+
+/* ======================
+   DELETE BOOK
+====================== */
+window.openDelete = function (id) {
+  deleteId = id;
+  document.getElementById("deleteModal")?.classList.add("show");
+};
+
+window.confirmDelete = async function () {
+  books = books.filter(b => b.id !== deleteId);
+  await setDoc(booksRef, { books });
+  document.getElementById("deleteModal")?.classList.remove("show");
+};
+
+window.cancelDelete = function () {
+  document.getElementById("deleteModal")?.classList.remove("show");
+  deleteId = null;
+};
 
 /* ======================
    OPEN BOOK
@@ -126,8 +128,21 @@ window.openBook = function (id) {
 };
 
 /* ======================
-   CLICK EVENT
+   EDIT BOOK
 ====================== */
-if (addBtn) {
-  addBtn.addEventListener("click", addBook);
-}
+window.editBook = async function (id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+
+  const newTitle = prompt("تعديل الاسم", book.title);
+  if (!newTitle) return;
+
+  book.title = newTitle;
+  await setDoc(booksRef, { books });
+};
+
+/* ======================
+   BUTTON EVENT
+====================== */
+document.querySelector(".add-book-btn")
+?.addEventListener("click", addBook);
