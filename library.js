@@ -5,14 +5,10 @@ import {
 import {
   getFirestore,
   doc,
-  getDoc,
-  setDoc,
-  onSnapshot
+  onSnapshot,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ======================
-   FIREBASE
-====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
   authDomain: "atqn-qr1.firebaseapp.com",
@@ -24,125 +20,75 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const booksRef = doc(db, "books", "global");
+const ref = doc(db, "books", "global");
 
-/* ======================
-   STATE
-====================== */
 let books = [];
-let deleteId = null;
 
 /* ======================
-   INIT FIRESTORE
+   REAL DATA ENGINE
 ====================== */
-async function init() {
-  const snap = await getDoc(booksRef);
+onSnapshot(ref, (snap) => {
 
-  if (!snap.exists()) {
-    await setDoc(booksRef, { books: [] });
-  }
-}
-init();
-
-/* ======================
-   REALTIME LISTENER
-====================== */
-onSnapshot(booksRef, (snap) => {
   const data = snap.data();
   books = data?.books || [];
-  render();
+
+  renderDashboard();
 });
 
 /* ======================
-   RENDER
+   CALCULATIONS (FIXED)
 ====================== */
-function render() {
+function getTotalBooks() {
+  return books.length;
+}
+
+function getTotalQRs() {
+  return books.reduce((sum, b) => sum + (b.qrs?.length || 0), 0);
+}
+
+/* ======================
+   RENDER DASHBOARD
+====================== */
+function renderDashboard() {
+
+  const booksCount = document.getElementById("booksCount");
+  const qrCount = document.getElementById("qrCount");
+
+  if (booksCount) booksCount.innerText = getTotalBooks();
+  if (qrCount) qrCount.innerText = getTotalQRs();
+
   const grid = document.getElementById("booksGrid");
   if (!grid) return;
 
   grid.innerHTML = "";
 
   books.forEach((b) => {
+
+    const qrLength = b.qrs ? b.qrs.length : 0;
+
     grid.innerHTML += `
       <div class="book-card">
-        <div class="book-icon">${b.icon || "📘"}</div>
-        <h3>${b.title}</h3>
-        <div class="book-count">${b.count || 0} QR</div>
 
-        <div class="book-actions">
-          <button class="action-btn edit-btn" onclick="editBook(${b.id})">تعديل</button>
-          <button class="action-btn delete-btn" onclick="openDelete(${b.id})">حذف</button>
+        <div class="book-icon">${b.icon || "📘"}</div>
+
+        <h3>${b.title}</h3>
+
+        <div class="book-count">
+          QR ${qrLength}
         </div>
 
-        <button class="book-btn" onclick="openBook(${b.id})">
+        <button onclick="openBook(${b.id})">
           فتح الكتاب
         </button>
+
       </div>
     `;
   });
 }
 
 /* ======================
-   ADD BOOK
-====================== */
-window.addBook = async function () {
-  const title = prompt("اسم الكتاب");
-  if (!title) return;
-
-  const newBook = {
-    id: Date.now(),
-    title,
-    icon: "📘",
-    count: 0,
-    qrs: []
-  };
-
-  books.push(newBook);
-  await setDoc(booksRef, { books });
-};
-
-/* ======================
-   DELETE BOOK
-====================== */
-window.openDelete = function (id) {
-  deleteId = id;
-  document.getElementById("deleteModal")?.classList.add("show");
-};
-
-window.confirmDelete = async function () {
-  books = books.filter(b => b.id !== deleteId);
-  await setDoc(booksRef, { books });
-  document.getElementById("deleteModal")?.classList.remove("show");
-};
-
-window.cancelDelete = function () {
-  document.getElementById("deleteModal")?.classList.remove("show");
-  deleteId = null;
-};
-
-/* ======================
    OPEN BOOK
 ====================== */
 window.openBook = function (id) {
-  window.location.href = `book.html?id=${id}`;
+  location.href = `book.html?id=${id}`;
 };
-
-/* ======================
-   EDIT BOOK
-====================== */
-window.editBook = async function (id) {
-  const book = books.find(b => b.id === id);
-  if (!book) return;
-
-  const newTitle = prompt("تعديل الاسم", book.title);
-  if (!newTitle) return;
-
-  book.title = newTitle;
-  await setDoc(booksRef, { books });
-};
-
-/* ======================
-   BUTTON EVENT
-====================== */
-document.querySelector(".add-book-btn")
-?.addEventListener("click", addBook);
