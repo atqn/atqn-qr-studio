@@ -1,42 +1,31 @@
 import { auth } from "./firebase.js";
+
 import {
-  signOut,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-/* ======================
-   LOGIN
-====================== */
-export async function login(email, password) {
-  return await signInWithEmailAndPassword(auth, email, password);
+export function guard() {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
 }
 
-/* ======================
-   LOGOUT (IMPORTANT FIX)
-====================== */
+export async function login(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function resetPassword(email) {
+  return sendPasswordResetEmail(auth, email);
+}
+
 export async function logout() {
   await signOut(auth);
   window.location.href = "login.html";
 }
 
-/* ======================
-   RESET PASSWORD
-====================== */
-export async function resetPassword(email) {
-  return await sendPasswordResetEmail(auth, email);
-}
-
-/* ======================
-   AUTH GUARD
-====================== */
-export function authGuard(callback) {
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
-    callback(user);
-  });
-}
+window.logout = logout;
