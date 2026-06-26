@@ -3,50 +3,23 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 guard();
 
-const CACHE_KEY = "atqn_book_cache";
-
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(location.search);
 const bookId = Number(params.get("id"));
 
 let books = [];
 let currentBook = null;
 
 /* ======================
-   CACHE LOAD
-====================== */
-function loadCache() {
-
-    const cached = localStorage.getItem(CACHE_KEY);
-
-    if (cached) {
-        try {
-            const data = JSON.parse(cached);
-            books = data.books || [];
-            currentBook = books.find(b => b.id === bookId);
-
-            render();
-        } catch (e) {}
-    }
-}
-
-function saveCache() {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ books }));
-}
-
-loadCache();
-
-/* ======================
-   DB INIT
+   INIT
 ====================== */
 async function ensureDatabase() {
     const snap = await getDoc(booksRef);
-
     if (!snap.exists()) {
         await setDoc(booksRef, { books: [] });
     }
 }
 
-function getCurrentBook() {
+function getBook() {
     return books.find(b => b.id === bookId);
 }
 
@@ -55,25 +28,35 @@ function getCurrentBook() {
 ====================== */
 function render() {
 
+    const title = document.getElementById("bookTitle");
+    const count = document.getElementById("bookCount");
+    const list = document.getElementById("qrList");
+
     if (!currentBook) return;
 
-    document.getElementById("bookTitle").textContent = currentBook.title;
-    document.getElementById("bookCount").textContent =
-        (currentBook.qrs || []).length;
+    title.textContent = currentBook.title;
+    count.textContent = (currentBook.qrs || []).length;
 
-    const qrList = document.getElementById("qrList");
-
-    qrList.innerHTML = "";
+    list.innerHTML = "";
 
     (currentBook.qrs || []).forEach(qr => {
 
-        qrList.innerHTML += `
-            <div class="book-card">
-                <h3>${qr.title}</h3>
-                <p>${qr.description || ""}</p>
-                <button onclick="openQR('${qr.content}')">فتح</button>
-            </div>
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        card.innerHTML = `
+            <h3>${qr.title}</h3>
+            <p>${qr.description || ""}</p>
+            <button class="qr-open">فتح</button>
         `;
+
+        // IMPORTANT: منع انتقال الكليك للصفحة
+        card.querySelector(".qr-open").addEventListener("click", (e) => {
+            e.stopPropagation();
+            window.open(qr.content, "_blank");
+        });
+
+        list.appendChild(card);
     });
 }
 
@@ -83,18 +66,13 @@ function render() {
 ensureDatabase();
 
 onSnapshot(booksRef, (snap) => {
-
-    const data = snap.data();
-    books = data?.books || [];
-
-    currentBook = getCurrentBook();
-
+    books = snap.data()?.books || [];
+    currentBook = getBook();
     render();
-    saveCache();
 });
 
 /* ======================
-   GLOBALS
+   OPEN QR (global safety)
 ====================== */
 window.openQR = function (url) {
     window.open(url, "_blank");
