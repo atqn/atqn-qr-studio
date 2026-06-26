@@ -16,29 +16,32 @@ body {
     overflow-x: hidden;
 }
 
-/* =========================
-   GENERAL
-========================= */
-
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 24px 20px;
-}
-
-.clean-link {
-    text-decoration: none;
-}
-
 button,
-a,
 input,
-select {
+select,
+textarea,
+a {
     font-family: "Cairo", sans-serif;
 }
 
 button {
     cursor: pointer;
+    border: none;
+}
+
+a {
+    color: inherit;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 35px 20px;
+}
+
+.clean-link {
+    text-decoration: none;
 }
 
 /* =========================
@@ -46,13 +49,14 @@ button {
 ========================= */
 
 .topbar {
+    width: 100%;
     background: #111827;
     border-bottom: 1px solid #334155;
-    padding: 12px 25px;
+    padding: 14px 28px;
 
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 
     position: sticky;
     top: 0;
@@ -66,26 +70,28 @@ button {
 }
 
 .brand img {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     object-fit: contain;
 }
 
 .brand h1 {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
-    margin: 0;
+    color: #ffffff;
+    white-space: nowrap;
 }
 
 .topbar nav {
     display: flex;
-    gap: 24px;
     align-items: center;
+    gap: 26px;
 }
 
 .topbar nav a {
-    color: #cbd5e1;
+    color: #e5e7eb;
     text-decoration: none;
+    font-size: 15px;
     font-weight: 700;
     transition: 0.2s;
 }
@@ -99,91 +105,100 @@ button {
    DASHBOARD
 ========================= */
 
-.dashboard-grid,
-.stats {
+.dashboard-grid {
     margin-top: 45px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap: 24px;
 }
 
-.stat-card,
-.card {
+.stat-card {
     background: #1e293b;
     border-radius: 22px;
-    padding: 32px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+    min-height: 180px;
+    padding: 35px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
 }
 
-.stat-number,
-.number {
-    font-size: 44px;
+.stat-number {
+    font-size: 46px;
     font-weight: 800;
     color: #38bdf8;
+    line-height: 1;
 }
 
-.stat-label,
-.label {
-    margin-top: 10px;
+.stat-label {
+    margin-top: 18px;
     color: #cbd5e1;
     font-size: 16px;
     font-weight: 700;
 }
 
-.home-actions,
-.actions {
-    margin-top: 55px;
+.home-actions {
+    margin-top: 34px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap: 24px;
 }
 
-.home-action-card,
-.action-card {
+.home-action-card {
     background: #1e293b;
+    border-radius: 22px;
+    min-height: 180px;
+    padding: 30px;
+
     color: #ffffff;
     text-decoration: none;
-    border-radius: 22px;
-    padding: 28px;
-    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
     transition: 0.25s;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
 }
 
-.home-action-card:hover,
-.action-card:hover {
-    transform: translateY(-5px);
+.home-action-card:hover {
     background: #243247;
+    transform: translateY(-5px);
 }
 
-.home-action-card span,
-.action-card span {
-    font-size: 40px;
+.home-action-card span {
+    font-size: 42px;
 }
 
-.home-action-card h2,
-.action-card h2 {
-    margin-top: 10px;
+.home-action-card h2 {
+    margin-top: 15px;
     font-size: 22px;
+    font-weight: 800;
 }
 
 /* =========================
-   HEADERS
+   PAGE HEADER
 ========================= */
 
 .library-header {
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 28px;
 }
 
 .library-header h2 {
-    font-size: 30px;
+    font-size: 34px;
+    font-weight: 800;
+    color: #ffffff;
     margin-bottom: 8px;
 }
 
 .library-header p {
-    color: #94a3b8;
+    color: #cbd5e1;
+    font-size: 16px;
     font-weight: 600;
 }
 
@@ -192,38 +207,40 @@ button {
 ========================= */
 
 .library-toolbar {
+    width: 100%;
     display: flex;
-    gap: 15px;
+    justify-content: flex-start;
     align-items: center;
-    margin-bottom: 25px;
+    gap: 15px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
 }
 
 .add-book-btn {
     background: #38bdf8;
     color: #0f172a;
-    border: none;
-    border-radius: 12px;
-    padding: 11px 20px;
-    font-size: 14px;
+    border-radius: 13px;
+    padding: 12px 22px;
+    min-height: 46px;
+
+    font-size: 15px;
     font-weight: 800;
-    cursor: pointer;
+    text-decoration: none;
 
     display: inline-flex;
     justify-content: center;
     align-items: center;
 
-    min-height: 44px;
     transition: 0.2s;
 }
 
 .add-book-btn:hover {
-    transform: translateY(-2px);
     background: #0ea5e9;
+    transform: translateY(-2px);
 }
 
 /* =========================
-   BOOKS GRID
+   BOOKS / QR GRID
 ========================= */
 
 .books-scroll {
@@ -231,15 +248,19 @@ button {
 }
 
 .books-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
-    gap: 34px;
-    justify-content: center;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 250px)) !important;
+    gap: 36px !important;
+    justify-content: center !important;
+    align-items: stretch !important;
     padding: 20px 0;
 }
 
 .book-card {
-    width: 250px;
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
     min-height: 270px;
 
     background: #1e293b;
@@ -247,9 +268,13 @@ button {
     padding: 24px;
 
     text-align: center;
-    transition: 0.25s;
 
-    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    transition: 0.25s;
 }
 
 .book-card:hover {
@@ -257,70 +282,79 @@ button {
 }
 
 .book-icon {
-    font-size: 52px;
-    margin-bottom: 14px;
+    font-size: 54px;
+    line-height: 1;
+    margin-bottom: 16px;
 }
 
 .book-card h3 {
-    margin-bottom: 10px;
+    width: 100%;
     font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
     line-height: 1.5;
+    margin-bottom: 8px;
+    word-break: break-word;
 }
 
 .book-count {
     color: #38bdf8;
+    font-size: 15px;
     font-weight: 800;
     margin-bottom: 16px;
-    line-height: 1.5;
 }
 
-.book-btn {
+.qr-description {
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 45px;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+.qr-link-badge {
     width: 100%;
-    height: 42px;
-
-    border: none;
-    border-radius: 12px;
-
-    background: #38bdf8;
-    color: #0f172a;
-
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.book-btn:hover {
-    background: #0ea5e9;
-    transform: translateY(-2px);
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #38bdf8;
+    border-radius: 11px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
 }
 
 .book-actions {
-    display: flex;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
+    margin-top: auto;
     margin-bottom: 12px;
 }
 
-.action-btn {
-    flex: 1;
-    min-height: 38px;
+.action-btn,
+.book-btn {
+    width: 100%;
+    min-height: 40px;
 
-    border: none;
     border-radius: 11px;
-
     padding: 9px 10px;
 
     font-size: 14px;
     font-weight: 800;
-    cursor: pointer;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 
     transition: 0.2s;
 }
 
-.action-btn:hover {
+.action-btn:hover,
+.book-btn:hover {
     transform: translateY(-2px);
 }
 
@@ -334,42 +368,9 @@ button {
     color: #ffffff;
 }
 
-.action-btn.primary {
+.book-btn {
     background: #38bdf8;
     color: #0f172a;
-}
-
-.action-btn.success {
-    background: #22c55e;
-    color: #ffffff;
-}
-
-.action-btn.dark {
-    background: #334155;
-    color: #ffffff;
-}
-
-/* =========================
-   QR CARDS
-========================= */
-
-.qr-description {
-    color: #cbd5e1;
-    font-size: 14px;
-    line-height: 1.7;
-    margin-bottom: 12px;
-    min-height: 42px;
-}
-
-.qr-link-badge {
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: #38bdf8;
-    border-radius: 11px;
-    padding: 7px 10px;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 14px;
 }
 
 /* =========================
@@ -377,64 +378,71 @@ button {
 ========================= */
 
 .create-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 22px;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px;
     align-items: stretch;
+    direction: rtl;
 }
 
 .panel {
     background: #1e293b;
     border-radius: 22px;
-    padding: 20px;
-    min-height: 370px;
+    padding: 22px;
+    min-height: 430px;
 
-    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
 }
 
 .panel h3 {
-    margin-bottom: 14px;
-    color: #38bdf8;
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 800;
+    color: #38bdf8;
+    margin-bottom: 18px;
 }
 
 .panel label {
     display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    color: #e5e7eb;
+    margin-top: 12px;
+    margin-bottom: 6px;
     font-size: 14px;
     font-weight: 700;
+    color: #e5e7eb;
 }
 
 .panel input,
 .panel select {
     width: 100%;
-    min-height: 42px;
-
-    border: none;
-    border-radius: 12px;
+    min-height: 44px;
 
     background: #0f172a;
     color: #ffffff;
 
-    padding: 0 12px;
-    font-size: 16px;
+    border: 1px solid transparent;
+    border-radius: 13px;
 
+    padding: 0 12px;
     outline: none;
+
+    font-size: 16px;
+}
+
+.panel input:focus,
+.panel select:focus {
+    border-color: #38bdf8;
 }
 
 .panel input[type="color"] {
     padding: 4px;
-    height: 42px;
+    height: 44px;
 }
 
 .logo-options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: 14px;
+    margin-bottom: 15px;
 }
 
 .radio-item {
@@ -457,8 +465,8 @@ button {
 
 .settings-divider {
     height: 1px;
-    background: rgba(255,255,255,0.10);
-    margin: 18px 0;
+    background: rgba(255,255,255,0.12);
+    margin: 20px 0;
 }
 
 .info-card {
@@ -467,14 +475,14 @@ button {
     border: 1px solid #334155;
     border-radius: 16px;
     padding: 16px;
-    min-height: 115px;
+    min-height: 120px;
 }
 
 .info-title {
     color: #38bdf8;
     font-size: 16px;
     font-weight: 800;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
 }
 
 .info-card p {
@@ -490,43 +498,70 @@ button {
 
 .preview-box {
     width: 100%;
-    height: 230px;
-    min-height: 230px;
+    height: 260px;
+    min-height: 260px;
 
     background: #0f172a;
     border: 2px dashed #334155;
     border-radius: 18px;
 
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
+    overflow: hidden;
     color: #94a3b8;
     font-size: 14px;
 
-    overflow: hidden;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .preview-box canvas,
-.preview-box svg {
-    max-width: 170px !important;
-    max-height: 170px !important;
+.preview-box svg,
+.preview-box img,
+#qrPreviewBox canvas,
+#qrPreviewBox svg,
+#qrPreviewBox img {
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 180px !important;
+    max-height: 180px !important;
+    object-fit: contain !important;
+}
+
+.preview-box > div,
+#qrPreviewBox > div {
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 180px !important;
+    max-height: 180px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
 .preview-actions,
 .vertical-actions {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-top: auto;
 }
 
-.preview-actions .action-btn,
-.vertical-actions .action-btn {
-    width: 100%;
-    min-height: 42px;
-    text-align: center;
+.action-btn.primary {
+    background: #38bdf8;
+    color: #0f172a;
+}
+
+.action-btn.success {
+    background: #22c55e;
+    color: #ffffff;
+}
+
+.action-btn.dark {
+    background: #334155;
+    color: #ffffff;
 }
 
 /* =========================
@@ -536,12 +571,11 @@ button {
 .modal-overlay {
     position: fixed;
     inset: 0;
-
     background: rgba(0,0,0,0.65);
 
     display: none;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
     z-index: 99999;
 }
@@ -552,16 +586,15 @@ button {
 
 .modal-box {
     width: 90%;
-    max-width: 380px;
+    max-width: 390px;
 
     background: #1e293b;
     border-radius: 22px;
-
     padding: 26px;
+
     text-align: center;
 
     box-shadow: 0 18px 45px rgba(0,0,0,0.45);
-
     animation: modalShow 0.25s ease;
 }
 
@@ -571,8 +604,9 @@ button {
 }
 
 .modal-box h3 {
-    margin-bottom: 12px;
     font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 14px;
 }
 
 .modal-box p {
@@ -584,11 +618,11 @@ button {
     width: 100%;
     height: 44px;
 
-    border: none;
-    border-radius: 12px;
-
     background: #0f172a;
     color: #ffffff;
+
+    border: none;
+    border-radius: 12px;
 
     padding: 0 12px;
     margin-bottom: 14px;
@@ -605,12 +639,10 @@ button {
 .modal-btn {
     flex: 1;
     height: 42px;
-
-    border: none;
     border-radius: 12px;
 
+    font-size: 14px;
     font-weight: 800;
-    cursor: pointer;
 
     transition: 0.2s;
 }
@@ -693,7 +725,7 @@ button {
 
 @media (max-width: 1100px) {
     .create-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .panel {
@@ -701,8 +733,7 @@ button {
     }
 
     .preview-box {
-        min-height: 240px;
-        height: 240px;
+        height: 260px;
     }
 }
 
@@ -720,15 +751,13 @@ button {
     }
 
     .dashboard-grid,
-    .stats,
-    .home-actions,
-    .actions {
+    .home-actions {
         grid-template-columns: 1fr;
     }
 
     .books-grid {
-        grid-template-columns: 1fr;
-        justify-items: center;
+        grid-template-columns: 1fr !important;
+        justify-items: center !important;
     }
 
     .library-toolbar {
@@ -737,12 +766,8 @@ button {
 }
 
 @media (max-width: 600px) {
-    body {
-        font-size: 14px;
-    }
-
     .container {
-        padding: 18px 14px;
+        padding: 22px 14px;
     }
 
     .brand h1 {
@@ -759,8 +784,9 @@ button {
     }
 
     .book-card {
-        width: 100%;
-        max-width: 330px;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 330px !important;
     }
 
     .panel {
@@ -768,15 +794,15 @@ button {
     }
 
     .preview-box canvas,
-    .preview-box svg {
-        max-width: 150px !important;
-        max-height: 150px !important;
+    .preview-box svg,
+    .preview-box img,
+    #qrPreviewBox canvas,
+    #qrPreviewBox svg,
+    #qrPreviewBox img {
+        width: 150px !important;
+        height: 150px !important;
     }
 }
-
-/* =========================
-   MOBILE INPUT ZOOM FIX
-========================= */
 
 input,
 select,
