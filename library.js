@@ -9,6 +9,22 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 guard();
 
+/* ======================
+   SAFE RENDER SYSTEM
+====================== */
+let isRendering = false;
+
+function safeRender(callback) {
+    if (isRendering) return;
+
+    isRendering = true;
+
+    requestAnimationFrame(() => {
+        callback();
+        isRendering = false;
+    });
+}
+
 let books = [];
 let editBookId = null;
 let deleteBookId = null;
@@ -40,6 +56,7 @@ function saveBooks() {
 }
 
 function renderBooks() {
+
     booksGrid.innerHTML = "";
 
     if (books.length === 0) {
@@ -107,16 +124,20 @@ addBookBtn.addEventListener("click", () => {
 cancelBookBtn.addEventListener("click", closeBookModal);
 
 saveBookBtn.addEventListener("click", async () => {
+
     const title = bookTitleInput.value.trim();
 
     if (!title) return;
 
     if (editBookId) {
+
         const index = books.findIndex((b) => b.id === editBookId);
         if (index !== -1) {
             books[index].title = title;
         }
+
     } else {
+
         books.push({
             id: Date.now(),
             title,
@@ -131,6 +152,7 @@ saveBookBtn.addEventListener("click", async () => {
 });
 
 booksGrid.addEventListener("click", (event) => {
+
     const editId = event.target.dataset.edit;
     const deleteId = event.target.dataset.delete;
     const openId = event.target.dataset.open;
@@ -156,6 +178,7 @@ cancelDeleteBtn.addEventListener("click", () => {
 });
 
 confirmDeleteBtn.addEventListener("click", async () => {
+
     if (!deleteBookId) return;
 
     books = books.filter((book) => book.id !== deleteBookId);
@@ -172,5 +195,7 @@ onSnapshot(booksRef, (snap) => {
     const data = snap.data();
     books = data?.books || [];
 
-    renderBooks();
+    safeRender(() => {
+        renderBooks();
+    });
 });
