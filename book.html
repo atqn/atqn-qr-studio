@@ -3,103 +3,92 @@
 
 <head>
 <meta charset="UTF-8">
-<title>الكتاب - ATQN</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>الكتاب - ATQN QR Studio</title>
 
 <link rel="stylesheet" href="style.css">
-
-<!-- QR STYLING ENGINE -->
-<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
 <header class="topbar">
+
     <div class="brand">
-        <img src="assets/atqn-logo.png">
+        <img src="assets/atqn-logo.png" alt="ATQN">
         <h1>ATQN QR Studio</h1>
     </div>
 
     <nav>
         <a href="index.html">الرئيسة</a>
-        <a href="library.html">المكتبة</a>
+        <a href="library.html">الكتب</a>
         <a href="create.html">إنشاء QR</a>
         <a href="#" onclick="logout()">خروج</a>
     </nav>
+
 </header>
 
-<div class="container">
+<main class="container">
 
     <div class="library-header">
-        <h2 id="bookTitle">الكتاب</h2>
-        <p id="bookCount">0 QR</p>
+        <h2 id="bookTitle">اسم الكتاب</h2>
+        <p id="bookCount">عدد الأكواد: 0</p>
     </div>
 
-    <!-- QR Editor Panel -->
-    <div class="qr-panel">
+    <div class="library-toolbar">
+        <button id="addQrBtn" class="add-book-btn">➕ إضافة QR جديد</button>
 
-        <input id="qrTitle" placeholder="عنوان QR">
-        <input id="qrDesc" placeholder="وصف QR">
-        <input id="qrLink" placeholder="الرابط">
-
-        <input type="color" id="qrColor" value="#000000">
-
-        <select id="qrSize">
-            <option value="300">300 DPI</option>
-            <option value="600">600 DPI</option>
-            <option value="1200">1200 DPI</option>
-            <option value="2400">2400 DPI</option>
-        </select>
-
-        <select id="qrStyle">
-            <option value="square">Square</option>
-            <option value="dots">Dots</option>
-            <option value="rounded">Rounded</option>
-            <option value="extra-rounded">Extra Rounded</option>
-        </select>
-
-        <select id="logoMode">
-            <option value="default">شعار ATQN</option>
-            <option value="upload">رفع شعار</option>
-        </select>
-
-        <input type="file" id="logoUpload" style="display:none;">
-
-        <button id="generateQR">⚡ توليد QR</button>
-        <button id="saveQR">💾 حفظ</button>
-
+        <a href="library.html" class="add-book-btn clean-link">
+            ← الرجوع للمكتبة
+        </a>
     </div>
 
-    <!-- Preview -->
-    <div id="qrCanvas"></div>
-
-    <!-- Actions -->
-    <div class="qr-actions">
-        <button id="downloadPNG">تحميل PNG</button>
-        <button id="downloadSVG">تحميل SVG</button>
+    <div class="books-scroll">
+        <div id="qrList" class="books-grid"></div>
     </div>
 
-    <hr>
+</main>
 
-    <!-- LIST -->
-    <div id="qrList"></div>
+<div id="qrModal" class="modal-overlay">
+    <div class="modal-box">
 
+        <div class="modal-icon">➕</div>
+
+        <h3 id="qrModalTitle">إضافة QR جديد</h3>
+
+        <input id="qrTitleInput" type="text" class="modal-input" placeholder="عنوان QR">
+
+        <input id="qrDescriptionInput" type="text" class="modal-input" placeholder="وصف مختصر">
+
+        <input id="qrLinkInput" type="text" class="modal-input" placeholder="الرابط أو المحتوى">
+
+        <div class="modal-actions">
+            <button id="saveQrBtn" class="modal-btn danger-btn">حفظ</button>
+            <button id="cancelQrBtn" class="modal-btn cancel-btn">إلغاء</button>
+        </div>
+
+    </div>
 </div>
 
-<script type="module" src="./book.js"></script>
+<div id="deleteQrModal" class="modal-overlay">
+    <div class="modal-box">
 
-<script type="module">
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        <div class="modal-icon">⚠️</div>
 
-onAuthStateChanged(auth, (user) => {
-    if (!user) location.href = "login.html";
-});
-</script>
+        <h3>تأكيد الحذف</h3>
 
-<script type="module">
-import { logout } from "./auth.js";
-window.logout = logout;
-</script>
+        <p>هل تريد حذف هذا الـ QR؟</p>
+
+        <div class="modal-actions">
+            <button id="confirmDeleteQrBtn" class="modal-btn danger-btn">حذف</button>
+            <button id="cancelDeleteQrBtn" class="modal-btn cancel-btn">إلغاء</button>
+        </div>
+
+    </div>
+</div>
+
+<script type="module" src="book.js"></script>
 
 </body>
 </html>
