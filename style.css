@@ -812,3 +812,12 @@ select,
 textarea {
     font-size: 16px !important;
 }
+
+.create-layout {
+    direction: ltr !important;
+}
+
+/* ترتيب الأعمدة بدون لمس التصميم */
+.create-layout > * {
+    direction: rtl;
+}
