@@ -466,16 +466,16 @@ a {
 .settings-divider {
     height: 5px;
     background: rgba(255,255,255,0.12);
-    margin: 22px 0;
+    margin: 24px 0;
 }
 
 .info-card {
-    margin-top: 30px;
+    margin-top: 42px;
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 16px;
     padding: 16px;
-    min-height: 130px;
+    min-height: 125px;
 }
 
 .info-title {
