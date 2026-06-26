@@ -1,3 +1,7 @@
+if (!document.body) {
+    throw new Error("Page not ready");
+}
+
 import { guard } from "./auth.js";
 import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
