@@ -928,3 +928,91 @@ body:has(.login-box) {
     align-items: center;
     background: #0f172a;
 }
+
+/* =========================
+   Login(UI Upgrade)
+========================= */
+body {
+    background: #0f172a;
+    font-family: "Cairo", sans-serif;
+}
+
+.login-box {
+    width: 360px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 18px;
+
+    background: rgba(30, 41, 59, 0.9);
+    backdrop-filter: blur(10px);
+
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    position: relative;
+}
+
+/* Title */
+.login-box h2 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Inputs */
+.login-box input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+.login-box input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56,189,248,0.3);
+}
+
+/* Buttons */
+.login-box button {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+/* Login button */
+#loginBtn {
+    background: linear-gradient(135deg,#38bdf8,#0ea5e9);
+    color: #0f172a;
+}
+
+#loginBtn:hover {
+    transform: translateY(-2px);
+}
+
+/* Reset button */
+#resetBtn {
+    background: transparent;
+    border: 1px solid #475569;
+    color: #fff;
+}
+
+#resetBtn:hover {
+    background: #1e293b;
+}
+
+/* Centering fix */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
