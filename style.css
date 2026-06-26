@@ -470,12 +470,12 @@ a {
 }
 
 .info-card {
-    margin-top: 20px;
+    margin-top: 34px;
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 16px;
     padding: 16px;
-    min-height: 120px;
+    min-height: 165px;
 }
 
 .info-title {
