@@ -1,34 +1,70 @@
-import { guard } from "./auth.js";
-import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
-guard();
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-async function ensureDatabase() {
-    const snap = await getDoc(booksRef);
+<title>ATQN QR Studio</title>
 
-    if (!snap.exists()) {
-        await setDoc(booksRef, { books: [] });
-    }
-}
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
 
-function updateDashboard(books) {
-    const booksCount = document.getElementById("booksCount");
-    const qrsCount = document.getElementById("qrsCount");
+<body>
 
-    const totalBooks = books.length;
-    const totalQrs = books.reduce((sum, book) => {
-        return sum + ((book.qrs || []).length);
-    }, 0);
+<header class="topbar">
 
-    booksCount.textContent = totalBooks;
-    qrsCount.textContent = totalQrs;
-}
+    <div class="brand">
+        <img src="assets/atqn-logo.png" alt="ATQN">
+        <h1>ATQN QR Studio</h1>
+    </div>
 
-ensureDatabase();
+    <nav>
+        <a href="index.html" class="active">الرئيسة</a>
+        <a href="library.html">الكتب</a>
+        <a href="create.html">إنشاء QR</a>
+        <a href="#" onclick="logout()">خروج</a>
+    </nav>
 
-onSnapshot(booksRef, (snap) => {
-    const data = snap.data();
-    const books = data?.books || [];
+</header>
 
-    updateDashboard(books);
-});
+<main class="container">
+       <div class="page-title">
+    <h1>لوحة التحكم</h1>
+    <p>إدارة الكتب وإنشاء رموز QR</p>
+</div>
+    <section class="dashboard-grid">
+
+        <div class="stat-card">
+            <div id="booksCount" class="stat-number">0</div>
+            <div class="stat-label">عدد الكتب</div>
+        </div>
+
+        <div class="stat-card">
+            <div id="qrsCount" class="stat-number">0</div>
+            <div class="stat-label">عدد الباركودات</div>
+        </div>
+
+    </section>
+
+    <section class="home-actions">
+
+        <a href="create.html" class="home-action-card">
+            <span>➕</span>
+            <h2>إنشاء QR جديد</h2>
+        </a>
+
+        <a href="library.html" class="home-action-card">
+            <span>📚</span>
+            <h2>مكتبة الكتب</h2>
+        </a>
+
+    </section>
+
+</main>
+
+<script type="module" src="index.js"></script>
+
+</body>
+</html>
