@@ -24,6 +24,16 @@ let syncTimer = null;
 let isInitialLoaded = false;
 
 /* ======================
+   AUTO GENERATE FUNCTION
+====================== */
+
+function autoGenerate() {
+    if (typeof generateQR === "function") {
+        generateQR();
+    }
+}
+
+/* ======================
    ELEMENTS
 ====================== */
 
@@ -478,3 +488,9 @@ onSnapshot(booksRef, (snap) => {
         generateQR();
     }
 });
+
+document.getElementById("qrContentInput")?.addEventListener("input", autoGenerate);
+document.getElementById("qrTitleInput")?.addEventListener("input", autoGenerate);
+document.getElementById("qrDescriptionInput")?.addEventListener("input", autoGenerate);
+document.getElementById("qrColorInput")?.addEventListener("input", autoGenerate);
+document.getElementById("qrSizeInput")?.addEventListener("change", autoGenerate);
