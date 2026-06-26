@@ -810,11 +810,4 @@ textarea {
     font-size: 16px !important;
 }
 
-/* =========================
-   HIDE GENERATE BUTTON (UI ONLY)
-========================= */
 
-#generateQR,
-button#generateQR {
-    display: none !important;
-}
