@@ -3,101 +3,153 @@
 
 <head>
 <meta charset="UTF-8">
-<title>إنشاء QR - ATQN</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<title>إنشاء QR - ATQN QR Studio</title>
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 </head>
 
 <body>
 
 <header class="topbar">
-  <div class="brand">
-    <img src="assets/atqn-logo.png">
-    <h1>ATQN QR Studio</h1>
-  </div>
 
-  <nav>
-    <a href="index.html">الرئيسية</a>
-    <a href="library.html">المكتبة</a>
-    <a href="create.html">إنشاء QR</a>
-    <a href="#" onclick="logout()">خروج</a>
-  </nav>
+    <div class="brand">
+        <img src="assets/atqn-logo.png" alt="ATQN">
+        <h1>ATQN QR Studio</h1>
+    </div>
+
+    <nav>
+        <a href="index.html">الرئيسة</a>
+        <a href="library.html">الكتب</a>
+        <a href="create.html" class="active">إنشاء QR</a>
+        <a href="#" onclick="logout()">خروج</a>
+    </nav>
+
 </header>
 
-<div class="create-layout">
+<main class="container">
 
-  <!-- LEFT: PREVIEW -->
-  <div class="panel preview-panel">
-    <h3>المعاينة</h3>
-
-    <div class="qr-preview-box">
-      <canvas id="qrCanvas"></canvas>
+    <div class="library-header">
+        <h2>إنشاء QR</h2>
+        <p id="pageSubtitle">إعداد الباركود وحفظه داخل المكتبة</p>
     </div>
 
-    <button id="generateQR">⚡ توليد QR</button>
-    <button id="saveQR">💾 حفظ داخل المكتبة</button>
-    <button id="downloadPNG">⬇ PNG</button>
-    <button id="downloadSVG">⬇ SVG</button>
-  </div>
+    <div class="create-layout">
 
-  <!-- CENTER: SETTINGS -->
-  <div class="panel settings-panel">
+        <section class="panel">
 
-    <h3>الإعدادات</h3>
+            <h3>بيانات الباركود</h3>
 
-    <input id="qrLink" placeholder="الرابط">
-    <input id="qrColor" type="color" value="#000000">
+            <label>اسم الكتاب</label>
+            <select id="bookSelect"></select>
 
-    <select id="qrSize">
-      <option value="300">300</option>
-      <option value="600">600</option>
-      <option value="1200">1200</option>
-      <option value="2400">2400</option>
-    </select>
+            <label>عنوان الباركود</label>
+            <input id="qrTitleInput" type="text" placeholder="عنوان QR">
 
-    <select id="logoMode">
-      <option value="default">شعار ATQN</option>
-      <option value="upload">رفع شعار</option>
-    </select>
+            <label>وصف مختصر</label>
+            <input id="qrDescriptionInput" type="text" placeholder="وصف مختصر">
 
-    <input type="file" id="logoUpload">
+            <label>المحتوى / الرابط</label>
+            <input id="qrContentInput" type="text" placeholder="الرابط أو المحتوى">
 
-  </div>
+            <div class="info-card">
+                <div class="info-title">📚 تنظيم الباركودات</div>
+                <p>يتم حفظ كل QR داخل الكتاب المحدد ومزامنته مباشرة عبر Firebase.</p>
+            </div>
 
-  <!-- RIGHT: BOOK DATA -->
-  <div class="panel data-panel">
+        </section>
 
-    <h3>بيانات الباركود</h3>
+        <section class="panel">
 
-    <select id="bookSelect"></select>
+            <h3>الإعدادات</h3>
 
-    <input id="qrTitle" placeholder="اسم الباركود">
-    <input id="qrDesc" placeholder="وصف مختصر">
+            <div class="logo-options">
 
-    <div class="hint">
-      تنظيم الباركود داخل الكتب
+                <label class="radio-item">
+                    <input type="radio" name="logoMode" value="default" checked>
+                    <span>استخدام شعار ATQN</span>
+                </label>
+
+                <label class="radio-item">
+                    <input type="radio" name="logoMode" value="upload">
+                    <span>رفع شعار من الجهاز</span>
+                </label>
+
+            </div>
+
+            <label>رفع الشعار داخل QR</label>
+            <input type="file" id="qrLogoInput" accept="image/*">
+
+            <div class="settings-divider"></div>
+
+            <label>اللون</label>
+            <input id="qrColorInput" type="color" value="#38bdf8">
+
+            <label>الستايل</label>
+            <select id="qrStyleInput">
+                <option value="square">Square</option>
+                <option value="dots">Dots</option>
+                <option value="rounded">Rounded</option>
+                <option value="extra-rounded">Extra Rounded</option>
+                <option value="classy">Classy</option>
+                <option value="classy-rounded">Classy Rounded</option>
+            </select>
+
+            <label>الدقة</label>
+            <select id="qrSizeInput">
+                <option value="300">300</option>
+                <option value="600" selected>600</option>
+                <option value="1200">1200</option>
+                <option value="2400">2400</option>
+            </select>
+
+        </section>
+
+        <section class="panel preview-panel">
+
+            <h3>المعاينة</h3>
+
+            <div id="qrPreviewBox" class="preview-box">
+                اضغط توليد المعاينة
+            </div>
+
+            <div class="preview-actions vertical-actions">
+
+                <button id="generatePreviewBtn" class="action-btn primary">
+                    ⚡ توليد المعاينة
+                </button>
+
+                <button id="saveQrChangesBtn" class="action-btn success">
+                    📚 حفظ في المكتبة
+                </button>
+
+                <button id="downloadQrBtn" class="action-btn dark">
+                    ⬇️ تحميل PNG
+                </button>
+
+                <button id="downloadSvgBtn" class="action-btn dark">
+                    ⬇️ تحميل SVG
+                </button>
+
+                <a href="library.html" class="action-btn dark clean-link">
+                    ← عودة للمكتبة
+                </a>
+
+            </div>
+
+        </section>
+
     </div>
 
-  </div>
+</main>
 
-</div>
+<div id="toast"></div>
 
-<script type="module" src="./create.js"></script>
-
-<script type="module">
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-  if (!user) location.href = "login.html";
-});
-</script>
-
-<script type="module">
-import { logout } from "./auth.js";
-window.logout = logout;
-</script>
+<script type="module" src="create.js"></script>
 
 </body>
 </html>
