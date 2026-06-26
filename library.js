@@ -3,174 +3,70 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 guard();
 
-const CACHE_KEY = "atqn_library_cache";
-
 let books = [];
-let editBookId = null;
-let deleteBookId = null;
 
 const booksGrid = document.getElementById("booksGrid");
+const addBookBtn = document.getElementById("addBookBtn");
 
 /* ======================
-   INSTANT CACHE LOAD
-====================== */
-function loadCache() {
-
-    const cached = localStorage.getItem(CACHE_KEY);
-
-    if (cached) {
-        try {
-            books = JSON.parse(cached);
-            renderBooks();
-        } catch (e) {}
-    }
-}
-
-function saveCache() {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(books));
-}
-
-/* ======================
-   SKELETON (fast UI)
-====================== */
-booksGrid.innerHTML = `
-    <div class="book-card">
-        <div class="book-icon">⏳</div>
-        <h3>جاري التحميل...</h3>
-        <div class="book-count">...</div>
-    </div>
-`;
-
-loadCache();
-
-/* ======================
-   DB INIT
+   INIT DB
 ====================== */
 async function ensureDatabase() {
     const snap = await getDoc(booksRef);
-
     if (!snap.exists()) {
         await setDoc(booksRef, { books: [] });
     }
 }
 
-function saveBooks() {
-    saveCache();
-    return setDoc(booksRef, { books });
-}
-
 /* ======================
-   RENDER (optimized)
+   RENDER
 ====================== */
-function renderBooks() {
+function render() {
 
-    if (!books) return;
+    booksGrid.innerHTML = "";
 
-    if (books.length === 0) {
-        booksGrid.innerHTML = `
-            <div class="book-card">
-                <div class="book-icon">📚</div>
-                <h3>لا توجد كتب بعد</h3>
-            </div>
+    books.forEach(book => {
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        card.innerHTML = `
+            <h3>${book.title}</h3>
+            <div>${(book.qrs || []).length} QR</div>
+
+            <button class="open-book">فتح الكتاب</button>
         `;
-        return;
-    }
 
-    let html = "";
+        // FIX: منع أي تضارب click
+        card.querySelector(".open-book").addEventListener("click", (e) => {
+            e.stopPropagation();
+            window.location.href = `book.html?id=${book.id}`;
+        });
 
-    for (const book of books) {
-
-        const count = (book.qrs || []).length;
-
-        html += `
-            <div class="book-card">
-
-                <div class="book-icon">${book.icon || "📘"}</div>
-
-                <h3>${book.title || ""}</h3>
-
-                <div class="book-count">${count} QR</div>
-
-                <button class="book-btn" data-open="${book.id}">
-                    📖 فتح
-                </button>
-
-            </div>
-        `;
-    }
-
-    requestAnimationFrame(() => {
-        booksGrid.innerHTML = html;
+        booksGrid.appendChild(card);
     });
 }
 
 /* ======================
-   MODAL + ACTIONS (unchanged)
+   ADD BOOK BUTTON FIX
 ====================== */
-function openBookModal(mode, book = null) {
-    editBookId = book ? book.id : null;
-
-    document.getElementById("bookModal").classList.add("show");
-    document.getElementById("bookTitleInput").value = book?.title || "";
-}
-
-function closeBookModal() {
-    editBookId = null;
-    document.getElementById("bookModal").classList.remove("show");
-}
-
-/* EVENTS */
-document.getElementById("addBookBtn").addEventListener("click", () => {
-    openBookModal("add");
+addBookBtn?.addEventListener("click", () => {
+    document.getElementById("bookModal")?.classList.add("show");
 });
-
-document.getElementById("saveBookBtn").addEventListener("click", async () => {
-
-    const title = document.getElementById("bookTitleInput").value.trim();
-    if (!title) return;
-
-    if (editBookId) {
-
-        const index = books.findIndex(b => b.id === editBookId);
-        if (index !== -1) books[index].title = title;
-
-    } else {
-
-        books.push({
-            id: Date.now(),
-            title,
-            icon: "📘",
-            qrs: []
-        });
-    }
-
-    await saveBooks();
-    closeBookModal();
-});
-
-document.getElementById("cancelBookBtn").addEventListener("click", closeBookModal);
-
-/* CLICK */
-booksGrid.addEventListener("click", (event) => {
-
-    const openId = event.target.dataset.open;
-
-    if (openId) {
-        window.location.href = `book.html?id=${openId}`;
-    }
-});
-
-ensureDatabase();
 
 /* ======================
-   FIREBASE REALTIME
+   SAVE + SYNC
 ====================== */
+async function save() {
+    await setDoc(booksRef, { books });
+}
+
+/* ======================
+   FIREBASE
+====================== */
+ensureDatabase();
+
 onSnapshot(booksRef, (snap) => {
-
-    const data = snap.data();
-    books = data?.books || [];
-
-    renderBooks();
-    saveCache();
+    books = snap.data()?.books || [];
+    render();
 });
-
