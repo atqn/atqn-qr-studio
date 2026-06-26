@@ -1,9 +1,3 @@
-if (!document.body) {
-    throw new Error("Page not ready");
-}
-
-if (!document.getElementById("qrCanvas")) return;
-
 import { guard } from "./auth.js";
 import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
