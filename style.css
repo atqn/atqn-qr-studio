@@ -470,12 +470,12 @@ a {
 }
 
 .info-card {
-    margin-top: 20px;
+    margin-top: 25px;
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 16px;
     padding: 16px;
-    min-height: 120px;
+    min-height: 130px;
 }
 
 .info-title {
@@ -522,10 +522,10 @@ a {
 #qrPreviewBox canvas,
 #qrPreviewBox svg,
 #qrPreviewBox img {
-    width: 200px !important;
-    height: 200px !important;
-    max-width: 200px !important;
-    max-height: 200px !important;
+    width: 210px !important;
+    height: 210px !important;
+    max-width: 210px !important;
+    max-height: 210px !important;
     object-fit: contain !important;
 }
 
