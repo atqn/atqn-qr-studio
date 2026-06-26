@@ -906,12 +906,12 @@ textarea {
 
 .page-title h1 {
     font-size: 34px;
-    font-weight: 900;
+    font-weight: 800;
     color: #ffffff;
+    margin-bottom: 8px;
 }
 
 .page-title p {
-    margin-top: 8px;
-    font-size: 16px;
     color: #94a3b8;
+    font-size: 15px;
 }
