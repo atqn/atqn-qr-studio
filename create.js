@@ -28,9 +28,11 @@ let isInitialLoaded = false;
 ====================== */
 
 function autoGenerate() {
-    if (typeof generateQR === "function") {
-        generateQR();
-    }
+    requestAnimationFrame(() => {
+        if (typeof generateQR === "function") {
+            generateQR();
+        }
+    });
 }
 
 /* ======================
@@ -474,23 +476,32 @@ bookSelect.addEventListener("change", () => {
    FIRESTORE LISTENER
 ====================== */
 
-ensureDatabase();
+function bindAutoGenerate() {
 
-onSnapshot(booksRef, (snap) => {
-    const data = snap.data();
+    const fields = [
+        "qrContentInput",
+        "qrTitleInput",
+        "qrDescriptionInput",
+        "qrColorInput",
+        "qrSizeInput"
+    ];
 
-    books = data?.books || [];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
 
-    renderBookSelect();
-    loadCurrentData();
+        if (!el) return;
 
-    if (qrContentInput.value.trim()) {
-        generateQR();
-    }
-});
+        el.addEventListener("input", autoGenerate);
+        el.addEventListener("change", autoGenerate);
+    });
+}
 
 document.getElementById("qrContentInput")?.addEventListener("input", autoGenerate);
 document.getElementById("qrTitleInput")?.addEventListener("input", autoGenerate);
 document.getElementById("qrDescriptionInput")?.addEventListener("input", autoGenerate);
 document.getElementById("qrColorInput")?.addEventListener("input", autoGenerate);
 document.getElementById("qrSizeInput")?.addEventListener("change", autoGenerate);
+
+window.addEventListener("load", () => {
+    bindAutoGenerate();
+});
