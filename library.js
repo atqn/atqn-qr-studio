@@ -1,94 +1,170 @@
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { guard } from "./auth.js";
+import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
-import {
-  getFirestore,
-  doc,
-  onSnapshot,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBmgkN6Glpa0ly_d4e8heB0TiCmV6ieKbw",
-  authDomain: "atqn-qr1.firebaseapp.com",
-  projectId: "atqn-qr1",
-  storageBucket: "atqn-qr1.firebasestorage.app",
-  messagingSenderId: "867770918097",
-  appId: "1:867770918097:web:419b4dc7fefe9e1c4d51f0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const ref = doc(db, "books", "global");
+guard();
 
 let books = [];
+let editBookId = null;
+let deleteBookId = null;
 
-/* ======================
-   REAL DATA ENGINE
-====================== */
-onSnapshot(ref, (snap) => {
+const booksGrid = document.getElementById("booksGrid");
 
-  const data = snap.data();
-  books = data?.books || [];
+const addBookBtn = document.getElementById("addBookBtn");
 
-  renderDashboard();
+const bookModal = document.getElementById("bookModal");
+const bookModalTitle = document.getElementById("bookModalTitle");
+const bookTitleInput = document.getElementById("bookTitleInput");
+const saveBookBtn = document.getElementById("saveBookBtn");
+const cancelBookBtn = document.getElementById("cancelBookBtn");
+
+const deleteModal = document.getElementById("deleteModal");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+async function ensureDatabase() {
+    const snap = await getDoc(booksRef);
+
+    if (!snap.exists()) {
+        await setDoc(booksRef, { books: [] });
+    }
+}
+
+function saveBooks() {
+    return setDoc(booksRef, { books });
+}
+
+function renderBooks() {
+    booksGrid.innerHTML = "";
+
+    if (books.length === 0) {
+        booksGrid.innerHTML = `
+            <div class="book-card">
+                <div class="book-icon">📚</div>
+                <h3>لا توجد كتب بعد</h3>
+                <div class="book-count">اضغط على إضافة كتاب</div>
+            </div>
+        `;
+        return;
+    }
+
+    books.forEach((book) => {
+        const count = (book.qrs || []).length;
+
+        booksGrid.innerHTML += `
+            <div class="book-card">
+
+                <div class="book-icon">${book.icon || "📘"}</div>
+
+                <h3>${book.title || ""}</h3>
+
+                <div class="book-count">${count} QR</div>
+
+                <div class="book-actions">
+                    <button class="action-btn edit-btn" data-edit="${book.id}">
+                        ✏️ تعديل
+                    </button>
+
+                    <button class="action-btn delete-btn" data-delete="${book.id}">
+                        🗑 حذف
+                    </button>
+                </div>
+
+                <button class="book-btn" data-open="${book.id}">
+                    📖 فتح الكتاب
+                </button>
+
+            </div>
+        `;
+    });
+}
+
+function openBookModal(mode, book = null) {
+    editBookId = book ? book.id : null;
+
+    bookModalTitle.textContent = mode === "edit" ? "تعديل الكتاب" : "إضافة كتاب";
+    bookTitleInput.value = book?.title || "";
+
+    bookModal.classList.add("show");
+    bookTitleInput.focus();
+}
+
+function closeBookModal() {
+    editBookId = null;
+    bookTitleInput.value = "";
+    bookModal.classList.remove("show");
+}
+
+addBookBtn.addEventListener("click", () => {
+    openBookModal("add");
 });
 
-/* ======================
-   CALCULATIONS (FIXED)
-====================== */
-function getTotalBooks() {
-  return books.length;
-}
+cancelBookBtn.addEventListener("click", closeBookModal);
 
-function getTotalQRs() {
-  return books.reduce((sum, b) => sum + (b.qrs?.length || 0), 0);
-}
+saveBookBtn.addEventListener("click", async () => {
+    const title = bookTitleInput.value.trim();
 
-/* ======================
-   RENDER DASHBOARD
-====================== */
-function renderDashboard() {
+    if (!title) return;
 
-  const booksCount = document.getElementById("booksCount");
-  const qrCount = document.getElementById("qrCount");
+    if (editBookId) {
+        const index = books.findIndex((b) => b.id === editBookId);
+        if (index !== -1) {
+            books[index].title = title;
+        }
+    } else {
+        books.push({
+            id: Date.now(),
+            title,
+            icon: "📘",
+            count: 0,
+            qrs: []
+        });
+    }
 
-  if (booksCount) booksCount.innerText = getTotalBooks();
-  if (qrCount) qrCount.innerText = getTotalQRs();
+    await saveBooks();
+    closeBookModal();
+});
 
-  const grid = document.getElementById("booksGrid");
-  if (!grid) return;
+booksGrid.addEventListener("click", (event) => {
+    const editId = event.target.dataset.edit;
+    const deleteId = event.target.dataset.delete;
+    const openId = event.target.dataset.open;
 
-  grid.innerHTML = "";
+    if (editId) {
+        const book = books.find((b) => b.id === Number(editId));
+        if (book) openBookModal("edit", book);
+    }
 
-  books.forEach((b) => {
+    if (deleteId) {
+        deleteBookId = Number(deleteId);
+        deleteModal.classList.add("show");
+    }
 
-    const qrLength = b.qrs ? b.qrs.length : 0;
+    if (openId) {
+        window.location.href = `book.html?id=${openId}`;
+    }
+});
 
-    grid.innerHTML += `
-      <div class="book-card">
+cancelDeleteBtn.addEventListener("click", () => {
+    deleteBookId = null;
+    deleteModal.classList.remove("show");
+});
 
-        <div class="book-icon">${b.icon || "📘"}</div>
+confirmDeleteBtn.addEventListener("click", async () => {
+    if (!deleteBookId) return;
 
-        <h3>${b.title}</h3>
+    books = books.filter((book) => book.id !== deleteBookId);
 
-        <div class="book-count">
-          QR ${qrLength}
-        </div>
+    await saveBooks();
 
-        <button onclick="openBook(${b.id})">
-          فتح الكتاب
-        </button>
+    deleteBookId = null;
+    deleteModal.classList.remove("show");
+});
 
-      </div>
-    `;
-  });
-}
+ensureDatabase();
 
-/* ======================
-   OPEN BOOK
-====================== */
-window.openBook = function (id) {
-  location.href = `book.html?id=${id}`;
-};
+onSnapshot(booksRef, (snap) => {
+    const data = snap.data();
+    books = data?.books || [];
+
+    renderBooks();
+});
