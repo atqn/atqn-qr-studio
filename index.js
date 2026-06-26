@@ -3,6 +3,16 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 guard();
 
+/* ======================
+   LOADING STATE (Skeleton بسيط)
+====================== */
+const booksCount = document.getElementById("booksCount");
+const qrsCount = document.getElementById("qrsCount");
+
+/* قيم مبدئية تمنع الفلاش */
+booksCount.textContent = "—";
+qrsCount.textContent = "—";
+
 async function ensureDatabase() {
     const snap = await getDoc(booksRef);
 
@@ -12,21 +22,28 @@ async function ensureDatabase() {
 }
 
 function updateDashboard(books) {
-    const booksCount = document.getElementById("booksCount");
-    const qrsCount = document.getElementById("qrsCount");
 
     const totalBooks = books.length;
+
     const totalQrs = books.reduce((sum, book) => {
         return sum + ((book.qrs || []).length);
     }, 0);
 
-    booksCount.textContent = totalBooks;
-    qrsCount.textContent = totalQrs;
+    /* تحديث مباشر بدون فلاش */
+    requestAnimationFrame(() => {
+        booksCount.textContent = totalBooks;
+        qrsCount.textContent = totalQrs;
+    });
 }
 
+/* إنشاء قاعدة البيانات */
 ensureDatabase();
 
+/* ======================
+   REALTIME LISTENER
+====================== */
 onSnapshot(booksRef, (snap) => {
+
     const data = snap.data();
     const books = data?.books || [];
 
