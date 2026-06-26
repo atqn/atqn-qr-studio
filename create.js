@@ -3,10 +3,17 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 guard();
 
-const params = new URLSearchParams(window.location.search);
+/* ======================
+   PARAMS
+====================== */
 
+const params = new URLSearchParams(window.location.search);
 const paramBookId = Number(params.get("book"));
 const paramQrId = Number(params.get("qr"));
+
+/* ======================
+   STATE
+====================== */
 
 let books = [];
 let currentBook = null;
@@ -14,6 +21,11 @@ let currentQR = null;
 let qrCode = null;
 let uploadedLogo = null;
 let syncTimer = null;
+let isInitialLoaded = false;
+
+/* ======================
+   ELEMENTS
+====================== */
 
 const bookSelect = document.getElementById("bookSelect");
 
@@ -35,6 +47,10 @@ const downloadSvgBtn = document.getElementById("downloadSvgBtn");
 
 const toast = document.getElementById("toast");
 
+/* ======================
+   INIT DATABASE
+====================== */
+
 async function ensureDatabase() {
     const snap = await getDoc(booksRef);
 
@@ -43,12 +59,17 @@ async function ensureDatabase() {
     }
 }
 
+/* ======================
+   TOAST
+====================== */
+
 function showToast(message, type = "success") {
     if (!toast) return;
 
     toast.textContent = message;
     toast.className = "toast";
     void toast.offsetWidth;
+
     toast.classList.add("show", type);
 
     clearTimeout(toast._timer);
@@ -58,8 +79,12 @@ function showToast(message, type = "success") {
     }, 2500);
 }
 
+/* ======================
+   HELPERS
+====================== */
+
 function normalizeContent(value) {
-    const text = value.trim();
+    const text = (value || "").trim();
 
     if (!text) return "";
 
@@ -90,11 +115,15 @@ function getBookIndex(bookId) {
 }
 
 function getQrIndex(bookIndex, qrId) {
-    return (books[bookIndex].qrs || []).findIndex((qr) => qr.id === qrId);
+    return (books[bookIndex]?.qrs || []).findIndex((qr) => qr.id === qrId);
+}
+
+function getLogoMode() {
+    return document.querySelector("input[name='logoMode']:checked")?.value || "default";
 }
 
 function getLogoSource() {
-    const logoMode = document.querySelector("input[name='logoMode']:checked")?.value || "default";
+    const logoMode = getLogoMode();
 
     if (logoMode === "upload" && uploadedLogo) {
         return uploadedLogo;
@@ -108,9 +137,20 @@ function getQrSettings() {
         color: qrColorInput.value || "#38bdf8",
         style: qrStyleInput.value || "square",
         size: Number(qrSizeInput.value || 600),
-        logoMode: document.querySelector("input[name='logoMode']:checked")?.value || "default"
+        logoMode: getLogoMode()
     };
 }
+
+function safeFileName(value) {
+    return String(value || "QR")
+        .trim()
+        .replace(/[\\/:*?"<>|]/g, "")
+        .replace(/\s+/g, "_");
+}
+
+/* ======================
+   RENDER BOOK SELECT
+====================== */
 
 function renderBookSelect() {
     bookSelect.innerHTML = "";
@@ -123,15 +163,21 @@ function renderBookSelect() {
     books.forEach((book) => {
         bookSelect.innerHTML += `
             <option value="${book.id}">
-                ${book.title}
+                ${book.title || "كتاب بدون اسم"}
             </option>
         `;
     });
 
-    if (paramBookId) {
+    if (paramBookId && books.some((book) => book.id === paramBookId)) {
         bookSelect.value = String(paramBookId);
+    } else if (!bookSelect.value && books.length > 0) {
+        bookSelect.value = String(books[0].id);
     }
 }
+
+/* ======================
+   LOAD CURRENT QR
+====================== */
 
 function loadCurrentData() {
     const selectedBookId = getSelectedBookId();
@@ -146,24 +192,35 @@ function loadCurrentData() {
         currentQR = currentBook.qrs.find((qr) => qr.id === paramQrId) || null;
     }
 
-    if (currentQR) {
+    if (currentQR && !isInitialLoaded) {
         qrTitleInput.value = currentQR.title || "";
         qrDescriptionInput.value = currentQR.description || "";
         qrContentInput.value = currentQR.content || "";
 
-        if (currentQR.qrSettings) {
-            qrColorInput.value = currentQR.qrSettings.color || "#38bdf8";
-            qrStyleInput.value = currentQR.qrSettings.style || "square";
-            qrSizeInput.value = currentQR.qrSettings.size || 600;
+        const settings = currentQR.qrSettings || {};
 
-            const logoMode = currentQR.qrSettings.logoMode || "default";
-            const radio = document.querySelector(`input[name='logoMode'][value="${logoMode}"]`);
-            if (radio) radio.checked = true;
-        }
+        qrColorInput.value = settings.color || "#38bdf8";
+        qrStyleInput.value = settings.style || "square";
+        qrSizeInput.value = settings.size || 600;
+
+        const logoMode = settings.logoMode || "default";
+        const radio = document.querySelector(`input[name='logoMode'][value="${logoMode}"]`);
+        if (radio) radio.checked = true;
+
+        isInitialLoaded = true;
     }
 }
 
+/* ======================
+   QR GENERATOR
+====================== */
+
 function generateQR() {
+    if (typeof QRCodeStyling === "undefined") {
+        showToast("مكتبة QR غير محملة", "error");
+        return;
+    }
+
     const content = normalizeContent(qrContentInput.value);
 
     if (!content) {
@@ -171,16 +228,14 @@ function generateQR() {
         return;
     }
 
-    const size = Number(qrSizeInput.value || 600);
-    const color = qrColorInput.value || "#38bdf8";
-    const style = qrStyleInput.value || "square";
+    const settings = getQrSettings();
     const logoSource = getLogoSource();
 
     qrPreviewBox.innerHTML = "";
 
     qrCode = new QRCodeStyling({
-        width: size,
-        height: size,
+        width: settings.size,
+        height: settings.size,
         data: content,
         image: logoSource,
 
@@ -189,17 +244,17 @@ function generateQR() {
         },
 
         dotsOptions: {
-            color: color,
-            type: style
+            color: settings.color,
+            type: settings.style
         },
 
         cornersSquareOptions: {
-            color: color,
-            type: style === "dots" ? "dot" : "extra-rounded"
+            color: settings.color,
+            type: settings.style === "dots" ? "dot" : "extra-rounded"
         },
 
         cornersDotOptions: {
-            color: color,
+            color: settings.color,
             type: "dot"
         },
 
@@ -217,6 +272,10 @@ function generateQR() {
     qrCode.append(qrPreviewBox);
 }
 
+/* ======================
+   SAVE QR
+====================== */
+
 async function saveQR(showMessage = true) {
     const title = qrTitleInput.value.trim();
     const description = qrDescriptionInput.value.trim();
@@ -224,15 +283,15 @@ async function saveQR(showMessage = true) {
 
     if (!title || !content) {
         if (showMessage) showToast("أدخل عنوان QR والرابط", "error");
-        return;
+        return false;
     }
 
-    const bookId = getSelectedBookId();
-    const bookIndex = getBookIndex(bookId);
+    const selectedBookId = getSelectedBookId();
+    const bookIndex = getBookIndex(selectedBookId);
 
     if (bookIndex === -1) {
         if (showMessage) showToast("اختر كتابًا صحيحًا", "error");
-        return;
+        return false;
     }
 
     books[bookIndex].qrs = books[bookIndex].qrs || [];
@@ -251,9 +310,26 @@ async function saveQR(showMessage = true) {
                 qrSettings,
                 updatedAt: Date.now()
             };
+
+            currentQR = books[bookIndex].qrs[qrIndex];
+        }
+    } else if (currentQR) {
+        const qrIndex = getQrIndex(bookIndex, currentQR.id);
+
+        if (qrIndex !== -1) {
+            books[bookIndex].qrs[qrIndex] = {
+                ...books[bookIndex].qrs[qrIndex],
+                title,
+                description,
+                content,
+                qrSettings,
+                updatedAt: Date.now()
+            };
+
+            currentQR = books[bookIndex].qrs[qrIndex];
         }
     } else {
-        const newQr = {
+        currentQR = {
             id: Date.now(),
             title,
             description,
@@ -263,30 +339,78 @@ async function saveQR(showMessage = true) {
             updatedAt: Date.now()
         };
 
-        books[bookIndex].qrs.push(newQr);
-        currentQR = newQr;
+        books[bookIndex].qrs.push(currentQR);
     }
 
     books[bookIndex].count = books[bookIndex].qrs.length;
 
     await setDoc(booksRef, { books });
 
+    currentBook = books[bookIndex];
+
     generateQR();
 
     if (showMessage) {
         showToast("تم الحفظ بنجاح");
     }
+
+    return true;
 }
 
-function autoSave() {
-    if (!currentQR && !paramQrId) return;
+/* ======================
+   AUTO SAVE
+====================== */
 
+function autoSave() {
     clearTimeout(syncTimer);
 
     syncTimer = setTimeout(() => {
+        const title = qrTitleInput.value.trim();
+        const content = qrContentInput.value.trim();
+
+        if (!title || !content) return;
+
         saveQR(false);
     }, 700);
 }
+
+/* ======================
+   EVENTS
+====================== */
+
+generatePreviewBtn.addEventListener("click", () => {
+    generateQR();
+});
+
+saveQrChangesBtn.addEventListener("click", async () => {
+    await saveQR(true);
+});
+
+downloadQrBtn.addEventListener("click", () => {
+    if (!qrCode) generateQR();
+    if (!qrCode) return;
+
+    const bookName = safeFileName(currentBook?.title || "book");
+    const qrName = safeFileName(qrTitleInput.value || "qr");
+
+    qrCode.download({
+        name: `${bookName}_${qrName}`,
+        extension: "png"
+    });
+});
+
+downloadSvgBtn.addEventListener("click", () => {
+    if (!qrCode) generateQR();
+    if (!qrCode) return;
+
+    const bookName = safeFileName(currentBook?.title || "book");
+    const qrName = safeFileName(qrTitleInput.value || "qr");
+
+    qrCode.download({
+        name: `${bookName}_${qrName}`,
+        extension: "svg"
+    });
+});
 
 qrLogoInput.addEventListener("change", () => {
     const file = qrLogoInput.files?.[0];
@@ -302,50 +426,13 @@ qrLogoInput.addEventListener("change", () => {
     autoSave();
 });
 
-generatePreviewBtn.addEventListener("click", generateQR);
-
-saveQrChangesBtn.addEventListener("click", async () => {
-    await saveQR(true);
-});
-
-downloadQrBtn.addEventListener("click", () => {
-    if (!qrCode) generateQR();
-    if (!qrCode) return;
-
-    const bookName = currentBook?.title || "book";
-    const qrTitle = qrTitleInput.value || "qr";
-
-    const name = `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
-
-    qrCode.download({
-        name,
-        extension: "png"
-    });
-});
-
-downloadSvgBtn.addEventListener("click", () => {
-    if (!qrCode) generateQR();
-    if (!qrCode) return;
-
-    const bookName = currentBook?.title || "book";
-    const qrTitle = qrTitleInput.value || "qr";
-
-    const name = `${bookName}_${qrTitle}`.replace(/\s+/g, "_");
-
-    qrCode.download({
-        name,
-        extension: "svg"
-    });
-});
-
 [
     qrTitleInput,
     qrDescriptionInput,
     qrContentInput,
     qrColorInput,
     qrStyleInput,
-    qrSizeInput,
-    bookSelect
+    qrSizeInput
 ].forEach((element) => {
     element.addEventListener("input", () => {
         generateQR();
@@ -367,7 +454,15 @@ document.querySelectorAll("input[name='logoMode']").forEach((radio) => {
 
 bookSelect.addEventListener("change", () => {
     currentBook = books.find((book) => book.id === getSelectedBookId()) || null;
+    currentQR = null;
+
+    generateQR();
+    autoSave();
 });
+
+/* ======================
+   FIRESTORE LISTENER
+====================== */
 
 ensureDatabase();
 
@@ -377,11 +472,6 @@ onSnapshot(booksRef, (snap) => {
     books = data?.books || [];
 
     renderBookSelect();
-
-    if (!bookSelect.value && books.length > 0) {
-        bookSelect.value = String(books[0].id);
-    }
-
     loadCurrentData();
 
     if (qrContentInput.value.trim()) {
