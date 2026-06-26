@@ -2,12 +2,12 @@ import { guard } from "./auth.js";
 import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 /* ======================
-   GUARD (SAFE RUN)
+   GUARD
 ====================== */
 guard();
 
 /* ======================
-   EARLY SAFETY CHECK (بدون كسر import)
+   SAFETY CHECK
 ====================== */
 if (!document.getElementById("qrList")) {
     console.warn("Book page not loaded properly");
@@ -47,6 +47,19 @@ const confirmDeleteQrBtn = document.getElementById("confirmDeleteQrBtn");
 const cancelDeleteQrBtn = document.getElementById("cancelDeleteQrBtn");
 
 /* ======================
+   SAFE OPEN (NEW)
+====================== */
+function safeOpen(url) {
+    if (!url) return;
+
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+    }
+
+    window.open(url, "_blank", "noopener");
+}
+
+/* ======================
    INIT DB
 ====================== */
 async function ensureDatabase() {
@@ -76,7 +89,7 @@ function updateHeader() {
 }
 
 /* ======================
-   RENDER QR LIST (SAFE)
+   RENDER QR LIST
 ====================== */
 function renderQrList() {
 
@@ -230,7 +243,7 @@ if (saveQrBtn) {
 }
 
 /* ======================
-   CLICK HANDLER (SAFE)
+   CLICK HANDLER (FIXED)
 ====================== */
 if (qrList) {
     qrList.addEventListener("click", (event) => {
@@ -250,7 +263,10 @@ if (qrList) {
         }
 
         if (openId) {
-            window.location.href = `create.html?book=${bookId}&qr=${openId}`;
+            const qr = (currentBook?.qrs || []).find(q => q.id === Number(openId));
+            if (qr) {
+                safeOpen(qr.content);   // 🔥 التعديل الأساسي هنا
+            }
         }
     });
 }
