@@ -22,6 +22,32 @@
 </div>
 
 <script type="module">
+
+/* ======================
+   TOAST (إضافة جديدة فقط)
+====================== */
+function showToast(msg) {
+    const div = document.createElement("div");
+    div.style.cssText = `
+        position:fixed;
+        top:20px;
+        right:20px;
+        background:#1e293b;
+        color:white;
+        padding:12px 16px;
+        border-radius:10px;
+        z-index:9999;
+        font-family: Cairo, sans-serif;
+    `;
+    div.innerText = msg;
+    document.body.appendChild(div);
+
+    setTimeout(() => div.remove(), 3000);
+}
+
+/* ======================
+   FIREBASE
+====================== */
 import { auth } from "./firebase.js";
 import {
   signInWithEmailAndPassword,
@@ -50,8 +76,8 @@ document.getElementById("loginBtn").onclick = async () => {
         await signInWithEmailAndPassword(auth, email, pass);
         window.location.href = "index.html";
     } catch (error) {
-        alert("خطأ في تسجيل الدخول");
         console.log(error);
+        showToast("خطأ في تسجيل الدخول");
     }
 };
 
@@ -63,16 +89,32 @@ document.getElementById("resetBtn").onclick = async () => {
     const email = document.getElementById("email").value;
 
     if (!email) {
-        alert("أدخل البريد أولاً");
+        showToast("أدخل البريد أولاً");
         return;
     }
 
     try {
         await sendPasswordResetEmail(auth, email);
-        alert("تم إرسال رابط الاستعادة إلى بريدك");
+        showToast("تم إرسال رابط الاستعادة إلى بريدك");
     } catch (error) {
-        alert("فشل إرسال رابط الاستعادة");
-        console.log(error);
+
+        console.log("RESET ERROR:", error.code, error.message);
+
+        if (error.code === "auth/user-not-found") {
+            showToast("هذا البريد غير مسجل");
+        }
+
+        else if (error.code === "auth/invalid-email") {
+            showToast("البريد غير صحيح");
+        }
+
+        else if (error.code === "auth/too-many-requests") {
+            showToast("محاولات كثيرة، حاول لاحقًا");
+        }
+
+        else {
+            showToast("فشل إرسال رابط الاستعادة");
+        }
     }
 };
 
