@@ -8,13 +8,6 @@ html {
     scroll-behavior: smooth;
 }
 
-body {
-    font-family: "Cairo", sans-serif;
-    background: #0f172a;
-    color: #ffffff;
-    direction: rtl;
-    overflow-x: hidden;
-}
 
 button,
 input,
@@ -916,9 +909,6 @@ textarea {
     font-size: 15px;
 }
 
-body {
-    margin: 0;
-}
 
 /* FIX LOGIN CENTER ONLY */
 body:has(.login-box) {
@@ -927,4 +917,38 @@ body:has(.login-box) {
     justify-content: center;
     align-items: center;
     background: #0f172a;
+}
+
+body {
+    margin: 0;
+    font-family: "Cairo", sans-serif;
+    background: #0f172a;
+    color: #ffffff;
+    direction: rtl;
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .login-box {
+        width: 90% !important;
+        max-width: 360px;
+        padding: 20px;
+        border-radius: 16px;
+    }
+
+    .login-page {
+        padding: 20px;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-box input {
+        font-size: 16px;
+    }
+
+    .login-box button {
+        font-size: 16px;
+    }
 }
