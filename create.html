@@ -40,25 +40,32 @@
 
     <div class="create-layout">
 
-        <section class="panel">
+        <section class="panel preview-panel">
 
-            <h3>بيانات الباركود</h3>
+            <h3>المعاينة</h3>
 
-            <label>اسم الكتاب</label>
-            <select id="bookSelect"></select>
+            <div id="qrPreviewBox" class="preview-box">
+                أدخل بيانات QR
+            </div>
 
-            <label>عنوان الباركود</label>
-            <input id="qrTitleInput" type="text" placeholder="عنوان QR">
+            <div class="preview-actions vertical-actions">
 
-            <label>وصف مختصر</label>
-            <input id="qrDescriptionInput" type="text" placeholder="وصف مختصر">
+                <button id="saveQrChangesBtn" class="action-btn success">
+                    📚 حفظ في المكتبة
+                </button>
 
-            <label>المحتوى / الرابط</label>
-            <input id="qrContentInput" type="text" placeholder="الرابط أو المحتوى">
+                <button id="downloadQrBtn" class="action-btn dark">
+                    ⬇️ تحميل PNG
+                </button>
 
-            <div class="info-card">
-                <div class="info-title">📚 تنظيم الباركودات</div>
-                <p>يتم حفظ كل QR داخل الكتاب المحدد ومزامنته مباشرة عبر Firebase.</p>
+                <button id="downloadSvgBtn" class="action-btn dark">
+                    ⬇️ تحميل SVG
+                </button>
+
+                <a href="library.html" class="action-btn dark clean-link">
+                    ← عودة للمكتبة
+                </a>
+
             </div>
 
         </section>
@@ -109,36 +116,25 @@
 
         </section>
 
-        <section class="panel preview-panel">
+        <section class="panel">
 
-            <h3>المعاينة</h3>
+            <h3>بيانات الباركود</h3>
 
-            <div id="qrPreviewBox" class="preview-box">
-                اضغط توليد المعاينة
-            </div>
+            <label>اسم الكتاب</label>
+            <select id="bookSelect"></select>
 
-            <div class="preview-actions vertical-actions">
+            <label>عنوان الباركود</label>
+            <input id="qrTitleInput" type="text" placeholder="عنوان QR">
 
-                <button id="generatePreviewBtn" class="action-btn primary">
-                    ⚡ توليد المعاينة
-                </button>
+            <label>وصف مختصر</label>
+            <input id="qrDescriptionInput" type="text" placeholder="وصف مختصر">
 
-                <button id="saveQrChangesBtn" class="action-btn success">
-                    📚 حفظ في المكتبة
-                </button>
+            <label>المحتوى / الرابط</label>
+            <input id="qrContentInput" type="text" placeholder="الرابط أو المحتوى">
 
-                <button id="downloadQrBtn" class="action-btn dark">
-                    ⬇️ تحميل PNG
-                </button>
-
-                <button id="downloadSvgBtn" class="action-btn dark">
-                    ⬇️ تحميل SVG
-                </button>
-
-                <a href="library.html" class="action-btn dark clean-link">
-                    ← عودة للمكتبة
-                </a>
-
+            <div class="info-card">
+                <div class="info-title">📚 تنظيم الباركودات</div>
+                <p>يتم حفظ كل QR داخل الكتاب المحدد ومزامنته مباشرة عبر Firebase.</p>
             </div>
 
         </section>
