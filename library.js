@@ -9,8 +9,18 @@ let deleteBookId = null;
 
 const booksGrid = document.getElementById("booksGrid");
 
-const addBookBtn = document.getElementById("addBookBtn");
+/* ======================
+   SKELETON LOADING (بسيط)
+====================== */
+booksGrid.innerHTML = `
+    <div class="book-card">
+        <div class="book-icon">⏳</div>
+        <h3>جاري تحميل الكتب...</h3>
+        <div class="book-count">...</div>
+    </div>
+`;
 
+const addBookBtn = document.getElementById("addBookBtn");
 const bookModal = document.getElementById("bookModal");
 const bookModalTitle = document.getElementById("bookModalTitle");
 const bookTitleInput = document.getElementById("bookTitleInput");
@@ -33,8 +43,14 @@ function saveBooks() {
     return setDoc(booksRef, { books });
 }
 
+/* ======================
+   RENDER (محسن بدون flicker)
+====================== */
 function renderBooks() {
-    booksGrid.innerHTML = "";
+
+    if (!books) return;
+
+    let html = "";
 
     if (books.length === 0) {
         booksGrid.innerHTML = `
@@ -47,10 +63,11 @@ function renderBooks() {
         return;
     }
 
-    books.forEach((book) => {
+    for (const book of books) {
+
         const count = (book.qrs || []).length;
 
-        booksGrid.innerHTML += `
+        html += `
             <div class="book-card">
 
                 <div class="book-icon">${book.icon || "📘"}</div>
@@ -75,9 +92,16 @@ function renderBooks() {
 
             </div>
         `;
+    }
+
+    requestAnimationFrame(() => {
+        booksGrid.innerHTML = html;
     });
 }
 
+/* ======================
+   MODALS (بدون تغيير)
+====================== */
 function openBookModal(mode, book = null) {
     editBookId = book ? book.id : null;
 
@@ -94,28 +118,28 @@ function closeBookModal() {
     bookModal.classList.remove("show");
 }
 
-addBookBtn.addEventListener("click", () => {
-    openBookModal("add");
-});
-
+addBookBtn.addEventListener("click", () => openBookModal("add"));
 cancelBookBtn.addEventListener("click", closeBookModal);
 
 saveBookBtn.addEventListener("click", async () => {
-    const title = bookTitleInput.value.trim();
 
+    const title = bookTitleInput.value.trim();
     if (!title) return;
 
     if (editBookId) {
+
         const index = books.findIndex((b) => b.id === editBookId);
+
         if (index !== -1) {
             books[index].title = title;
         }
+
     } else {
+
         books.push({
             id: Date.now(),
             title,
             icon: "📘",
-            count: 0,
             qrs: []
         });
     }
@@ -124,7 +148,11 @@ saveBookBtn.addEventListener("click", async () => {
     closeBookModal();
 });
 
+/* ======================
+   CLICK HANDLER
+====================== */
 booksGrid.addEventListener("click", (event) => {
+
     const editId = event.target.dataset.edit;
     const deleteId = event.target.dataset.delete;
     const openId = event.target.dataset.open;
@@ -144,12 +172,16 @@ booksGrid.addEventListener("click", (event) => {
     }
 });
 
+/* ======================
+   DELETE
+====================== */
 cancelDeleteBtn.addEventListener("click", () => {
     deleteBookId = null;
     deleteModal.classList.remove("show");
 });
 
 confirmDeleteBtn.addEventListener("click", async () => {
+
     if (!deleteBookId) return;
 
     books = books.filter((book) => book.id !== deleteBookId);
@@ -160,9 +192,13 @@ confirmDeleteBtn.addEventListener("click", async () => {
     deleteModal.classList.remove("show");
 });
 
+/* ======================
+   INIT DB + REALTIME
+====================== */
 ensureDatabase();
 
 onSnapshot(booksRef, (snap) => {
+
     const data = snap.data();
     books = data?.books || [];
 
