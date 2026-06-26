@@ -810,4 +810,6 @@ textarea {
     font-size: 16px !important;
 }
 
-
+.create-layout .panel:nth-child(2) button:first-of-type {
+    display: none !important;
+}
