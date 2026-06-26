@@ -4,15 +4,45 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 guard();
 
 /* ======================
-   LOADING STATE (Skeleton بسيط)
+   CACHE KEY
+====================== */
+const CACHE_KEY = "atqn_dashboard_cache";
+
+/* ======================
+   ELEMENTS
 ====================== */
 const booksCount = document.getElementById("booksCount");
 const qrsCount = document.getElementById("qrsCount");
 
-/* قيم مبدئية تمنع الفلاش */
-booksCount.textContent = "—";
-qrsCount.textContent = "—";
+/* ======================
+   LOAD CACHE INSTANTLY
+====================== */
+function loadCache() {
+    const cached = localStorage.getItem(CACHE_KEY);
 
+    if (cached) {
+        try {
+            const books = JSON.parse(cached);
+            updateDashboard(books);
+        } catch (e) {}
+    }
+}
+
+function saveCache(books) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(books));
+}
+
+/* ======================
+   INIT UI (instant)
+====================== */
+booksCount.textContent = "0";
+qrsCount.textContent = "0";
+
+loadCache();
+
+/* ======================
+   DB INIT
+====================== */
 async function ensureDatabase() {
     const snap = await getDoc(booksRef);
 
@@ -21,6 +51,9 @@ async function ensureDatabase() {
     }
 }
 
+/* ======================
+   UPDATE DASHBOARD
+====================== */
 function updateDashboard(books) {
 
     const totalBooks = books.length;
@@ -29,19 +62,19 @@ function updateDashboard(books) {
         return sum + ((book.qrs || []).length);
     }, 0);
 
-    /* تحديث مباشر بدون فلاش */
     requestAnimationFrame(() => {
         booksCount.textContent = totalBooks;
         qrsCount.textContent = totalQrs;
     });
+
+    saveCache(books);
 }
 
-/* إنشاء قاعدة البيانات */
+/* ======================
+   REALTIME FIREBASE
+====================== */
 ensureDatabase();
 
-/* ======================
-   REALTIME LISTENER
-====================== */
 onSnapshot(booksRef, (snap) => {
 
     const data = snap.data();
