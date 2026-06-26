@@ -24,23 +24,36 @@
 <script type="module">
 
 /* ======================
-   TOAST (إضافة جديدة فقط)
+   TOAST (محسن + تحت الزر)
 ====================== */
-function showToast(msg) {
+function showToast(msg, targetId = null, type = "info") {
+
     const div = document.createElement("div");
-    div.style.cssText = `
-        position:fixed;
-        top:20px;
-        right:20px;
-        background:#1e293b;
-        color:white;
-        padding:12px 16px;
-        border-radius:10px;
-        z-index:9999;
-        font-family: Cairo, sans-serif;
-    `;
+
     div.innerText = msg;
-    document.body.appendChild(div);
+
+    div.style.cssText = `
+        background:${type === "error" ? "#ef4444" : "#1e293b"};
+        color:white;
+        padding:10px 12px;
+        border-radius:8px;
+        margin-top:10px;
+        font-size:14px;
+        width:100%;
+        text-align:center;
+        font-family:Cairo, sans-serif;
+    `;
+
+    if (targetId) {
+        const target = document.getElementById(targetId);
+        if (target) {
+            target.insertAdjacentElement("afterend", div);
+        } else {
+            document.body.appendChild(div);
+        }
+    } else {
+        document.body.appendChild(div);
+    }
 
     setTimeout(() => div.remove(), 3000);
 }
@@ -77,7 +90,7 @@ document.getElementById("loginBtn").onclick = async () => {
         window.location.href = "index.html";
     } catch (error) {
         console.log(error);
-        showToast("خطأ في تسجيل الدخول");
+        showToast("خطأ في تسجيل الدخول", null, "error");
     }
 };
 
@@ -89,31 +102,34 @@ document.getElementById("resetBtn").onclick = async () => {
     const email = document.getElementById("email").value;
 
     if (!email) {
-        showToast("أدخل البريد أولاً");
+        showToast("أدخل البريد أولاً", "resetBtn", "error");
         return;
     }
 
     try {
         await sendPasswordResetEmail(auth, email);
-        showToast("تم إرسال رابط الاستعادة إلى بريدك");
+
+        // 🔥 يظهر تحت زر الاستعادة مباشرة
+        showToast("تم إرسال رابط الاستعادة إلى بريدك", "resetBtn");
+
     } catch (error) {
 
         console.log("RESET ERROR:", error.code, error.message);
 
         if (error.code === "auth/user-not-found") {
-            showToast("هذا البريد غير مسجل");
+            showToast("هذا البريد غير مسجل", "resetBtn", "error");
         }
 
         else if (error.code === "auth/invalid-email") {
-            showToast("البريد غير صحيح");
+            showToast("البريد غير صحيح", "resetBtn", "error");
         }
 
         else if (error.code === "auth/too-many-requests") {
-            showToast("محاولات كثيرة، حاول لاحقًا");
+            showToast("محاولات كثيرة، حاول لاحقًا", "resetBtn", "error");
         }
 
         else {
-            showToast("فشل إرسال رابط الاستعادة");
+            showToast("فشل إرسال رابط الاستعادة", "resetBtn", "error");
         }
     }
 };
