@@ -35,10 +35,23 @@ const logoInput = document.getElementById("qrLogoInput");
 ====================== */
 
 onSnapshot(booksRef, (snap) => {
+
   books = snap.data()?.books || [];
 
   renderBooks();
+
+  const id = Number(bookSelect.value);
+
+  if (!id && books.length > 0) {
+    bookSelect.value = books[0].id;
+  }
+
   loadBook();
+
+  // 🔥 مهم جدًا: تشغيل التوليد بعد تحميل البيانات
+  setTimeout(() => {
+    generateQR();
+  }, 50);
 });
 
 /* ======================
@@ -64,15 +77,23 @@ bookSelect.addEventListener("change", () => {
 ====================== */
 
 function loadBook() {
+
   const id = Number(bookSelect.value);
 
   currentBook = books.find(b => b.id === id);
 
   if (!currentBook) return;
 
-  // أهم سطر (حل مشكلة عدم ظهور البيانات)
+  // 🔥 تحديث العنوان والعدد
+  document.getElementById("bookTitle").innerText = currentBook.title;
+  document.getElementById("bookCount").innerText = currentBook.qrs?.length || 0;
+
   renderQRs();
-  generateQR();
+
+  // 🔥 أهم سطر لحل المشكلة
+  setTimeout(() => {
+    generateQR();
+  }, 50);
 }
 
 /* ======================
@@ -102,28 +123,39 @@ function renderQRs() {
 ====================== */
 
 function generateQR() {
+
   const value = link.value;
 
-  if (!value) return;
+  if (!value) {
+    preview.innerHTML = "أدخل رابط أو محتوى QR";
+    return;
+  }
 
   preview.innerHTML = "";
 
-  const qr = new QRCodeStyling({
-    width: Number(size.value),
-    height: Number(size.value),
-    data: value,
-    image: uploadedLogo || "assets/atqn-logo.png",
-    dotsOptions: {
-      color: color.value,
-      type: "square"
-    },
-    backgroundOptions: {
-      color: "#fff"
-    }
-  });
+  try {
 
-  qr.append(preview);
-  qrInstance = qr;
+    const qr = new QRCodeStyling({
+      width: Number(size.value || 600),
+      height: Number(size.value || 600),
+      data: value,
+      image: "assets/atqn-logo.png",
+      dotsOptions: {
+        color: color.value || "#000",
+        type: "square"
+      },
+      backgroundOptions: {
+        color: "#ffffff"
+      }
+    });
+
+    qr.append(preview);
+
+    qrInstance = qr;
+
+  } catch (e) {
+    console.log("QR ERROR:", e);
+  }
 }
 
 /* ======================
@@ -199,3 +231,12 @@ document.getElementById("downloadSVG").onclick = () => {
     name: "QR"
   });
 };
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    if (bookSelect.value) {
+      loadBook();
+      generateQR();
+    }
+  }, 100);
+});
