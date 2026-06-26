@@ -24,18 +24,6 @@ let syncTimer = null;
 let isInitialLoaded = false;
 
 /* ======================
-   AUTO GENERATE FUNCTION
-====================== */
-
-function autoGenerate() {
-    requestAnimationFrame(() => {
-        if (typeof generateQR === "function") {
-            generateQR();
-        }
-    });
-}
-
-/* ======================
    ELEMENTS
 ====================== */
 
@@ -476,32 +464,17 @@ bookSelect.addEventListener("change", () => {
    FIRESTORE LISTENER
 ====================== */
 
-function bindAutoGenerate() {
+ensureDatabase();
 
-    const fields = [
-        "qrContentInput",
-        "qrTitleInput",
-        "qrDescriptionInput",
-        "qrColorInput",
-        "qrSizeInput"
-    ];
+onSnapshot(booksRef, (snap) => {
+    const data = snap.data();
 
-    fields.forEach(id => {
-        const el = document.getElementById(id);
+    books = data?.books || [];
 
-        if (!el) return;
+    renderBookSelect();
+    loadCurrentData();
 
-        el.addEventListener("input", autoGenerate);
-        el.addEventListener("change", autoGenerate);
-    });
-}
-
-document.getElementById("qrContentInput")?.addEventListener("input", autoGenerate);
-document.getElementById("qrTitleInput")?.addEventListener("input", autoGenerate);
-document.getElementById("qrDescriptionInput")?.addEventListener("input", autoGenerate);
-document.getElementById("qrColorInput")?.addEventListener("input", autoGenerate);
-document.getElementById("qrSizeInput")?.addEventListener("change", autoGenerate);
-
-window.addEventListener("load", () => {
-    bindAutoGenerate();
+    if (qrContentInput.value.trim()) {
+        generateQR();
+    }
 });
