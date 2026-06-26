@@ -463,13 +463,13 @@ a {
     font-weight: 700;
 }
 
-
 .settings-divider {
     height: 5px;
-    background: rgba(56,189,248,0.35);
-    margin: 24px 0 22px;
-    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    margin: 20px 0;
 }
+
+
 
 .info-card {
     margin-top: 25px;
