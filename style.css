@@ -466,8 +466,7 @@ a {
 .settings-divider {
     height: 4px;
     background: rgba(255,255,255,0.12);
-    margin: 28px 0 22px;
-    border-radius: 999px;
+    margin: 12px 0;
 }
 
 .info-card {
