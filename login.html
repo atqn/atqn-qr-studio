@@ -3,14 +3,11 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>تسجيل الدخول</title>
-
 <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="login-page">
+<body>
 
 <div class="login-box">
 
@@ -23,6 +20,63 @@
     <button id="resetBtn">نسيت كلمة المرور</button>
 
 </div>
+
+<script type="module">
+import { auth } from "./firebase.js";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+/* ======================
+   AUTO REDIRECT IF LOGGED
+====================== */
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        window.location.href = "index.html";
+    }
+});
+
+/* ======================
+   LOGIN
+====================== */
+document.getElementById("loginBtn").onclick = async () => {
+
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        window.location.href = "index.html";
+    } catch (error) {
+        alert("خطأ في تسجيل الدخول");
+        console.log(error);
+    }
+};
+
+/* ======================
+   RESET PASSWORD
+====================== */
+document.getElementById("resetBtn").onclick = async () => {
+
+    const email = document.getElementById("email").value;
+
+    if (!email) {
+        alert("أدخل البريد أولاً");
+        return;
+    }
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        alert("تم إرسال رابط الاستعادة إلى بريدك");
+    } catch (error) {
+        alert("فشل إرسال رابط الاستعادة");
+        console.log(error);
+    }
+};
+
+</script>
 
 </body>
 </html>
