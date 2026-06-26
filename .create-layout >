@@ -566,6 +566,30 @@ a {
 }
 
 /* =========================
+   FIX: COLUMN ORDER (CREATE PAGE)
+========================= */
+
+/* نخلي الشبكة تمشي من اليمين لليسار بشكل صحيح */
+.create-layout {
+    direction: rtl !important;
+}
+
+/* نحدد ترتيب الأعمدة بشكل ثابت */
+.create-layout > :nth-child(1) {
+    order: 3; /* بيانات الباركود */
+}
+
+.create-layout > :nth-child(2) {
+    order: 2; /* الإعدادات */
+}
+
+.create-layout > :nth-child(3) {
+    order: 1; /* المعاينة */
+}
+
+
+
+/* =========================
    MODALS
 ========================= */
 
