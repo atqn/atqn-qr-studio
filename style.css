@@ -898,3 +898,20 @@ textarea {
 .toast.error {
     border-right: 4px solid #ef4444;
 }
+
+.page-title {
+    text-align: center;
+    margin: 30px 0 40px;
+}
+
+.page-title h1 {
+    font-size: 34px;
+    font-weight: 900;
+    color: #ffffff;
+}
+
+.page-title p {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #94a3b8;
+}
