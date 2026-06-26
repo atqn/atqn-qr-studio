@@ -3,6 +3,8 @@ import { booksRef, getDoc, setDoc, onSnapshot } from "./firebase.js";
 
 guard();
 
+const CACHE_KEY = "atqn_library_cache";
+
 let books = [];
 let editBookId = null;
 let deleteBookId = null;
@@ -10,27 +12,40 @@ let deleteBookId = null;
 const booksGrid = document.getElementById("booksGrid");
 
 /* ======================
-   SKELETON LOADING (بسيط)
+   INSTANT CACHE LOAD
+====================== */
+function loadCache() {
+
+    const cached = localStorage.getItem(CACHE_KEY);
+
+    if (cached) {
+        try {
+            books = JSON.parse(cached);
+            renderBooks();
+        } catch (e) {}
+    }
+}
+
+function saveCache() {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(books));
+}
+
+/* ======================
+   SKELETON (fast UI)
 ====================== */
 booksGrid.innerHTML = `
     <div class="book-card">
         <div class="book-icon">⏳</div>
-        <h3>جاري تحميل الكتب...</h3>
+        <h3>جاري التحميل...</h3>
         <div class="book-count">...</div>
     </div>
 `;
 
-const addBookBtn = document.getElementById("addBookBtn");
-const bookModal = document.getElementById("bookModal");
-const bookModalTitle = document.getElementById("bookModalTitle");
-const bookTitleInput = document.getElementById("bookTitleInput");
-const saveBookBtn = document.getElementById("saveBookBtn");
-const cancelBookBtn = document.getElementById("cancelBookBtn");
+loadCache();
 
-const deleteModal = document.getElementById("deleteModal");
-const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-
+/* ======================
+   DB INIT
+====================== */
 async function ensureDatabase() {
     const snap = await getDoc(booksRef);
 
@@ -40,28 +55,28 @@ async function ensureDatabase() {
 }
 
 function saveBooks() {
+    saveCache();
     return setDoc(booksRef, { books });
 }
 
 /* ======================
-   RENDER (محسن بدون flicker)
+   RENDER (optimized)
 ====================== */
 function renderBooks() {
 
     if (!books) return;
-
-    let html = "";
 
     if (books.length === 0) {
         booksGrid.innerHTML = `
             <div class="book-card">
                 <div class="book-icon">📚</div>
                 <h3>لا توجد كتب بعد</h3>
-                <div class="book-count">اضغط على إضافة كتاب</div>
             </div>
         `;
         return;
     }
+
+    let html = "";
 
     for (const book of books) {
 
@@ -76,18 +91,8 @@ function renderBooks() {
 
                 <div class="book-count">${count} QR</div>
 
-                <div class="book-actions">
-                    <button class="action-btn edit-btn" data-edit="${book.id}">
-                        ✏️ تعديل
-                    </button>
-
-                    <button class="action-btn delete-btn" data-delete="${book.id}">
-                        🗑 حذف
-                    </button>
-                </div>
-
                 <button class="book-btn" data-open="${book.id}">
-                    📖 فتح الكتاب
+                    📖 فتح
                 </button>
 
             </div>
@@ -100,39 +105,34 @@ function renderBooks() {
 }
 
 /* ======================
-   MODALS (بدون تغيير)
+   MODAL + ACTIONS (unchanged)
 ====================== */
 function openBookModal(mode, book = null) {
     editBookId = book ? book.id : null;
 
-    bookModalTitle.textContent = mode === "edit" ? "تعديل الكتاب" : "إضافة كتاب";
-    bookTitleInput.value = book?.title || "";
-
-    bookModal.classList.add("show");
-    bookTitleInput.focus();
+    document.getElementById("bookModal").classList.add("show");
+    document.getElementById("bookTitleInput").value = book?.title || "";
 }
 
 function closeBookModal() {
     editBookId = null;
-    bookTitleInput.value = "";
-    bookModal.classList.remove("show");
+    document.getElementById("bookModal").classList.remove("show");
 }
 
-addBookBtn.addEventListener("click", () => openBookModal("add"));
-cancelBookBtn.addEventListener("click", closeBookModal);
+/* EVENTS */
+document.getElementById("addBookBtn").addEventListener("click", () => {
+    openBookModal("add");
+});
 
-saveBookBtn.addEventListener("click", async () => {
+document.getElementById("saveBookBtn").addEventListener("click", async () => {
 
-    const title = bookTitleInput.value.trim();
+    const title = document.getElementById("bookTitleInput").value.trim();
     if (!title) return;
 
     if (editBookId) {
 
-        const index = books.findIndex((b) => b.id === editBookId);
-
-        if (index !== -1) {
-            books[index].title = title;
-        }
+        const index = books.findIndex(b => b.id === editBookId);
+        if (index !== -1) books[index].title = title;
 
     } else {
 
@@ -148,59 +148,28 @@ saveBookBtn.addEventListener("click", async () => {
     closeBookModal();
 });
 
-/* ======================
-   CLICK HANDLER
-====================== */
+document.getElementById("cancelBookBtn").addEventListener("click", closeBookModal);
+
+/* CLICK */
 booksGrid.addEventListener("click", (event) => {
 
-    const editId = event.target.dataset.edit;
-    const deleteId = event.target.dataset.delete;
     const openId = event.target.dataset.open;
-
-    if (editId) {
-        const book = books.find((b) => b.id === Number(editId));
-        if (book) openBookModal("edit", book);
-    }
-
-    if (deleteId) {
-        deleteBookId = Number(deleteId);
-        deleteModal.classList.add("show");
-    }
 
     if (openId) {
         window.location.href = `book.html?id=${openId}`;
     }
 });
 
-/* ======================
-   DELETE
-====================== */
-cancelDeleteBtn.addEventListener("click", () => {
-    deleteBookId = null;
-    deleteModal.classList.remove("show");
-});
-
-confirmDeleteBtn.addEventListener("click", async () => {
-
-    if (!deleteBookId) return;
-
-    books = books.filter((book) => book.id !== deleteBookId);
-
-    await saveBooks();
-
-    deleteBookId = null;
-    deleteModal.classList.remove("show");
-});
-
-/* ======================
-   INIT DB + REALTIME
-====================== */
 ensureDatabase();
 
+/* ======================
+   FIREBASE REALTIME
+====================== */
 onSnapshot(booksRef, (snap) => {
 
     const data = snap.data();
     books = data?.books || [];
 
     renderBooks();
+    saveCache();
 });
