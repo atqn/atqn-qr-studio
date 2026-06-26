@@ -809,3 +809,17 @@ select,
 textarea {
     font-size: 16px !important;
 }
+
+#generateQR {
+    display: none !important;
+}
+
+#saveQR {
+    margin-top: 0px;
+    width: 100%;
+}
+
+.qr-panel button {
+    width: 100%;
+    margin-top: 10px;
+}
