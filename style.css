@@ -916,3 +916,15 @@ textarea {
     font-size: 15px;
 }
 
+body {
+    margin: 0;
+}
+
+/* FIX LOGIN CENTER ONLY */
+body:has(.login-box) {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0f172a;
+}
