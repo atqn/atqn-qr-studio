@@ -3,11 +3,14 @@
 
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>تسجيل الدخول</title>
+
 <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="login-page">
 
 <div class="login-box">
 
@@ -21,37 +24,5 @@
 
 </div>
 
-<script type="module">
-import { auth } from "./firebase.js";
-import {
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        window.location.href = "index.html";
-    }
-});
-
-document.getElementById("loginBtn").onclick = async () => {
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
-
-    await signInWithEmailAndPassword(auth, email, pass);
-    window.location.href = "index.html";
-};
-
-    
-    
-document.getElementById("resetBtn").onclick = async () => {
-    const email = document.getElementById("email").value;
-    await sendPasswordResetEmail(auth, email);
-    showToast("تم إرسال رابط الاستعادة", "success");
-};
-</script>
-
 </body>
 </html>
-
