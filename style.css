@@ -464,15 +464,15 @@ a {
 }
 
 .settings-divider {
-    height: 5px;
+    height: 4px;
     background: rgba(255,255,255,0.12);
-    margin: 20px 0;
+    margin: 22px 0;
 }
 
 
 
 .info-card {
-    margin-top: 25px;
+    margin-top: 23px;
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 16px;
