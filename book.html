@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>الكتاب - ATQN QR Studio</title>
+
+<!-- Favicon -->
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+
+<!-- لون شريط المتصفح -->
+<meta name="theme-color" content="#F5C400">
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        <img src="assets/atqn-logo.png" alt="ATQN">
+        <h1>ATQN QR Studio</h1>
+    </div>
+
+    <nav>
+        <a href="index.html">الرئيسة</a>
+        <a href="library.html">الكتب</a>
+        <a href="create.html">إنشاء QR</a>
+        <a href="#" onclick="logout()">خروج</a>
+    </nav>
+
+</header>
+
+<main class="container">
+
+    <div class="library-header">
+        <h2 id="bookTitle">اسم الكتاب</h2>
+        <p id="bookCount">عدد الأكواد: 0</p>
+    </div>
+
+    <div class="library-toolbar">
+        <button id="addQrBtn" class="add-book-btn">➕ إضافة QR جديد</button>
+
+        <a href="library.html" class="add-book-btn clean-link">
+            ← الرجوع للمكتبة
+        </a>
+    </div>
+
+    <div class="books-scroll">
+        <div id="qrList" class="books-grid"></div>
+    </div>
+
+</main>
+
+<div id="qrModal" class="modal-overlay">
+    <div class="modal-box">
+
+        <div class="modal-icon">➕</div>
+
+        <h3 id="qrModalTitle">إضافة QR جديد</h3>
+
+        <input id="qrTitleInput" type="text" class="modal-input" placeholder="عنوان QR">
+
+        <input id="qrDescriptionInput" type="text" class="modal-input" placeholder="وصف مختصر">
+
+        <input id="qrLinkInput" type="text" class="modal-input" placeholder="الرابط أو المحتوى">
+
+        <div class="modal-actions">
+            <button id="saveQrBtn" class="modal-btn danger-btn">حفظ</button>
+            <button id="cancelQrBtn" class="modal-btn cancel-btn">إلغاء</button>
+        </div>
+
+    </div>
+</div>
+
+<div id="deleteQrModal" class="modal-overlay">
+    <div class="modal-box">
+
+        <div class="modal-icon">⚠️</div>
+
+        <h3>تأكيد الحذف</h3>
+
+        <p>هل تريد حذف هذا الـ QR؟</p>
+
+        <div class="modal-actions">
+            <button id="confirmDeleteQrBtn" class="modal-btn danger-btn">حذف</button>
+            <button id="cancelDeleteQrBtn" class="modal-btn cancel-btn">إلغاء</button>
+        </div>
+
+    </div>
+</div>
+
+<script type="module" src="book.js"></script>
+
+</body>
+</html>
