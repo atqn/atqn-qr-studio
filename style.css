@@ -954,4 +954,54 @@ body {
 }
 
 
+/* =========================
+   LOGIN BRAND HEADER
+========================= */
 
+.login-wrapper {
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    background: #0f172a;
+}
+
+.login-brand-main {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-brand-main img {
+    width: 125px;
+    height: 125px;
+    object-fit: contain;
+    margin-bottom: 14px;
+}
+
+.login-brand-main h1 {
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+body:has(.login-wrapper) {
+    height: auto;
+    display: block;
+    background: #0f172a;
+}
+
+@media (max-width: 768px) {
+    .login-brand-main img {
+        width: 105px;
+        height: 105px;
+    }
+
+    .login-brand-main h1 {
+        font-size: 26px;
+    }
+}
